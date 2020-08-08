@@ -1,0 +1,174 @@
+{
+	"name": "twee3-language-tools",
+	"displayName": "Twee 3 Language Tools",
+	"description": "Syntax highlighting and Language Server implementation for Twee 3.",
+	"version": "0.1.0",
+	"author": "Cyrus Firheir",
+	"publisher": "cyrusfirheir",
+	"icon": "./icon.png",
+	"license": "MIT",
+	"engines": {
+		"vscode": "^1.47.0"
+	},
+	"categories": [
+		"Language Packs",
+		"Extension Packs",
+		"Snippets"
+	],
+	"keywords": [
+		"twee",
+		"twee3",
+		"vscode"
+	],
+	"activationEvents": [
+		"onLanguage:twee3",
+		"onLanguage:twee3-sugarcube-2",
+		"onLanguage:twee3-harlowe-3"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"languages": [
+			{
+				"id": "twee3",
+				"extensions": [
+					".tw",
+					".twee"
+				],
+				"configuration": "./defs/language-configuration.json"
+			},
+			{
+				"id": "twee3-sugarcube-2",
+				"aliases": [
+					"twee3-sc2",
+					"twee3-sugarcube-2"
+				],
+				"configuration": "./defs/sugarcube-2/language-configuration.json"
+			},
+			{
+				"id": "twee3-harlowe-3",
+				"aliases": [
+					"twee3-h3",
+					"twee3-harlowe-3"
+				],
+				"configuration": "./defs/harlowe-3/language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "twee3",
+				"scopeName": "source.twee3",
+				"path": "./defs/grammar.json",
+				"embeddedLanguages": {
+					"source.json.twee3": "json",
+					"source.js.twee3": "javascript",
+					"source.css.twee3": "css",
+					"source.html.twee3": "html"
+				}
+			},
+			{
+				"language": "twee3-sugarcube-2",
+				"scopeName": "source.sugarcube-2.twee3",
+				"path": "./defs/sugarcube-2/grammar.json",
+				"embeddedLanguages": {
+					"source.json.twee3": "json",
+					"source.js.twee3": "javascript",
+					"source.css.twee3": "css",
+					"source.html.twee3": "html"
+				}
+			},
+			{
+				"language": "twee3-harlowe-3",
+				"scopeName": "source.harlowe-3.twee3",
+				"path": "./defs/harlowe-3/grammar.json",
+				"embeddedLanguages": {
+					"source.json.twee3": "json",
+					"source.js.twee3": "javascript",
+					"source.css.twee3": "css",
+					"source.html.twee3": "html"
+				}
+			}
+		],
+		"snippets": [
+			{
+				"language": "twee3",
+				"path": "./defs/snippets.json"
+			},
+			{
+				"language": "twee3-sugarcube-2",
+				"path": "./defs/sugarcube-2/snippets.json"
+			},
+			{
+				"language": "twee3-harlowe-3",
+				"path": "./defs/harlowe-3/snippets.json"
+			}
+		],
+		"semanticTokenScopes": [
+			{
+				"scopes": {
+					"startToken": [
+						"storage.type"
+					],
+					"special": [
+						"support.class"
+					],
+					"passageName": [
+						"entity.name.function"
+					],
+					"passageTags": [
+						"constant.language"
+					],
+					"passageMeta": [
+						"punctuation"
+					]
+				}
+			}
+		],
+		"configuration": {
+			"title": "Twee 3 Language Tools",
+			"properties": {
+				"twee3LanguageTools.format": {
+					"type": "string",
+					"default": "",
+					"description": "Storyformat of the current project."
+				},
+				"twee3LanguageTools.formatVersion": {
+					"type": "string",
+					"default": "",
+					"description": "Version of the Storyformat in use."
+				},
+				"twee3LanguageTools.formatOverride": {
+					"type": "string",
+					"default": "",
+					"description": "Identifier of storyformat to override the format set by StoryData."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint src --ext ts",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^7.0.2",
+		"@types/node": "^13.11.0",
+		"eslint": "^6.8.0",
+		"@typescript-eslint/parser": "^2.30.0",
+		"@typescript-eslint/eslint-plugin": "^2.30.0",
+		"glob": "^7.1.6",
+		"mocha": "^7.1.2",
+		"typescript": "^3.8.3",
+		"vscode-test": "^1.3.0"
+	},
+	"dependencies": {
+		"@types/vscode": "^1.43.0",
+		"uuid": "^8.3.0",
+		"vscode-languageclient": "^6.1.3",
+		"vscode-languageserver": "^6.1.1",
+		"vscode-languageserver-textdocument": "^1.0.1"
+	}
+}
