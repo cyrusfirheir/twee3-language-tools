@@ -6,6 +6,10 @@
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "./icon.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/cyrusfirheir/twee3-language-tools.git"
+	},
 	"license": "MIT",
 	"engines": {
 		"vscode": "^1.47.0"

@@ -2,6 +2,8 @@
 
 Syntax highlighting for SugarCube 2, and Harlowe 3, on top of base colors for Twee 3 code.
 
+[Repository](https://github.com/cyrusfirheir/twee3-language-tools).
+
 ---
 
 ## Requirements
