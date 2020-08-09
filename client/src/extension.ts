@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import headsplit from "./headsplit";
+import headsplit from './headsplit';
 
 import {
 	LanguageClient,
@@ -26,10 +26,8 @@ const legend = (function () {
 		
 	];
 	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
-
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
-
 
 interface IParsedToken {
 	line: number;
@@ -204,7 +202,7 @@ vscode.workspace.onDidChangeConfiguration(() => {
 
 export function activate(context: vscode.ExtensionContext) {
 	
-	const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf8"));
+	const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../../package.json"), "utf8"));
 	const formats = pkg.contributes.languages.map((el: { id: any; }) => el.id);	
 
 	vscode.workspace.findFiles("**/*.tw*").then(v => {
@@ -216,7 +214,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let serverModule = context.asAbsolutePath(
-		path.join('out', 'server.js')
+		path.join('server', 'out', 'server.js')
 	);
 
 	let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };

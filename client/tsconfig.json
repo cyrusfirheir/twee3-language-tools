@@ -1,11 +1,11 @@
 {
-	"extends": "./tsconfig.base.json",
+	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
 		"module": "commonjs",
-		"target": "es6",
+		"target": "es2017",
 		"outDir": "out",
 		"rootDir": "src",
-		"lib": [ "es6" ],
+		"lib": [ "es2017" ],
 		"sourceMap": true
 	},
 	"include": [
@@ -13,9 +13,5 @@
 	],
 	"exclude": [
 		"node_modules"
-	],
-	"references": [
-		{ "path": "./client" },
-		{ "path": "./server" }
 	]
 }
