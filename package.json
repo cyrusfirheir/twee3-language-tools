@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and Language Server implementation for Twee 3.",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "icon.png",
