@@ -1,11 +1,3 @@
 {
-    "JSDoc comment": {
-        "prefix": "/**",
-        "body": [
-            "/**",
-            " * $0",
-            " */"
-        ],
-        "description": "Insert JSDoc comment."
-    }
+    
 }

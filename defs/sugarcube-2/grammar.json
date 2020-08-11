@@ -8,7 +8,6 @@
         { "include": "#stylesheet" },
         { "include": "#link-markup" },
         { "include": "#script-tag" },
-        { "include": "#style-tag" },
         { "include": "#html" },
         {
             "begin": "<!--",
@@ -19,25 +18,10 @@
     "repository": {
         "sugarcube-2": {
             "patterns": [
-                { "include": "#sc-comments-jsdoc" },
-                { "include": "#sc-comments" },
                 { "include": "#sc-script-tag" },
                 { "include": "#sc-macro" },
                 { "include": "#sc-variables" }
             ]
-        },
-        "sc-comments-jsdoc": {
-            "begin": "(?=\\/\\*\\*)",
-            "end": "(?<=\\*\\/)",
-            "name": "source.js.twee3",
-            "patterns": [
-                { "include": "source.js" }
-            ]
-        },
-        "sc-comments": {
-            "begin": "\\/\\*",
-            "end": "\\*\\/",
-            "name": "comment.block"
         },
         "sc-script-tag": {
             "begin": "(<<)(script)(?=>>)",
@@ -94,7 +78,8 @@
             },
             "patterns": [
                 {
-                    "include": "#sc-variables"
+                    "match": "([\\$_])([A-Za-z_][A-Za-z0-9_]*)\\b",
+                    "name": "entity.name.tag"
                 },
                 {
                     "match": "\\b(is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|undef)\\b",
@@ -139,7 +124,7 @@
             ]
         },
         "sc-variables": {
-            "match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
+            "match": "([\\$_\\?])([A-Za-z_][A-Za-z0-9_]*)\\b",
             "name": "entity.name.tag"
         },
         "json": {
@@ -233,49 +218,6 @@
                     "patterns": [
                         {
                             "include": "source.js"
-                        }
-                    ]
-                }
-            ]
-        },
-        "style-tag": {
-            "begin": "(<)(style)\\b(?=[^>]*(?:(?:type=('text/css'|\"text/css\")|lang=(css|'css'|\"css\")))?)(?![^/>]*/>\\s*$)",
-            "beginCaptures": {
-                "1": {
-                    "name": "punctuation.definition.tag.begin.html"
-                },
-                "2": {
-                    "name": "entity.name.tag.html"
-                }
-            },
-            "end": "(</)(style)(>)",
-            "endCaptures": {
-                "1": {
-                    "name": "punctuation.definition.tag.begin.html"
-                },
-                "2": {
-                    "name": "entity.name.tag.html"
-                },
-                "3": {
-                    "name": "punctuation.definition.tag.end.html"
-                }
-            },
-            "patterns": [
-                {
-                    "include": "#tag-internals"
-                },
-                {
-                    "name": "source.css.twee3",
-                    "begin": "(>)",
-                    "beginCaptures": {
-                        "1": {
-                            "name": "punctuation.definition.tag.end.html"
-                        }
-                    },
-                    "end": "(?=</style>)",
-                    "patterns": [
-                        {
-                            "include": "source.css"
                         }
                     ]
                 }

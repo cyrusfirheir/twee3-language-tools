@@ -2,10 +2,10 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and Language Server implementation for Twee 3.",
-	"version": "0.2.0",
+	"version": "0.1.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
-	"icon": "res/icon.png",
+	"icon": "icon.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/cyrusfirheir/twee3-language-tools.git"
@@ -29,9 +29,8 @@
 	],
 	"activationEvents": [
 		"onLanguage:twee3",
-		"onLanguage:twee3-chapbook-1",
-		"onLanguage:twee3-harlowe-3",
-		"onLanguage:twee3-sugarcube-2"
+		"onLanguage:twee3-sugarcube-2",
+		"onLanguage:twee3-harlowe-3"
 	],
 	"main": "./client/out/extension.js",
 	"contributes": {
@@ -45,12 +44,12 @@
 				"configuration": "./defs/language-configuration.json"
 			},
 			{
-				"id": "twee3-chapbook-1",
+				"id": "twee3-sugarcube-2",
 				"aliases": [
-					"twee3-cb2",
-					"twee3-chapbook-1"
+					"twee3-sc2",
+					"twee3-sugarcube-2"
 				],
-				"configuration": "./defs/chapbook-1/language-configuration.json"
+				"configuration": "./defs/sugarcube-2/language-configuration.json"
 			},
 			{
 				"id": "twee3-harlowe-3",
@@ -59,14 +58,6 @@
 					"twee3-harlowe-3"
 				],
 				"configuration": "./defs/harlowe-3/language-configuration.json"
-			},
-			{
-				"id": "twee3-sugarcube-2",
-				"aliases": [
-					"twee3-sc2",
-					"twee3-sugarcube-2"
-				],
-				"configuration": "./defs/sugarcube-2/language-configuration.json"
 			}
 		],
 		"grammars": [
@@ -74,28 +65,6 @@
 				"language": "twee3",
 				"scopeName": "source.twee3",
 				"path": "./defs/grammar.json",
-				"embeddedLanguages": {
-					"source.json.twee3": "json",
-					"source.js.twee3": "javascript",
-					"source.css.twee3": "css",
-					"source.html.twee3": "html"
-				}
-			},
-			{
-				"language": "twee3-chapbook-1",
-				"scopeName": "source.chapbook-1.twee3",
-				"path": "./defs/chapbook-1/grammar.json",
-				"embeddedLanguages": {
-					"source.json.twee3": "json",
-					"source.js.twee3": "javascript",
-					"source.css.twee3": "css",
-					"source.html.twee3": "html"
-				}
-			},
-			{
-				"language": "twee3-harlowe-3",
-				"scopeName": "source.harlowe-3.twee3",
-				"path": "./defs/harlowe-3/grammar.json",
 				"embeddedLanguages": {
 					"source.json.twee3": "json",
 					"source.js.twee3": "javascript",
@@ -113,6 +82,17 @@
 					"source.css.twee3": "css",
 					"source.html.twee3": "html"
 				}
+			},
+			{
+				"language": "twee3-harlowe-3",
+				"scopeName": "source.harlowe-3.twee3",
+				"path": "./defs/harlowe-3/grammar.json",
+				"embeddedLanguages": {
+					"source.json.twee3": "json",
+					"source.js.twee3": "javascript",
+					"source.css.twee3": "css",
+					"source.html.twee3": "html"
+				}
 			}
 		],
 		"snippets": [
@@ -121,51 +101,52 @@
 				"path": "./defs/snippets.json"
 			},
 			{
-				"language": "twee3-chapbook-1",
-				"path": "./defs/chapbook-1/snippets.json"
+				"language": "twee3-sugarcube-2",
+				"path": "./defs/sugarcube-2/snippets.json"
 			},
 			{
 				"language": "twee3-harlowe-3",
 				"path": "./defs/harlowe-3/snippets.json"
-			},
-			{
-				"language": "twee3-sugarcube-2",
-				"path": "./defs/sugarcube-2/snippets.json"
 			}
 		],
 		"semanticTokenScopes": [
 			{
 				"scopes": {
-					"startToken": [ "storage.type" ],
-					"special": [ "support.class" ],
-					"passageName": [ "entity.name.function" ],
-					"passageTags": [ "constant.language" ],
-					"passageMeta": [ "punctuation" ]
+					"startToken": [
+						"storage.type"
+					],
+					"special": [
+						"support.class"
+					],
+					"passageName": [
+						"entity.name.function"
+					],
+					"passageTags": [
+						"constant.language"
+					],
+					"passageMeta": [
+						"punctuation"
+					]
 				}
 			}
 		],
 		"configuration": {
 			"title": "Twee 3 Language Tools",
 			"properties": {
-				"twee3LanguageTools.storyformat.id": {
+				"twee3LanguageTools.format": {
 					"type": "string",
 					"default": "",
-					"description": "Identifier of the storyformat in use."
+					"description": "Storyformat of the current project."
 				},
-				"twee3LanguageTools.storyformat.name": {
+				"twee3LanguageTools.formatVersion": {
 					"type": "string",
 					"default": "",
-					"description": "Name of the storyformat in use."
+					"description": "Version of the Storyformat in use."
 				},
-				"twee3LanguageTools.storyformat.version": {
+				"twee3LanguageTools.formatOverride": {
 					"type": "string",
 					"default": "",
-					"description": "Version of the storyformat in use."
-				},
-				"twee3LanguageTools.storyformat.override": {
-					"type": "string",
-					"default": "",
-					"description": "Identifier of the storyformat to override the format set by StoryData."
+					"description": "Identifier of storyformat to override the format set by StoryData."
 				}
 			}
 		}
@@ -174,10 +155,10 @@
 		"vscode:prepublish": "npm run webpack",
 		"webpack": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
 		"webpack:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
-		"compile": "tsc -b ./",
-		"compile:client": "tsc -b ./client/tsconfig.json",
-		"compile:server": "tsc -b ./server/tsconfig.json",
-		"watch": "tsc -b -w",
+		"compile": "tsc -p ./",
+		"compile:client": "tsc -p ./client/tsconfig.json",
+		"compile:server": "tsc -p ./server/tsconfig.json",
+		"watch": "tsc -p -w",
 		"lint": "npm run lint:client && npm run lint:server",
 		"lint:client": "eslint --config ./client/.eslintrc.json ./client/src/*.ts",
 		"lint:server": "eslint --config ./server/.eslintrc.json ./server/src/*.ts",

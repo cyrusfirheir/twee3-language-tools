@@ -14,4 +14,3 @@ client/**
 server/**
 !server/out/server.js
 defs/_language_template/**
-.res.ignore/**
