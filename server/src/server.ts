@@ -9,16 +9,16 @@ import {
 	CompletionItem,
 	TextDocumentPositionParams,
 	TextDocumentSyncKind,
-	InitializeResult
+	InitializeResult,
+	CompletionItemKind,
+	InsertTextFormat
 } from 'vscode-languageserver';
-
-import headsplit from "./headsplit";
-
-const { v4: uuidv4 } = require('uuid');
-
 import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
+
+import headsplit from "./headsplit";
+const { v4: uuidv4 } = require('uuid');
 
 let connection = createConnection(ProposedFeatures.all);
 
@@ -82,32 +82,40 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	const raw = textDocument.getText();
     let lines = raw.split(/\r?\n/g);
     lines.forEach((line, i) => {
-		if (line.startsWith("::") && !line[2].match(/\s/)) {
-			diagnostics.push({
-                severity: DiagnosticSeverity.Warning,
-                range: {
-                    start: { line: i, character: 0},
-                    end: { line: i, character: 3 }
-				},
-				message: `\nNo space between Start token (::) and passage name.\n\nIf this is a CSS pseudo selector, add a Universal selector (*), or at least one whitespace before (::)\n\n`,
-                source: 'Style guide'
-            });
-		}
-		if (line.match(/^::\s*StoryData\b/gm)) {
-			const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
-			if (storydata?.content) {
-				try {
-					JSON.parse(storydata.content);
-				} catch (ex) {
-					diagnostics.push({
-						severity: DiagnosticSeverity.Error,
-						range: {
-							start: { line: i, character: 0},
-							end: { line: i + storydata.content.split("\n").length + 1, character: 0 }
-						},
-						message: `\nMalformed StoryData JSON!\n\n${ex}\n\n`,
-						source: 'ex'
-					});
+		
+		if (line.startsWith("::")) {
+			const escaped = line.replace(/\\./g, "ec"); // escaped characters
+
+			if (!line[2].match(/\s/)) {
+				diagnostics.push({
+					severity: DiagnosticSeverity.Warning,
+					range: {
+						start: { line: i, character: 0 },
+						end: { line: i, character: 3 }
+					},
+					message: `\nNo space between Start token (::) and passage name.\n\n(If this is a CSS selector for a pseudo element, add a universal selector (*), or at least one whitespace before the start token.)\n\n`,
+					source: 'Style guide',
+					code: 0
+				});
+			}
+
+			if (line.match(/^::\s*StoryData\b/gm)) {
+				const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
+				if (storydata?.content) {
+					try {
+						JSON.parse(storydata.content);
+					} catch (ex) {
+						diagnostics.push({
+							severity: DiagnosticSeverity.Error,
+							range: {
+								start: { line: i, character: 0 },
+								end: { line: i + storydata.content.split("\n").length + 1, character: 0 }
+							},
+							message: `\nMalformed StoryData JSON!\n\n${ex}\n\n`,
+							source: 'ex',
+							code: 1
+						});
+					}
 				}
 			}
 		}
@@ -123,10 +131,7 @@ connection.onDidChangeWatchedFiles(_change => {
 connection.onCompletion(
 	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
 		return [
-			{
-				label: "StoryData",
-				data: "StoryData"
-			}
+			{ label: "StoryData" }
 		];
 	}
 );
@@ -135,20 +140,24 @@ connection.onCompletionResolve(
 	(item: CompletionItem): CompletionItem => {
 		const completions: any = {
 			"StoryData": {
-				label: `:: StoryData\n` +
-				`{\n\t` +
-					`"ifid": "${uuidv4().toUpperCase()}",\n\t` +
-					`"format": "",\n\t` +
-					`"format-version": "",\n\t` +
-					`"start": ""\n` +
-				`}`,
-				data: "StoryData",
+				label: "StoryData",
+				insertText: 
+					`:: StoryData\n` +
+					`{\n\t` +
+						`"ifid": "${uuidv4().toUpperCase()}",\n\t` +
+						`"format": "$1",\n\t` +
+						`"format-version": "$2",\n\t` +
+						`"start": "$3"\n` +
+					`}`
+				,
+				insertTextFormat: InsertTextFormat.Snippet,
+				kind: CompletionItemKind.Snippet,
 				detail: "StoryData JSON chunk",
-				documentation: "\nInserts JSON chunk for StoryData special passage along with a generated IFID.\n\n"
+				documentation: "Inserts JSON chunk for StoryData special passage along with a generated IFID.\n\n"
 			}
 		};
 		
-		return completions[item.data];
+		return completions[item.label];
 	}
 );
 

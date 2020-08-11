@@ -8,6 +8,7 @@
         { "include": "#stylesheet" },
         { "include": "#link-markup" },
         { "include": "#script-tag" },
+        { "include": "#style-tag" },
         { "include": "#html" },
         {
             "begin": "<!--",
@@ -43,16 +44,10 @@
                     "name": "variable.language.super"
                 },
                 {
-                    "match": "\\$\\b([A-Za-z_][A-Za-z0-9_]*)\\b",
-                    "name": "entity.name.tag"
+                    "include": "#h-hook"
                 },
                 {
-                    "match": "\\b(_[A-Za-z_][A-Za-z0-9_]*)\\b",
-                    "name": "entity.name.tag"
-                },
-                {
-                    "match": "\\?\\b([A-Za-z_][A-Za-z0-9_]*)\\b",
-                    "name": "entity.name.tag"
+                    "include": "#h-variables"
                 },
                 {
                     "match": "\\b(alnum|alphanumeric|any|array|bool(?:ean)?|changer|colou?r|const|command|dm|data|map|type|set|ds|digit|gradient|empty|even|int(?:eger)?|lambda|lowercase|macro|newline|num(?:ber)?|odd|str(?:ing)?|uppercase|whitespace|a|an|its|name|tags|is|to|into|in|when|via|making|each|and|or|not|does|contains|bind|matches|where)\\b",
@@ -93,7 +88,7 @@
             "name": "entity.name.tag"
         },
         "h-variables": {
-            "match": "([\\$_\\?])([A-Za-z_][A-Za-z0-9_]*)\\b",
+            "match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
             "name": "entity.name.tag"
         },
         "json": {
@@ -187,6 +182,49 @@
                     "patterns": [
                         {
                             "include": "source.js"
+                        }
+                    ]
+                }
+            ]
+        },
+        "style-tag": {
+            "begin": "(<)(style)\\b(?=[^>]*(?:(?:type=('text/css'|\"text/css\")|lang=(css|'css'|\"css\")))?)(?![^/>]*/>\\s*$)",
+            "beginCaptures": {
+                "1": {
+                    "name": "punctuation.definition.tag.begin.html"
+                },
+                "2": {
+                    "name": "entity.name.tag.html"
+                }
+            },
+            "end": "(</)(style)(>)",
+            "endCaptures": {
+                "1": {
+                    "name": "punctuation.definition.tag.begin.html"
+                },
+                "2": {
+                    "name": "entity.name.tag.html"
+                },
+                "3": {
+                    "name": "punctuation.definition.tag.end.html"
+                }
+            },
+            "patterns": [
+                {
+                    "include": "#tag-internals"
+                },
+                {
+                    "name": "source.css.twee3",
+                    "begin": "(>)",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "punctuation.definition.tag.end.html"
+                        }
+                    },
+                    "end": "(?=</style>)",
+                    "patterns": [
+                        {
+                            "include": "source.css"
                         }
                     ]
                 }

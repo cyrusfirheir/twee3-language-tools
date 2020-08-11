@@ -2,7 +2,11 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and Language Server implementation for Twee 3.",
+<<<<<<< HEAD
 	"version": "0.2.5",
+=======
+	"version": "0.2.0",
+>>>>>>> parent of acb069b... Revert "jsdoc branch"
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -47,7 +51,11 @@
 			{
 				"id": "twee3-chapbook-1",
 				"aliases": [
+<<<<<<< HEAD
 					"twee3-cb1",
+=======
+					"twee3-cb2",
+>>>>>>> parent of acb069b... Revert "jsdoc branch"
 					"twee3-chapbook-1"
 				],
 				"configuration": "./defs/chapbook-1/language-configuration.json"
