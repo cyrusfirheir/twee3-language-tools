@@ -1,12 +1,12 @@
 {
-    "name": "twee3-formatName-formatVersion",
-    "scopeName": "source.formatName-formatVersion.twee3",
+    "name": "twee3-chapbook-1",
+    "scopeName": "source.chapbook-1.twee3",
     "patterns": [
-        { "include": "#formatName-formatVersion" },
+        { "include": "#link-markup" },
+        { "include": "#chapbook-1" },
         { "include": "#json" },
         { "include": "#script" },
         { "include": "#stylesheet" },
-        { "include": "#link-markup" },
         { "include": "#script-tag" },
         { "include": "#style-tag" },
         { "include": "#html" },
@@ -17,9 +17,159 @@
         }
     ],
     "repository": {
-        "formatName-formatVersion": {
+        "chapbook-1": {
             "patterns": [
-                
+                { "include": "#cb-variable-section" },
+                { "include": "#cb-script-tag" },
+                { "include": "#cb-style-tag" },
+                { "include": "#cb-inserts" },
+                { "include": "#cb-modifiers" },
+                {
+                    "match": "^--$",
+                    "name": "comment.block"
+                }
+            ]
+        },
+        "cb-variable-section": {
+            "patterns": [
+                {
+                    "match": "^([a-zA-Z\\$\\_][a-zA-Z0-9\\$\\_]+)(?=:)",
+                    "captures": {
+                        "1": { "name": "entity.name.tag" }
+                    }
+                },
+                {
+                    "match": ":(.*)",
+                    "captures": {
+                        "1": {
+                            "patterns": [
+                                { "include": "#mod-patterns" }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "cb-script-tag": {
+            "name": "source.js.twee3",
+            "begin": "(?i)(\\[)(JavaScript)(\\])",
+            "beginCaptures": {
+                "1": { "name": "punctuation.separator" },
+                "2": { "name": "variable.language.super" },
+                "3": { "name": "punctuation.separator" }
+            },
+            "end": "(?i)(?=\\s*\\[cont(?:'d|inued?)?\\])|(?=::)",
+            "patterns": [
+                {
+                    "include": "source.js"
+                }
+            ]
+        },
+        "cb-style-tag": {
+            "name": "source.css.twee3",
+            "begin": "(?i)(\\[)(CSS)(\\])",
+            "beginCaptures": {
+                "1": { "name": "punctuation.separator" },
+                "2": { "name": "variable.language.super" },
+                "3": { "name": "punctuation.separator" }
+            },
+            "end": "(?i)(?=\\s*\\[cont(?:'d|inued?)?\\])|(?=::)",
+            "patterns": [
+                {
+                    "include": "source.css"
+                }
+            ]
+        },
+        "cb-modifiers": {
+            "begin": "(\\[)",
+            "beginCaptures": {
+                "1": {
+                    "name": "punctuation.separator"
+                }
+            },
+            "end": "(\\])",
+            "endCaptures": {
+                "1": {
+                    "name": "punctuation.separator"
+                }
+            },
+            "patterns": [
+                {
+                    "match": "(?<=\\[)[a-zA-Z\\$\\_]*(?=\\s|\\])",
+                    "name": "variable.language.super"
+                },
+                {
+                    "include": "#mod-patterns"
+                }
+            ]
+        },
+        "cb-inserts": {
+            "match": "(\\{)(.*?)(\\})",
+            "captures": {
+                "1": { "name": "punctuation.definition.tag.begin.html" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "[a-zA-Z0-9\\$\\_]+(?=:)",
+                            "name": "variable.language.super"
+                        },
+                        {
+                            "include": "#mod-patterns"
+                        }
+                    ]
+                },
+                "3": { "name": "punctuation.definition.tag.end.html" }
+            }
+        },
+        "mod-patterns": {
+            "patterns": [
+                {
+                    "match": "!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|(?<!\\()/=|%=|\\+=|\\-=|&=|\\^=|\\b(in|instanceof|new|delete|typeof|void)\\b",
+                    "name": "keyword.operator"
+                },
+                {
+                    "match": "('[^']*')",
+                    "name": "string.quoted.single.html"
+                },
+                {
+                    "match": "(\"[^\"]*\")",
+                    "name": "string.quoted.double.html"
+                },
+                {
+                    "match": "[+-]?(?:\\d*\\.)?\\d+[Mm]?[Ss]",
+                    "name": "constant.numeric.css"
+                },
+                {
+                    "match": "\\b((0(x|X)[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?))\\b",
+                    "name": "constant.numeric.js"
+                },
+                {
+                    "match": "\\b(Infinity|NaN|undefined|null|true|false)\\b",
+                    "name": "constant.language.js"
+                },
+                {
+                    "match": "(/[^/]*/)",
+                    "name": "string.regexp.js"
+                },
+                {
+                    "match": "(\\.[a-zA-Z_]+)",
+                    "name": "entity.name.function"
+                },
+                {
+                    "match": "([\\(\\)\\{\\}\\[\\]])",
+                    "name": "meta.brace"
+                },
+                {
+                    "include": "#cb-variables"
+                }
+            ]
+        },
+        "cb-variables": {
+            "patterns": [
+                {
+                    "match": "\\b([A-Za-z\\$\\_][A-Za-z0-9\\$\\_]+)\\b",
+                    "name": "entity.name.tag"
+                }
             ]
         },
         "json": {
