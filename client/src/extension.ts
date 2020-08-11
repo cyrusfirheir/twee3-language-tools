@@ -16,8 +16,6 @@ import { performance } from 'perf_hooks';
 
 let ctx: vscode.ExtensionContext;
 
-import { URL } from 'url';
-
 let client: LanguageClient;
 
 const tokenTypes = new Map<string, number>();
@@ -157,7 +155,6 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 	}
 }
 
-<<<<<<< HEAD
 const tweeProjectConfig = async function (document: vscode.TextDocument) {
 	const raw = document.getText();
 	if (!raw.match(/^::\s*StoryData\b/gm)) return;
@@ -179,30 +176,6 @@ const tweeProjectConfig = async function (document: vscode.TextDocument) {
 		config.update("name", fName),
 		config.update("version", fVersion)
 	]);
-=======
-const tweeProjectConfig = function (document: vscode.TextDocument) {
-	const raw = document.getText();
-	if (raw.match(/^::\s*StoryData\b/gm)) {
-		const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
-		if (storydata?.content) {
-			try {
-				const formatInfo = JSON.parse(storydata.content);
-				const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
-				const fName = formatInfo.format;
-				const fVersion = formatInfo["format-version"];
-				return Promise.all([
-					config.update("id", fName.toLowerCase() + "-" + fVersion.split(".")[0]),
-					config.update("name", fName),
-					config.update("version", fVersion)
-				]);
-			} catch {
-				vscode.window.showErrorMessage("Malformed StoryData JSON!");
-				return new Promise(res => res());
-			}
-		}
-	}
-	return new Promise(res => res());
->>>>>>> parent of acb069b... Revert "jsdoc branch"
 };
 
 const changeStoryFormat = async function (document: vscode.TextDocument) {
@@ -213,7 +186,6 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 
 	if (!override) format = "twee3-" + config.get("id");
 	else format = "twee3-" + override;
-<<<<<<< HEAD
 
 	const langs = await vscode.languages.getLanguages();
 	if (!langs.includes(format)) format = "twee3";
@@ -225,25 +197,11 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 	else return new Promise(res => res(document));
 };
 
-=======
-
-	const langs = await vscode.languages.getLanguages();
-	if (!langs.includes(format)) format = "twee3";
-	
-	if (
-		document.fileName.match(/\.tw(?:ee)?$/) &&
-		document.languageId !== format
-	) return vscode.languages.setTextDocumentLanguage(document, format);
-	else return new Promise(res => res(document));
-};
-
->>>>>>> parent of acb069b... Revert "jsdoc branch"
 vscode.workspace.onDidOpenTextDocument((document: vscode.TextDocument) => {
 	changeStoryFormat(document);
 });
 
 vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-<<<<<<< HEAD
 	collectDocumentation(ctx, document.getText());
 	tweeProjectConfig(document)
 		.then(() => changeStoryFormat(document));
@@ -277,49 +235,12 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-=======
-	tweeProjectConfig(document)
-		.then(() => changeStoryFormat(document))
-		.then(() => collectDocumentation(document.getText()));
-});
-
-export function activate(context: vscode.ExtensionContext) {
-
-	const ws = vscode.workspace.workspaceFolders?.[0].uri.path;
-    if (ws) {
-		const wsURL = new URL("file://" + ws + "/.vscode/.t3lt_temp.json");
-		fs.writeFileSync(wsURL, "{}", "utf8");
-	}
-
-	const pkg = JSON.parse(fs.readFileSync(path.join(context.extensionPath, "package.json"), "utf8"));
-	const formats = pkg.contributes.languages.map((el: { id: any; }) => el.id);	
-
-	vscode.workspace.findFiles("**/*.tw*").then(v => {
-		v.forEach(file => {
-			vscode.workspace.openTextDocument(vscode.Uri.file(file.path)).then(document => {
-				tweeProjectConfig(document)
-					.then(() => changeStoryFormat(document))
-					.then(() => collectDocumentation(document.getText()));
-			});
-		});
-	});
-
-	vscode.workspace.findFiles("**/*.d.{js,ts}", "**/node_modules/**").then(v => {
-		v.forEach(file => {
-			vscode.workspace.openTextDocument(vscode.Uri.file(file.path)).then(document => {
-				collectDocumentation(document.getText());
-			});
-		});
-	});
-	
->>>>>>> parent of acb069b... Revert "jsdoc branch"
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
 			"enabled": true
 		}, true);
 	}
 
-<<<<<<< HEAD
 	ctx.subscriptions.push(
 		vscode.languages.registerDocumentSemanticTokensProvider(formats.map((el: string) => {
 			return { language: el };
@@ -328,16 +249,6 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.languages.registerCompletionItemProvider('twee3-sugarcube-2', {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				return sc2.completion(ctx);
-=======
-	context.subscriptions.push(
-		vscode.languages.registerDocumentSemanticTokensProvider(formats.map((el: string) => {
-			return { language: el };
-		}), new DocumentSemanticTokensProvider(), legend)
-	,
-		vscode.languages.registerCompletionItemProvider('twee3-sugarcube-2', {
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-				return sc2.completion();
->>>>>>> parent of acb069b... Revert "jsdoc branch"
 			}
 		})
 	);
@@ -382,15 +293,8 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
-<<<<<<< HEAD
 	ctx.workspaceState.update("jsdocs", {});
 
-=======
-	const ws = vscode.workspace.workspaceFolders;
-	if (ws) fs.unlink(new URL("file://" + ws[0].uri.path + "/.t3lt_temp.json"), (err) => {
-		if (err) throw err;
-	});
->>>>>>> parent of acb069b... Revert "jsdoc branch"
 	if (!client) {
 		return undefined;
 	}
