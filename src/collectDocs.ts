@@ -11,11 +11,11 @@ interface jsdocParsed {
     returns?: Array<Object>;
 };
 
-export const collectDocumentation = function (context: vscode.ExtensionContext, raw: string) {
+export const collectDocumentation = function (context: vscode.ExtensionContext, document: vscode.TextDocument) {
     const old = context.workspaceState.get("jsdocs", {});
 
     let docs: any = {};
-    raw.match(/\/\*\*[\w\W]*?\*\//g)?.forEach(el => {
+    document.getText().match(/\/\*\*[\w\W]*?\*\//g)?.forEach(el => {
         const _parsed: jsdocParsed = jsdoc.explainSync({ source: el })[0];
         docs[_parsed.name] = _parsed;
     });

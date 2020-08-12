@@ -29,12 +29,14 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 
 ## Requirements
 
+The extension relies on a workspace (or a folder) being open. If single files are to be edited, the storyformat must be configured manually.
+
 Supported file extensions:
 
 - `.tw`
 - `.twee`
 
-To set the correct storyformat for `.tw` (or `.twee`) files, a `StoryData` passage with the storyformat mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
+To set the correct storyformat for the files, a `StoryData` passage with the storyformat mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
 
 ---
 
@@ -43,15 +45,10 @@ To set the correct storyformat for `.tw` (or `.twee`) files, a `StoryData` passa
 This extension contributes the following settings:
 
 Automatically set by the `StoryData` special passage (if it exists):
-- `twee3LanguageTools.storyformat.id`: Identifier of the storyformat in use.
-- `twee3LanguageTools.storyformat.name` : Name of the storyformat in use.
-- `twee3LanguageTools.storyformat.version` : Version of the storyformat in use.
+- `twee3LanguageTools.storyformat.current`: Identifier of the storyformat in use.
 
 Manual settings:
-- `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`. Valid values:
-    - `chapbook-1`
-    - `harlowe-3`
-    - `sugarcube-2`
+- `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`.
 
 ---
 

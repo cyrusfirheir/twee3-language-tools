@@ -1,8 +1,8 @@
 {
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
-	"description": "Syntax highlighting and Language Server implementation for Twee 3.",
-	"version": "0.2.5",
+	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
+	"version": "0.2.7",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -33,7 +33,7 @@
 		"onLanguage:twee3-harlowe-3",
 		"onLanguage:twee3-sugarcube-2"
 	],
-	"main": "./client/out/extension.js",
+	"main": "./out/extension.js",
 	"contributes": {
 		"languages": [
 			{
@@ -136,69 +136,74 @@
 		"semanticTokenScopes": [
 			{
 				"scopes": {
-					"startToken": [ "storage.type" ],
-					"special": [ "support.class" ],
-					"passageName": [ "entity.name.function" ],
-					"passageTags": [ "constant.language" ],
-					"passageMeta": [ "punctuation" ]
+					"startToken": [
+						"storage.type"
+					],
+					"special": [
+						"support.class"
+					],
+					"passageName": [
+						"entity.name.function"
+					],
+					"passageTags": [
+						"constant.language"
+					],
+					"passageMeta": [
+						"punctuation"
+					]
 				}
 			}
 		],
 		"configuration": {
 			"title": "Twee 3 Language Tools",
 			"properties": {
-				"twee3LanguageTools.storyformat.id": {
+				"twee3LanguageTools.storyformat.current": {
 					"type": "string",
 					"default": "",
-					"description": "Identifier of the storyformat in use."
-				},
-				"twee3LanguageTools.storyformat.name": {
-					"type": "string",
-					"default": "",
-					"description": "Name of the storyformat in use."
-				},
-				"twee3LanguageTools.storyformat.version": {
-					"type": "string",
-					"default": "",
-					"description": "Version of the storyformat in use."
+					"markdownDescription": "Identifier of the storyformat in use. (Managed by the `StoryData` special passage.)"
 				},
 				"twee3LanguageTools.storyformat.override": {
 					"type": "string",
+					"enum": [
+						"",
+						"chapbook-1",
+						"harlowe-3",
+						"sugarcube-2"
+					],
 					"default": "",
-					"description": "Identifier of the storyformat to override the format set by StoryData."
+					"markdownDescription": "Identifier of the storyformat to override the format set by `StoryData`."
 				}
 			}
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run webpack",
-		"webpack": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
-		"webpack:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
-		"compile": "tsc -b ./",
-		"compile:client": "tsc -b ./client/tsconfig.json",
-		"compile:server": "tsc -b ./server/tsconfig.json",
-		"watch": "tsc -b -w",
-		"lint": "npm run lint:client && npm run lint:server",
-		"lint:client": "eslint --config ./client/.eslintrc.json ./client/src/*.ts",
-		"lint:server": "eslint --config ./server/.eslintrc.json ./server/src/*.ts",
-		"clean": "rimraf client/out && rimraf server/out",
-		"postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+		"vscode:prepublish": "npm run clean && webpack --mode production",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"build": "tsc -b ./",
+		"compile": "tsc -p ./",
+		"watch": "tsc -w ./",
+		"test-compile": "tsc -p ./",
+		"lint": "eslint . --ext .ts,.tsx",
+		"clean": "rimraf out"
 	},
 	"devDependencies": {
-		"@types/glob": "^7.1.1",
 		"@types/mocha": "^7.0.2",
 		"@types/node": "^13.11.0",
-		"@typescript-eslint/eslint-plugin": "^2.30.0",
-		"@typescript-eslint/parser": "^2.30.0",
+		"@types/vscode": "^1.42.0",
+		"@typescript-eslint/eslint-plugin": "^3.9.0",
+		"@typescript-eslint/parser": "^3.9.0",
 		"eslint": "^6.8.0",
-		"glob": "^7.1.6",
 		"mocha": "^7.1.2",
 		"rimraf": "^3.0.2",
 		"ts-loader": "^8.0.2",
-		"typescript": "^3.8.3",
-		"merge-options": "^2.0.0",
-		"vscode-test": "^1.3.0",
+		"typescript": "^3.9.7",
 		"webpack": "^4.44.1",
 		"webpack-cli": "^3.3.12"
+	},
+	"dependencies": {
+		"@types/uuid": "^8.3.0",
+		"jsdoc-api": "^6.0.0",
+		"uuid": "^8.3.0"
 	}
 }

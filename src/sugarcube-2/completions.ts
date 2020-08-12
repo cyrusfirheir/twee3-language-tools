@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { CompletionItemKind } from 'vscode-languageclient';
 
 interface jsdocParsed {
     comment: string;
@@ -46,14 +45,14 @@ const createSnippetDocs = function (target: jsdocParsed) {
 };
 
 export const completion = function (context: vscode.ExtensionContext) {
-    let r: Array<vscode.CompletionItem> = [];
-    const docs: Array<jsdocParsed> = Object.values(context.workspaceState.get("jsdocs", {}));
+    let r: vscode.CompletionItem[] = [];
+    const docs: jsdocParsed[] = Object.values(context.workspaceState.get("jsdocs", {}));
 
     docs.forEach((el: jsdocParsed) => {
         const names = [el.name].concat(el.alias?.split(" ") || []);
 
         names.forEach(elem => {
-            const snippet = new vscode.CompletionItem(elem, CompletionItemKind.Method);
+            const snippet = new vscode.CompletionItem(elem, vscode.CompletionItemKind.Method);
             snippet.insertText = new vscode.SnippetString(createSnippet(el));
             snippet.documentation = new vscode.MarkdownString(createSnippetDocs(el));
             snippet.detail = el.kind || "";

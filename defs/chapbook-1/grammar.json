@@ -2,13 +2,13 @@
     "name": "twee3-chapbook-1",
     "scopeName": "source.chapbook-1.twee3",
     "patterns": [
-        { "include": "#link-markup" },
-        { "include": "#chapbook-1" },
         { "include": "#json" },
         { "include": "#script" },
         { "include": "#stylesheet" },
         { "include": "#script-tag" },
         { "include": "#style-tag" },
+        { "include": "#link-markup" },
+        { "include": "#chapbook-1" },
         { "include": "#html" },
         {
             "begin": "<!--",
