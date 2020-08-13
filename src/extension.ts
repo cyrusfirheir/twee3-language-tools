@@ -77,22 +77,6 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 	else return new Promise(res => res(document));
 };
 
-vscode.workspace.onDidChangeConfiguration((e) => {
-	if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
-		vscode.workspace.findFiles("**/*.tw*").then(async v => {
-			for (let file of v) {
-				const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(file.path));
-				changeStoryFormat(doc);
-			}
-		});
-	}
-});
-
-vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-	collectDocumentation(ctx, document);
-	tweeProjectConfig(document);
-});
-
 export async function activate(context: vscode.ExtensionContext) {
 	ctx = context;
 
@@ -132,22 +116,48 @@ export async function activate(context: vscode.ExtensionContext) {
 			return { language: el };
 		}), new DocumentSemanticTokensProvider(), legend)
 		,
-		vscode.languages.registerCompletionItemProvider('twee3', {
+		vscode.languages.registerCompletionItemProvider(formats.map((el: string) => {
+			return { language: el };
+		}), {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				return twee3.completion();
 			}
 		})
 		,
-		vscode.languages.registerCompletionItemProvider('twee3-sugarcube-2', {
+		vscode.languages.registerCompletionItemProvider({
+			language: 'twee3-sugarcube-2'
+		}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				return sc2.completion(ctx);
 			}
 		})
 		,
 		vscode.window.onDidChangeActiveTextEditor(editor => {
-			if (editor) {
-				updateDiagnostics(editor.document, collection);
+			if (editor) updateDiagnostics(editor.document, collection);
+		})
+		,
+		vscode.workspace.onDidOpenTextDocument(document => {
+			updateDiagnostics(document, collection);
+		})
+		,
+		vscode.workspace.onDidChangeTextDocument(e => {
+			updateDiagnostics(e.document, collection);
+		})
+		,
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
+				vscode.workspace.findFiles("**/*.tw*").then(async v => {
+					for (let file of v) {
+						const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(file.path));
+						changeStoryFormat(doc);
+					}
+				});
 			}
+		})
+		,
+		vscode.workspace.onDidSaveTextDocument(document => {
+			collectDocumentation(ctx, document);
+			tweeProjectConfig(document);
 		})
 	);
 }

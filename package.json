@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -203,7 +203,7 @@
 	},
 	"dependencies": {
 		"@types/uuid": "^8.3.0",
-		"jsdoc-api": "^6.0.0",
+		"comment-parser": "^0.7.5",
 		"uuid": "^8.3.0"
 	}
 }
