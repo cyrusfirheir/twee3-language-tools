@@ -36,7 +36,9 @@ const createSnippetDocs = function (target: jsdocParsed) {
     target.returns.forEach((el: any) => {
         r += " - ";
         r += el.type ? `\`${el.type.split("|").join(" | ")}\` ` : "";
-        r += el.description ? `  \n\t ${el.description}` : "";
+        r += el.name
+            ? `  \n\t ${el.name} ${el.description || ""}`
+            : "";
         r += "  \n\n";
     });
     return r;
