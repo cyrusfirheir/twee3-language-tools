@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.0
+
+Adds:
+
+- A new tree view container in the activity bar. Currently, it shows a list of passages across all Twee files in the workspace, along with links to jump to them. See [Readme](README.md#features) for screencaps.
+
+Fixes:
+
+- > If JSDoc comments containing widget/macro documentations are removed, older definitions still stay in memory, and cause the editor to provide suggestions for macros that are no longer documented. To fix, restart VSCode, or reload the window (type "Reload Window" into the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default)).
+
+---
+
 ## v0.2.0
 
 Adds:
@@ -10,7 +22,7 @@ Adds:
 
 Fixes:
 
-- SugarCube comments (`/* */`) not getting tokenized.
+- SugarCube block comments (`/* */`) not getting tokenized.
 
 ---
 

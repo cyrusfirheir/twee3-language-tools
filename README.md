@@ -4,6 +4,11 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 
 ## **Features**
 
+### Twee
+- Syntax highlighting.
+- A list of passages for quick jumps.
+    ![Passage List](https://imgur.com/3WObntl.png)
+
 ### Chapbook
 *(id: `chapbook-1`)*
 - Syntax highlighting.
@@ -54,7 +59,7 @@ Manual settings:
 
 ## Known issues
 
-- If JSDoc comments containing widget/macro documentations are removed, older definitions still stay in memory, and cause the editor to provide suggestions for macros that are no longer documented. To fix, restart VSCode, or reload the window (type "Reload Window" into the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default)).
+None, currently.
 
 ---
 

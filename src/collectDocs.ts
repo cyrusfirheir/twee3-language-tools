@@ -1,19 +1,20 @@
 import * as vscode from 'vscode';
 import * as cp from 'comment-parser';
 
-interface jsdocParsed {
+export interface jsdocParsed {
     name: string;
     alias: string[];
     kind: string[];
     params: Object[];
     returns: Object[];
     description: string;
+    __origin__: string;
 };
 
 export const collectDocumentation = function (context: vscode.ExtensionContext, document: vscode.TextDocument) {
-    const old = context.workspaceState.get("jsdocs", {});
+    const old: jsdocParsed[] = context.workspaceState.get("jsdocs", []);
+    const docs: jsdocParsed[] = Array.from(old).filter(el => el.__origin__ !== document.uri.path);
 
-    let docs: any = {};
     document.getText().match(/\/\*\*[\w\W]*?\*\//g)?.forEach(el => {
         const _parsed = cp(el)[0];
         let newDoc: jsdocParsed = {
@@ -22,7 +23,8 @@ export const collectDocumentation = function (context: vscode.ExtensionContext, 
             kind: [],
             params: [],
             returns: [],
-            description: _parsed.description
+            description: _parsed.description,
+            __origin__: document.uri.path
         };
         _parsed.tags.forEach((elem, i) => {
             switch (elem.tag) {
@@ -52,8 +54,8 @@ export const collectDocumentation = function (context: vscode.ExtensionContext, 
                 }
             }
         });
-        if (newDoc.name) docs[newDoc.name] = newDoc;
+        if (newDoc.name) docs.push(newDoc);
     });
 
-    return context.workspaceState.update("jsdocs", Object.assign(old, docs));
+    return context.workspaceState.update("jsdocs", docs);
 };

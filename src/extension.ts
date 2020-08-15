@@ -9,7 +9,9 @@ import * as sc2 from './sugarcube-2/completions';
 
 import { parseText } from './parseText';
 import { updateDiagnostics } from './diagnostics';
-import { collectDocumentation } from './collectDocs';
+import { collectDocumentation, jsdocParsed } from './collectDocs';
+
+import { PassageListProvider, Passage } from './tree-view';
 
 let ctx: vscode.ExtensionContext;
 
@@ -24,7 +26,7 @@ const legend = (function () {
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const allTokens = parseText(document.getText());
+		const allTokens = await parseText(ctx, document);
 		const builder = new vscode.SemanticTokensBuilder();
 		allTokens.forEach((_token) => {
 			builder.push(_token.line, _token.startCharacter, _token.length, this._encodeTokenType(_token.tokenType));
@@ -79,6 +81,10 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 
 export async function activate(context: vscode.ExtensionContext) {
 	ctx = context;
+	const passageListProvider = new PassageListProvider(ctx);
+
+	await ctx.workspaceState.update("jsdocs", undefined);
+	await ctx.workspaceState.update("passages", undefined);
 
 	await vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").update("current", "");
 
@@ -87,16 +93,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.workspace.findFiles("**/*.tw*").then(async (v) => {
 		for (let file of v) {
-			const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(file.path));
+			const doc = await vscode.workspace.openTextDocument(file);
 			tweeProjectConfig(doc);
-			collectDocumentation(ctx, doc);
+			await collectDocumentation(ctx, doc);
+			await parseText(ctx, doc, passageListProvider);
 		}
 	});
 	
 	vscode.workspace.findFiles("**/*.d.{js,ts}", "**/node_modules/**").then(async (v) => {
 		for (let file of v) {
-			const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(file.path));
-			collectDocumentation(ctx, doc);
+			const doc = await vscode.workspace.openTextDocument(file);
+			await collectDocumentation(ctx, doc);
 		}
 	});
 
@@ -110,7 +117,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	if (vscode.window.activeTextEditor) {
 		updateDiagnostics(vscode.window.activeTextEditor.document, collection);
 	}
-
+	
 	ctx.subscriptions.push(
 		vscode.languages.registerDocumentSemanticTokensProvider(formats.map((el: string) => {
 			return { language: el };
@@ -146,22 +153,65 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
-				vscode.workspace.findFiles("**/*.tw*").then(async v => {
-					for (let file of v) {
-						const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(file.path));
-						changeStoryFormat(doc);
-					}
-				});
+				vscode.workspace.findFiles("**/*.tw*")
+					.then(v => v.forEach(
+						file => vscode.workspace.openTextDocument(file)
+							.then(doc => changeStoryFormat(doc))
+					));
+			}
+		})
+		,
+		vscode.workspace.onDidCreateFiles(e => {
+			e.files.forEach(file => vscode.workspace.openTextDocument(file).then((doc) => changeStoryFormat(doc)));
+		})
+		,
+		vscode.workspace.onDidDeleteFiles(async e => {
+			for (let file of e.files) {
+				const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
+				const passages = Array.from(oldPassages).filter(el => el.__origin__ !== file.path);
+				await ctx.workspaceState.update("passages", passages);
+
+				const oldDocs: jsdocParsed[] = ctx.workspaceState.get("jsdocs", []);
+				const docs = Array.from(oldDocs).filter(el => el.__origin__ !== file.path);
+				await ctx.workspaceState.update("jsdocs", docs);
+				passageListProvider.refresh();
+			}
+		})
+		,
+		vscode.workspace.onDidRenameFiles(async e => {
+			for (let file of e.files) {
+				let doc = await vscode.workspace.openTextDocument(file.newUri);
+				changeStoryFormat(doc);
+				await parseText(ctx, doc, passageListProvider);
+				await collectDocumentation(ctx, doc);
 			}
 		})
 		,
 		vscode.workspace.onDidSaveTextDocument(document => {
-			collectDocumentation(ctx, document);
 			tweeProjectConfig(document);
+			collectDocumentation(ctx, document);
+			parseText(ctx, document, passageListProvider);
+		})
+		,
+		vscode.window.registerTreeDataProvider(
+			'passages-list',
+			passageListProvider
+		)
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item) => {
+			vscode.window.showTextDocument(vscode.Uri.file(item.__origin__)).then(editor => {
+				const regexp = new RegExp(
+					"^::\\s*" +
+					item.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+					"\\s*(\\[|\\{|$)"
+				);
+				const lines = editor.document.getText().split(/\r?\n/);
+				const start = Math.max(0, lines.findIndex(el => el.match(regexp)));
+				editor.revealRange(new vscode.Range(
+					new vscode.Position(start, 0),
+					new vscode.Position(start, 0)
+				), vscode.TextEditorRevealType.AtTop);
+			});
 		})
 	);
-}
-
-export async function deactivate(): Promise<void> {
-	ctx.workspaceState.update("jsdocs", {});
 }

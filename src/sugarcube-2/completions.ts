@@ -1,13 +1,5 @@
 import * as vscode from 'vscode';
-
-interface jsdocParsed {
-    name: string;
-    alias: string[];
-    kind: string[];
-    params: Object[];
-    returns: Object[];
-    description: string;
-};
+import { jsdocParsed } from '../collectDocs';
 
 export const createSnippet = function (target: jsdocParsed) {
     let r = `<<${target.name}`;
@@ -46,7 +38,7 @@ const createSnippetDocs = function (target: jsdocParsed) {
 
 export const completion = function (context: vscode.ExtensionContext) {
     let r: vscode.CompletionItem[] = [];
-    const docs: jsdocParsed[] = Object.values(context.workspaceState.get("jsdocs", {}));
+    const docs: jsdocParsed[] = context.workspaceState.get("jsdocs", []);
 
     docs.forEach((el: jsdocParsed) => {
         const names = [el.name].concat(el.alias || []);
