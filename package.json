@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -213,7 +213,12 @@
 			{
                 "command": "twee3LanguageTools.passage.list",
                 "title": "Toggle listing"
-            }
+			},
+			{
+				"command": "twee3LanguageTools.ifid.generate",
+				"title": "Generate IFID",
+				"category": "Twee3 Language Tools"
+			}
 		],
 		"menus": {
 			"view/title": [

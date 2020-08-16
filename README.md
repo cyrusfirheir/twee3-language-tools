@@ -5,34 +5,29 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 ## **Features**
 
 ### Twee
-- Syntax highlighting.
-- A list of passages for quick jumps.
+- Syntax highlighting.  
+- Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default) and search for "IFID".  
+- A list of passages for quick jumps.  
     ![Passage List](https://imgur.com/3WObntl.png)
 
 ### Chapbook
 *(id: `chapbook-1`)*
-- Syntax highlighting.
+- Syntax highlighting.  
     ![Chapbook syntax](https://imgur.com/0SmpnBT.png)
 
 ### Harlowe
 *(id: `harlowe-3`)*
-- Syntax highlighting.
+- Syntax highlighting.  
     ![Harlowe syntax](https://imgur.com/XTWOyHP.png)
 
 ### SugarCube
 *(id: `sugarcube-2`)*
-- Syntax highlighting.
+- Syntax highlighting.  
     ![Harlowe syntax](https://imgur.com/9Z94sM4.png)
-
-- `WIP` Code suggestions via [JSDoc](https://jsdoc.app/) comments. The extension scans through `*.tw`, `*.twee`, `*.d.js`, and `*.d.ts` files (excluding the directory `node_modules`) for JSDoc comments.
-    - Comments with `@name` specified in them will show up as suggestions while typing, and pressing <kbd>Tab</kbd> or <kbd>Enter/Return</kbd> will insert the snippet of code with tab stops for each `@param` mentioned in the comment.  
-    ![SugarCube JSDoc widget example](https://imgur.com/6w0DlY1.gif)
-    - You can also specify the `@kind` of snippet (e.g. widget, macro). Including the word 'container' in the `@kind` string will add a closing tag for the inserted snippet.  
-    ![SugarCube JSDoc container macro example](https://imgur.com/5cXnqIw.gif)
 
 ---
 
-## Requirements
+## **Requirements**
 
 The extension relies on a workspace (or a folder) being open. If single files are to be edited, the storyformat must be configured manually.
 
@@ -45,7 +40,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
 ---
 
-## Extension Settings
+## **Extension Settings**
 
 This extension contributes the following settings:
 
@@ -58,13 +53,7 @@ Manual settings:
 
 ---
 
-## Known issues
-
-None, currently.
-
----
-
-## Changelog
+## **Changelog**
 
 Changelog [here](CHANGELOG.md).
 

@@ -1,11 +1,14 @@
 {
-    "JSDoc comment": {
-        "prefix": "/**",
+    "StoryData": {
+        "prefix": "StoryData",
         "body": [
-            "/**",
-            " * $0",
-            " */"
+            ":: StoryData",
+            "{",
+            "\t\"ifid\": \"$1\",",
+            "\t\"format\": \"$2\",",
+            "\t\"format-version\": \"$3\"",
+            "}"
         ],
-        "description": "Insert JSDoc comment."
+        "description": "StoryData JSON chunk."
     }
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.3
+
+Removes:
+
+- Parsing of JSDoc comments to provide code suggestions. This was causing basic plaintext suggestions to stop working, and is a limitation of the code completion features VSCode facilitates. Going forward, suggestions will be left to code snippets defined in JSON files.
+
+---
+
 ## v0.3.0
 
 Adds:
