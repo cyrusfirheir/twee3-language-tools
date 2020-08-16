@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -172,6 +172,11 @@
 					],
 					"default": "",
 					"markdownDescription": "Identifier of the storyformat to override the format set by `StoryData`."
+				},
+				"twee3LanguageTools.passage.list": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Collect passage names to display a list of quick 'jump' links?"
 				}
 			}
 		},
@@ -187,21 +192,41 @@
 		"views": {
 			"twee3-language-tools": [
 				{
-					"id": "passages-list",
-					"name": "Passages"
+					"id": "t3lt-passages-list",
+					"name": "Passages",
+					"when": "config.twee3LanguageTools.passage.list || resourceFilename =~ /.*?\\.tw(?:ee)?$/",
+					"contextualTitle": "Passages"
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "t3lt-passages-list",
+				"contents": "Passage list turned off.\n[Enable](command:twee3LanguageTools.passage.list)"
+			}
+		],
 		"commands": [
             {
                 "command": "twee3LanguageTools.passage.jump",
                 "title": "Jump"
+			},
+			{
+                "command": "twee3LanguageTools.passage.list",
+                "title": "Toggle listing"
             }
 		],
 		"menus": {
+			"view/title": [
+				{
+				  "command": "twee3LanguageTools.passage.list",
+				  "when": "view == t3lt-passages-list",
+				  "group": "navigation"
+				}
+			],
 			"view/item/context": [
 				{
 					"command": "twee3LanguageTools.passage.jump",
+					"when": "view == t3lt-passages-list",
 					"group": "inline"
 				}
 			]

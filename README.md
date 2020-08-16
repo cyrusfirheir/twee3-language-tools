@@ -54,6 +54,7 @@ Automatically set by the `StoryData` special passage (if it exists):
 
 Manual settings:
 - `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`.
+- `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links?
 
 ---
 

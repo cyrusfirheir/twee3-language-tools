@@ -2,11 +2,7 @@ import * as vscode from 'vscode';
 import headsplit from './headsplit';
 
 export const updateDiagnostics = function (document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
-
-	if (!document.languageId.match(/twee3.*/)) {
-		collection.clear();
-		return;
-	}
+	if (!document.languageId.match(/^twee3.*/)) return;
 
 	let diagnostics: vscode.Diagnostic[] = [];
 	const raw = document.getText();

@@ -73,7 +73,7 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 	const langs = await vscode.languages.getLanguages();
 	if (!langs.includes(format)) format = "twee3";
 	if (
-		document.fileName.match(/\.tw(?:ee)?$/) &&
+		document.languageId.match(/^twee3.*/) &&
 		document.languageId !== format
 	) return vscode.languages.setTextDocumentLanguage(document, format);
 	else return new Promise(res => res(document));
@@ -96,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const doc = await vscode.workspace.openTextDocument(file);
 			tweeProjectConfig(doc);
 			await collectDocumentation(ctx, doc);
-			await parseText(ctx, doc, passageListProvider);
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await parseText(ctx, doc, passageListProvider);
 		}
 	});
 	
@@ -159,6 +159,16 @@ export async function activate(context: vscode.ExtensionContext) {
 							.then(doc => changeStoryFormat(doc))
 					));
 			}
+			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) vscode.workspace.findFiles("**/*.tw*")
+					.then(async v => {
+						for (let file of v) {
+							const doc = await vscode.workspace.openTextDocument(file);
+							parseText(ctx, doc, passageListProvider);
+						}
+					});
+				else ctx.workspaceState.update("passages", undefined).then(() => passageListProvider.refresh());
+			}
 		})
 		,
 		vscode.workspace.onDidCreateFiles(e => {
@@ -182,7 +192,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			for (let file of e.files) {
 				let doc = await vscode.workspace.openTextDocument(file.newUri);
 				changeStoryFormat(doc);
-				await parseText(ctx, doc, passageListProvider);
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await parseText(ctx, doc, passageListProvider);
 				await collectDocumentation(ctx, doc);
 			}
 		})
@@ -190,11 +200,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidSaveTextDocument(document => {
 			tweeProjectConfig(document);
 			collectDocumentation(ctx, document);
-			parseText(ctx, document, passageListProvider);
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) parseText(ctx, document, passageListProvider);
 		})
 		,
 		vscode.window.registerTreeDataProvider(
-			'passages-list',
+			't3lt-passages-list',
 			passageListProvider
 		)
 		,
@@ -212,6 +222,11 @@ export async function activate(context: vscode.ExtensionContext) {
 					new vscode.Position(start, 0)
 				), vscode.TextEditorRevealType.AtTop);
 			});
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.list", () => {
+			const config = vscode.workspace.getConfiguration("twee3LanguageTools.passage");
+			config.update("list", !config.get("list"));
 		})
 	);
 }

@@ -1,4 +1,4 @@
-import { TextDocument, ExtensionContext, ThemeIcon } from 'vscode';
+import { TextDocument, ExtensionContext, ThemeIcon, workspace } from 'vscode';
 import { Passage, PassageListProvider } from './tree-view';
 
 interface IParsedToken {
@@ -10,8 +10,11 @@ interface IParsedToken {
 }
 
 export const parseText = async function (context: ExtensionContext, document: TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
-    const old: Passage[] = context.workspaceState.get("passages", []);
-    const passages: Passage[] = Array.from(old).filter(el => el.__origin__ !== document.uri.path);
+    let passages: Passage[] = [];
+    if (workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
+        const old: Passage[] = context.workspaceState.get("passages", []);
+        passages = Array.from(old).filter(el => el.__origin__ !== document.uri.path);
+    }
     const r: IParsedToken[] = [];
     const lines = document.getText().split(/\r?\n/);
     lines.forEach((line, i) => {
@@ -43,18 +46,16 @@ export const parseText = async function (context: ExtensionContext, document: Te
                 oMeta > 0 && !meta ||
                 oMeta > 0 && oMeta < oTag
             )) {
-                const passageName = line.substring(2, 2 + nameLength).trim();
-                const specialName = [
+                let passageName, specialName, passageTags, specialTag, passageMeta;
+
+                passageName = line.substring(2, 2 + nameLength).trim();
+                specialName = [
                     "StoryTitle",
                     "StoryData",
                     "Start"
                 ].includes(passageName);
 
-                let passage = new Passage(document.uri.path, passageName);
-
-                if (passageName === "Start") passage.iconPath = new ThemeIcon("rocket");
-                else if (passageName === "StoryTitle") passage.iconPath = new ThemeIcon("mention");
-                else if (passageName === "StoryData") passage.iconPath = new ThemeIcon("json");
+                
 
                 r.push({
                     line: i, startCharacter: 0, length: 2, tokenType: "startToken", tokenModifiers: []
@@ -65,17 +66,11 @@ export const parseText = async function (context: ExtensionContext, document: Te
                 });
 
                 if (oTag > 0) {
-                    const passageTags = line.substring(oTag + 1, cTag).trim();
-                    const specialTag = [
+                    passageTags = line.substring(oTag + 1, cTag).trim();
+                    specialTag = [
                         "script",
                         "stylesheet"
                     ].includes(passageTags);
-
-                    passage.tags = passageTags.split(" ");
-                    passage.description = passage.tags.join(", ");
-
-                    if (passage.tags?.includes("script")) passage.iconPath = new ThemeIcon("code");
-                    else if (passage.tags?.includes("stylesheet")) passage.iconPath = new ThemeIcon("paintcan");
 
                     r.push({
                         line: i, startCharacter: oTag, length: 1, tokenType: "comment", tokenModifiers: []
@@ -89,8 +84,7 @@ export const parseText = async function (context: ExtensionContext, document: Te
                 }
 
                 if (oMeta > 0) {
-                    passage.meta = line.substring(oMeta, cMeta + 1);
-
+                    passageMeta = line.substring(oMeta, cMeta + 1);
                     r.push({
                         line: i, startCharacter: oMeta, length: 1, tokenType: "comment", tokenModifiers: []
                     }, {
@@ -100,11 +94,30 @@ export const parseText = async function (context: ExtensionContext, document: Te
                     });
                 }
 
-                passages.push(passage);
+                if (workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
+                    let passage = new Passage(document.uri.path, passageName);
+
+                    passage.tags = passageTags?.split(" ");
+                    passage.description = passage.tags?.join(", ") || "";
+
+                    passage.meta = passageMeta || "";
+
+                    if (specialName) switch (passageName) {
+                        case "Start": passage.iconPath = new ThemeIcon("rocket"); break;
+                        case "StoryTitle": passage.iconPath = new ThemeIcon("mention"); break;
+                        case "StoryData": passage.iconPath = new ThemeIcon("json"); break;
+                    }
+                    else if (specialTag) switch (passage.tags?.[0]) {
+                        case "script": passage.iconPath = new ThemeIcon("code"); break;
+                        case "stylesheet": passage.iconPath = new ThemeIcon("paintcan"); break;
+                    }
+
+                    passages.push(passage);
+                }
             }
         }
     });
-    await context.workspaceState.update("passages", passages);
+    if (workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await context.workspaceState.update("passages", passages);
     provider?.refresh();
     return Promise.resolve(r);
 }
