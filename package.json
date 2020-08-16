@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -175,7 +175,7 @@
 				},
 				"twee3LanguageTools.passage.list": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"markdownDescription": "Collect passage names to display a list of quick 'jump' links?"
 				}
 			}
