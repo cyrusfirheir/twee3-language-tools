@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -82,7 +80,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	await Promise.all([
 		ctx.workspaceState.update("passages", undefined),
-		ctx.workspaceState.update("jsdocs", undefined),
 		vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").update("current", "")
 	]);
 
@@ -115,6 +112,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
+			changeStoryFormat(document);
 			updateDiagnostics(document, collection);
 		})
 		,
