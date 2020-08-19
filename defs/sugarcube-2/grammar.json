@@ -19,19 +19,10 @@
     "repository": {
         "sugarcube-2": {
             "patterns": [
-                { "include": "#sc-comments-jsdoc" },
                 { "include": "#sc-comments" },
                 { "include": "#sc-script-tag" },
                 { "include": "#sc-macro" },
                 { "include": "#sc-variables" }
-            ]
-        },
-        "sc-comments-jsdoc": {
-            "begin": "(?=\\/\\*\\*)",
-            "end": "(?<=\\*\\/)",
-            "name": "source.js.twee3",
-            "patterns": [
-                { "include": "source.js" }
             ]
         },
         "sc-comments": {
@@ -123,10 +114,6 @@
                 {
                     "match": "\\b(Infinity|NaN|undefined|null|true|false)\\b",
                     "name": "constant.language.js"
-                },
-                {
-                    "match": "(/[^/]*/)",
-                    "name": "string.regexp.js"
                 },
                 {
                     "match": "(\\.[a-zA-Z_]+)",

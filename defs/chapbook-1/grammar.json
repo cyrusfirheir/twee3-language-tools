@@ -148,10 +148,6 @@
                     "name": "constant.language.js"
                 },
                 {
-                    "match": "(/[^/]*/)",
-                    "name": "string.regexp.js"
-                },
-                {
                     "match": "(\\.[a-zA-Z_]+)",
                     "name": "entity.name.function"
                 },
