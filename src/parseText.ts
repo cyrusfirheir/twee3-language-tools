@@ -39,7 +39,7 @@ export const parseText = async function (context: ExtensionContext, document: Te
                     : line.length;
 
             if (!(
-                escaped.substring(2, 2 + nameLength).match(/[}\]]/g) ||
+                /[}\]]/g.test(escaped.substring(2, 2 + nameLength)) ||
                 escaped.split("[").length - 1 > 1 ||
                 escaped.split("{").length - 1 > 1 ||
                 oTag > 0 && !tag ||

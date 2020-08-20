@@ -9,7 +9,7 @@ export default function headsplit(raw: string, regexp: RegExp, caps: number = 1)
     }
     _caps = _caps.slice(0, -6);
     for (let t = 0; t < text.length; t++) {
-        if (text[t].match(regexp)) {
+        if (regexp.test(text[t])) {
             retArr.push({
                 header: _header.trim(),
                 content: _content.trim()

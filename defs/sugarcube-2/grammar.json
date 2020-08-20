@@ -88,7 +88,7 @@
                     "include": "#sc-variables"
                 },
                 {
-                    "match": "\\b(is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|undef)\\b",
+                    "match": "\\b(to|is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|undef)\\b",
                     "name": "keyword.operator"
                 },
                 {

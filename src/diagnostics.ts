@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import headsplit from './headsplit';
 
 export const updateDiagnostics = function (document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
-	if (!document.languageId.match(/^twee3.*/)) return;
+	if (!/^twee3.*/.test(document.languageId)) return;
 
 	let diagnostics: vscode.Diagnostic[] = [];
 	const raw = document.getText();
@@ -11,7 +11,7 @@ export const updateDiagnostics = function (document: vscode.TextDocument, collec
 		
 		if (line.startsWith("::")) {
 
-			if (!line[2].match(/\s/)) {
+			if (!/\s/.test(line[2])) {
 				diagnostics.push({
 					severity: vscode.DiagnosticSeverity.Warning,
 					range: new vscode.Range(
@@ -24,7 +24,7 @@ export const updateDiagnostics = function (document: vscode.TextDocument, collec
 				});
 			}
 
-			if (line.match(/^::\s*StoryData\b/gm)) {
+			if (/^::\s*StoryData\b/gm.test(line)) {
 				const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
 				if (storydata?.content) {
 					try {

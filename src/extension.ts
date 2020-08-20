@@ -68,7 +68,7 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 	const langs = await vscode.languages.getLanguages();
 	if (!langs.includes(format)) format = "twee3";
 	if (
-		document.languageId.match(/^twee3.*/) &&
+		/^twee3.*/.test(document.languageId) &&
 		document.languageId !== format
 	) return vscode.languages.setTextDocumentLanguage(document, format);
 	else return new Promise(res => res(document));
@@ -179,7 +179,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					"\\s*(\\[|\\{|$)"
 				);
 				const lines = editor.document.getText().split(/\r?\n/);
-				const start = Math.max(0, lines.findIndex(el => el.match(regexp)));
+				const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
 				editor.revealRange(new vscode.Range(
 					new vscode.Position(start, 0),
 					new vscode.Position(start, 0)
