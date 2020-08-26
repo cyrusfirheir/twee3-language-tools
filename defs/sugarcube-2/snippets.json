@@ -1,14 +1,14 @@
 {
-    "StoryData": {
-        "prefix": "StoryData",
-        "body": [
-            ":: StoryData",
-            "{",
-            "\t\"ifid\": \"$1\",",
-            "\t\"format\": \"$2\",",
-            "\t\"format-version\": \"$3\"",
-            "}"
-        ],
-        "description": "StoryData JSON chunk."
-    }
+	"StoryData": {
+		"prefix": "StoryData",
+		"body": [
+			":: StoryData",
+			"{",
+			"\t\"ifid\": \"$1\",",
+			"\t\"format\": \"$2\",",
+			"\t\"format-version\": \"$3\"",
+			"}"
+		],
+		"description": "StoryData JSON chunk."
+	}
 }

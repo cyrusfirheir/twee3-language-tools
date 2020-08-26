@@ -1,23 +1,21 @@
 import * as vscode from 'vscode';
 import headsplit from './headsplit';
+// import { diagnostics as sc2 } from './sugarcube-2/diagnostics';
 
 export const updateDiagnostics = function (document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
 	if (!/^twee3.*/.test(document.languageId)) return;
 
 	let diagnostics: vscode.Diagnostic[] = [];
 	const raw = document.getText();
-    let lines = raw.split(/\r?\n/g);
-    lines.forEach((line, i) => {
-		
+	let lines = raw.split(/\r?\n/g);
+	lines.forEach((line, i) => {
+
 		if (line.startsWith("::")) {
 
 			if (!/\s/.test(line[2])) {
 				diagnostics.push({
 					severity: vscode.DiagnosticSeverity.Warning,
-					range: new vscode.Range(
-						new vscode.Position(i, 0),
-						new vscode.Position(i, 3)
-					),
+					range: new vscode.Range(i, 0, i, 3),
 					message: `\nNo space between Start token (::) and passage name.\n\n(If this is a CSS selector for a pseudo element, add a universal selector (*), or at least one whitespace before the start token.)\n\n`,
 					source: 'Style guide',
 					code: 0
@@ -32,10 +30,7 @@ export const updateDiagnostics = function (document: vscode.TextDocument, collec
 					} catch (ex) {
 						diagnostics.push({
 							severity: vscode.DiagnosticSeverity.Error,
-							range: new vscode.Range(
-								new vscode.Position(i, 0),
-								new vscode.Position(i + storydata.content.split("\n").length + 1, 0)
-							),
+							range: new vscode.Range(i, 0, i + storydata.content.split("\n").length + 1, 0),
 							message: `\nMalformed StoryData JSON!\n\n${ex}\n\n`,
 							source: 'ex',
 							code: 1
@@ -45,6 +40,8 @@ export const updateDiagnostics = function (document: vscode.TextDocument, collec
 			}
 		}
 	});
+
+	// if (document.languageId === "twee3-sugarcube-2") diagnostics = diagnostics.concat(sc2(document));
 
 	collection.set(document.uri, diagnostics);
 }

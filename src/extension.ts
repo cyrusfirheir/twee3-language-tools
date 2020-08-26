@@ -8,6 +8,9 @@ import { updateDiagnostics } from './diagnostics';
 
 import { PassageListProvider, Passage } from './tree-view';
 
+import * as sc2m from './sugarcube-2/macroRange';
+let sc2MacroPairs: sc2m.macro[] = [];
+
 let ctx: vscode.ExtensionContext;
 
 const tokenTypes = new Map<string, number>();
@@ -77,6 +80,9 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 export async function activate(context: vscode.ExtensionContext) {
 	ctx = context;
 	const passageListProvider = new PassageListProvider(ctx);
+	const collection = vscode.languages.createDiagnosticCollection();
+
+	if (vscode.window.activeTextEditor) sc2MacroPairs = sc2m.collect(vscode.window.activeTextEditor.document.getText());
 
 	await Promise.all([
 		ctx.workspaceState.update("passages", undefined),
@@ -87,6 +93,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		for (let file of v) {
 			const doc = await vscode.workspace.openTextDocument(file);
 			tweeProjectConfig(doc);
+			updateDiagnostics(doc, collection);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await parseText(ctx, doc, passageListProvider);
 		}
 	});
@@ -97,36 +104,59 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	const collection = vscode.languages.createDiagnosticCollection('test');
-	if (vscode.window.activeTextEditor) {
-		updateDiagnostics(vscode.window.activeTextEditor.document, collection);
-	}
-	
 	ctx.subscriptions.push(
 		vscode.languages.registerDocumentSemanticTokensProvider({
 			pattern: "**/*.tw*"
 		}, new DocumentSemanticTokensProvider(), legend)
 		,
+		vscode.window.onDidChangeTextEditorSelection(e => {
+			if (e.textEditor.document.languageId === "twee3-sugarcube-2") {
+				let r: vscode.Range[] = [];
+				e.selections.forEach(sel => {
+					let pos = sel.active;
+					let target = sc2MacroPairs
+						.filter(el => el.open && el.id !== el.pair).reverse()
+						.find(el => (new vscode.Range(el.range.start, sc2MacroPairs[el.pair].range.end)).contains(pos));
+					if (target) {
+						let open = target.range;
+						let close = sc2MacroPairs[target.pair].range;
+						r.push(
+							new vscode.Range(open.start.translate(0, 2), open.end),
+							new vscode.Range(close.start.translate(0, 3), close.end)
+						);
+					}
+				});
+				e.textEditor.setDecorations(sc2m.decor, r);
+			}
+		})
+		,
 		vscode.window.onDidChangeActiveTextEditor(editor => {
-			if (editor) updateDiagnostics(editor.document, collection);
+			if (editor) {
+				updateDiagnostics(editor.document, collection);
+				if (editor.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = sc2m.collect(editor.document.getText());
+			}
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
-			changeStoryFormat(document);
+			changeStoryFormat(document).then(() => {
+				if (document.languageId === "twee3-sugarcube-2") sc2MacroPairs = sc2m.collect(document.getText());
+			});
 			updateDiagnostics(document, collection);
 		})
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
+			if (e.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = sc2m.collect(e.document.getText());
 			updateDiagnostics(e.document, collection);
 		})
 		,
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
-				vscode.workspace.findFiles("**/*.tw*")
-					.then(v => v.forEach(
-						file => vscode.workspace.openTextDocument(file)
-							.then(doc => changeStoryFormat(doc))
-					));
+				vscode.workspace.findFiles("**/*.tw*").then(v => v.forEach(file => {
+					vscode.workspace.openTextDocument(file).then(doc => {
+						changeStoryFormat(doc);
+						updateDiagnostics(doc, collection);
+					})
+				}));
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) vscode.workspace.findFiles("**/*.tw*")
@@ -180,10 +210,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				);
 				const lines = editor.document.getText().split(/\r?\n/);
 				const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
-				editor.revealRange(new vscode.Range(
-					new vscode.Position(start, 0),
-					new vscode.Position(start, 0)
-				), vscode.TextEditorRevealType.AtTop);
+				editor.revealRange(new vscode.Range(start, 0, start, 0), vscode.TextEditorRevealType.AtTop);
 			});
 		})
 		,

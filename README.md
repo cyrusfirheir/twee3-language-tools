@@ -23,7 +23,9 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 ### SugarCube
 *(id: `sugarcube-2`)*
 - Syntax highlighting.  
-    ![Harlowe syntax](https://imgur.com/9Z94sM4.png)
+    ![SugarCube syntax](https://imgur.com/9Z94sM4.png)
+- Container macro pair highlights.
+	![SC macro pairs](https://imgur.com/qjcr3ZK.png)
 
 ---
 

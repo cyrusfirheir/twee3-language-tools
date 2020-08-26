@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.8
+
+Adds:
+
+- SugarCube:
+    - JS syntax highlighting inside the `<<run>>` and `<<print>>` macros.
+	- Container macros now have decorators for their closing tag. See [Readme](README.md#sugarcube) for more details.
+
+---
+
 ## v0.3.3
 
 Removes:
@@ -16,7 +26,7 @@ Adds:
 
 Fixes:
 
-- > If JSDoc comments containing widget/macro documentations are removed, older definitions still stay in memory, and cause the editor to provide suggestions for macros that are no longer documented. To fix, restart VSCode, or reload the window (type "Reload Window" into the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default)).
+- > ~~If JSDoc comments containing widget/macro documentations are removed, older definitions still stay in memory, and cause the editor to provide suggestions for macros that are no longer documented. To fix, restart VSCode, or reload the window (type "Reload Window" into the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default)).~~
 
 ---
 
@@ -26,7 +36,7 @@ Adds:
 
 - Syntax highlighting for Chapbook 1.
 
-- JSDoc comment support for SugarCube. See [Readme](README.md#features) for more information.
+- ~~JSDoc comment support for SugarCube. See [Readme](README.md#features) for more information.~~
 
 Fixes:
 
