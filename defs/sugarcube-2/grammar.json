@@ -42,7 +42,7 @@
 					"include": "#sc-script-tag"
 				},
 				{
-					"include": "#sc-run-print-macro"
+					"include": "#sc-set-run-print-macro"
 				},
 				{
 					"include": "#sc-macro"
@@ -100,8 +100,8 @@
 				}
 			]
 		},
-		"sc-run-print-macro": {
-			"begin": "(<<)(\\=|\\-|print|run)",
+		"sc-set-run-print-macro": {
+			"begin": "(<<)(\\=|\\-|print|run|set)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -119,6 +119,9 @@
 			"patterns": [
 				{
 					"include": "#sc-variables"
+				},
+				{
+					"include": "#sc-syntactic-sugar"
 				},
 				{
 					"name": "source.js.twee3",
@@ -151,8 +154,7 @@
 					"include": "#sc-variables"
 				},
 				{
-					"match": "\\b(to|is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|undef)\\b",
-					"name": "keyword.operator"
+					"include": "#sc-syntactic-sugar"
 				},
 				{
 					"match": "!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|(?<!\\()/=|%=|\\+=|\\-=|&=|\\^=|\\b(in|instanceof|new|delete|typeof|void)\\b",
@@ -191,6 +193,10 @@
 		"sc-variables": {
 			"match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
 			"name": "entity.name.tag"
+		},
+		"sc-syntactic-sugar": {
+			"match": "\\b(to|is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|undef)\\b",
+			"name": "keyword.operator"
 		},
 		"json": {
 			"begin": "^::\\s*StoryData",
