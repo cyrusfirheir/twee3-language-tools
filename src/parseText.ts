@@ -112,7 +112,7 @@ export const parseText = async function (context: ExtensionContext, document: Te
 						case "stylesheet": icon = "paintcan"; break;
 					}
 
-					passage.iconPath = icon ? "" : new ThemeIcon(icon);
+					passage.iconPath = icon ? new ThemeIcon(icon) : "";
 
 					passages.push(passage);
 				}
