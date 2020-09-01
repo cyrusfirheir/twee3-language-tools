@@ -1,4 +1,4 @@
-import { TextDocument, ExtensionContext, ThemeIcon, workspace } from 'vscode';
+import * as vscode from 'vscode';
 import { Passage, PassageListProvider } from './tree-view';
 
 interface IParsedToken {
@@ -9,11 +9,13 @@ interface IParsedToken {
 	tokenModifiers: string[];
 }
 
-export const parseText = async function (context: ExtensionContext, document: TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
+export const parseText = async function (context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
 	let passages: Passage[] = [];
-	if (workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
+	let list = false;
+	if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
+		list = true;
 		const old: Passage[] = context.workspaceState.get("passages", []);
-		passages = Array.from(old).filter(el => el.__origin__ !== document.uri.path);
+		passages = old.filter(el => el.__origin__ !== document.uri.path);
 	}
 	const r: IParsedToken[] = [];
 	const lines = document.getText().split(/\r?\n/);
@@ -92,7 +94,7 @@ export const parseText = async function (context: ExtensionContext, document: Te
 					});
 				}
 
-				if (workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
+				if (list) {
 					let passage = new Passage(document.uri.path, passageName);
 
 					passage.tags = passageTags?.split(" ");
@@ -112,14 +114,16 @@ export const parseText = async function (context: ExtensionContext, document: Te
 						case "stylesheet": icon = "paintcan"; break;
 					}
 
-					passage.iconPath = icon ? new ThemeIcon(icon) : "";
+					passage.iconPath = icon ? new vscode.ThemeIcon(icon) : "";
 
 					passages.push(passage);
 				}
 			}
 		}
 	});
-	if (workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await context.workspaceState.update("passages", passages);
+
+	if (list) await context.workspaceState.update("passages", passages);
 	provider?.refresh();
+
 	return Promise.resolve(r);
 }

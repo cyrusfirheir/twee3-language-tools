@@ -38,7 +38,16 @@ Supported file extensions:
 - `.tw`
 - `.twee`
 
-To set the correct storyformat for the files, a `StoryData` passage with the storyformat mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
+To set the correct storyformat for the files, a `StoryData` passage with the storyformat (and version) (see example below) mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
+
+```json
+:: StoryData
+{
+	"ifid": "514BB5F3-27EC-40E4-936B-45A21A048BCC",
+	"format": "SugarCube",
+	"format-version": "2.33.2"
+}
+```
 
 ---
 

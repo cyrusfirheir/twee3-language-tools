@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.3.10",
+	"version": "0.3.11",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -137,7 +137,7 @@
 			{
 				"scopes": {
 					"startToken": [
-						"storage.type"
+						"punctuation"
 					],
 					"special": [
 						"support.class"
@@ -184,7 +184,7 @@
 			"activitybar": [
 				{
 					"id": "twee3-language-tools",
-					"title": "Twee 3 Language Tools",
+					"title": "T3LT",
 					"icon": "res/tree-view.svg"
 				}
 			]

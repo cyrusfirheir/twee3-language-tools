@@ -64,7 +64,7 @@
 					"name": "punctuation.definition.tag.begin.html"
 				},
 				"2": {
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				}
 			},
 			"end": "(<</)(script)(>>)",
@@ -73,7 +73,7 @@
 					"name": "punctuation.definition.tag.begin.html"
 				},
 				"2": {
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				},
 				"3": {
 					"name": "punctuation.definition.tag.end.html"
@@ -107,7 +107,7 @@
 					"name": "punctuation.definition.tag.begin.html"
 				},
 				"2": {
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				}
 			},
 			"end": "(>>)",
@@ -140,7 +140,7 @@
 					"name": "punctuation.definition.tag.begin.html"
 				},
 				"2": {
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				}
 			},
 			"end": "(>>)",

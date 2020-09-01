@@ -63,7 +63,7 @@
 			"patterns": [
 				{
 					"match": "([a-zA-Z\\-\\_]+):",
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				},
 				{
 					"include": "#h-hook"

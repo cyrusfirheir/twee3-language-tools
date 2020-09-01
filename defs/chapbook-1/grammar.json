@@ -88,7 +88,7 @@
 					"name": "punctuation.separator"
 				},
 				"2": {
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				},
 				"3": {
 					"name": "punctuation.separator"
@@ -109,7 +109,7 @@
 					"name": "punctuation.separator"
 				},
 				"2": {
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				},
 				"3": {
 					"name": "punctuation.separator"
@@ -138,7 +138,7 @@
 			"patterns": [
 				{
 					"match": "(?<=\\[)[a-zA-Z\\$\\_]*(?=\\s|\\])",
-					"name": "variable.language.super"
+					"name": "keyword.control.flow.js"
 				},
 				{
 					"include": "#mod-patterns"
@@ -155,7 +155,7 @@
 					"patterns": [
 						{
 							"match": "[a-zA-Z0-9\\$\\_]+(?=:)",
-							"name": "variable.language.super"
+							"name": "keyword.control.flow.js"
 						},
 						{
 							"include": "#mod-patterns"

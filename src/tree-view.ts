@@ -16,7 +16,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 	getChildren(element?: Passage): Thenable<Passage[]> {
 		const passages: Passage[] = this.context.workspaceState.get("passages", []);
-		return Promise.resolve(Array.from(passages).sort((a, b) => a.name.localeCompare(b.name)));
+		return Promise.resolve(passages.sort((a, b) => a.name.localeCompare(b.name)));
 	}
 }
 
