@@ -26,6 +26,16 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
     ![SugarCube syntax](https://imgur.com/9Z94sM4.png)
 - Container macro pair highlights.
 	![SC macro pairs](https://imgur.com/qjcr3ZK.png)
+- Diagnostics:
+	- Macros with opening tags but no closes (and vice-versa):
+		![SC open-close diagnostics](https://imgur.com/ReJBG4p.png)
+	- Deprecated macros:
+		![SC deprecated diagnostics](https://imgur.com/KS14xHZ.png)
+	- Deprecated `<<end...>>` closing macros:
+		![SC deprecated end tag diagnostics](https://imgur.com/VaXZorc.png)
+	- Unrecognized macros. New/custom macros can be defined manually ([see custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
+		![SC unrecognized diagnostics](https://imgur.com/gv3OJ4i.png)
+
 
 ---
 
@@ -51,6 +61,49 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
 ---
 
+## **twee-config**
+
+### Custom Macro definitions for SugarCube
+
+The extension adds diagnostics for erroneous usage of macros in TwineScript for the `sugarcube-2` storyformat. By default, only the definitions for the core SugarCube library are present, but custom definitions can be added. The process is as follows:
+
+1. Add a `*.twee-config.yaml` **OR** `*.twee-config.json` (`*` represents any valid file name) file to your project folder (or anywhere in the workspace.)
+2. Define custom macros as follows:
+	- If using `*.twee-config.yaml` (indentation is important for `.yaml` files):
+		```yaml
+		sugarcube-2:
+
+		  macros:
+
+		    customMacroName:
+		      name: customMacroName
+		      container: true
+
+		    anotherOne:
+		      name: anotherOne
+		```
+	- If using `*.twee-config.json`:
+		```json
+		{
+			"sugarcube-2": {
+				"macros": {
+					"customMacroName": {
+						"name": "customMacroName",
+						"container": true
+					},
+					"anotherOne": {
+						"name": "anotherOne"
+					}
+				}
+			}
+		}
+		```
+**NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following files can also be used as examples):
+- `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml)),
+- `live-update.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/live-update/live-update.twee-config.yaml))
+
+---
+
 ## **Extension Settings**
 
 This extension contributes the following settings:
@@ -60,7 +113,8 @@ Automatically set by the `StoryData` special passage (if it exists):
 
 Manual settings:
 - `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`.
-- `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links?
+- `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links? (`false` by default.)
+- `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)
 
 ---
 

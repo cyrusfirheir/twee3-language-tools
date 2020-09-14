@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import headsplit from './headsplit';
-// import { diagnostics as sc2 } from './sugarcube-2/diagnostics';
+import { diagnostics as sc2 } from './sugarcube-2/macros';
 
-export const updateDiagnostics = function (document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
+export const updateDiagnostics = async function (document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 	if (!/^twee3.*/.test(document.languageId)) return;
 
 	let diagnostics: vscode.Diagnostic[] = [];
@@ -41,7 +41,7 @@ export const updateDiagnostics = function (document: vscode.TextDocument, collec
 		}
 	});
 
-	// if (document.languageId === "twee3-sugarcube-2") diagnostics = diagnostics.concat(sc2(document));
+	if (document.languageId === "twee3-sugarcube-2") diagnostics = diagnostics.concat(await sc2(document.getText()));
 
 	collection.set(document.uri, diagnostics);
-}
+};

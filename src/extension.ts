@@ -8,7 +8,7 @@ import { updateDiagnostics } from './diagnostics';
 
 import { PassageListProvider, Passage } from './tree-view';
 
-import * as sc2m from './sugarcube-2/macroRange';
+import * as sc2m from './sugarcube-2/macros';
 let sc2MacroPairs: sc2m.macro[] = [];
 
 let ctx: vscode.ExtensionContext;
@@ -82,7 +82,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
-	if (vscode.window.activeTextEditor) sc2MacroPairs = sc2m.collect(vscode.window.activeTextEditor.document.getText());
+	if (vscode.window.activeTextEditor) sc2MacroPairs = (await sc2m.collect(vscode.window.activeTextEditor.document.getText())).macros;
 
 	await Promise.all([
 		ctx.workspaceState.update("passages", undefined),
@@ -122,7 +122,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						let close = sc2MacroPairs[target.pair].range;
 						r.push(
 							new vscode.Range(open.start.translate(0, 2), open.end),
-							new vscode.Range(close.start.translate(0, 3), close.end)
+							new vscode.Range(close.start.translate(0, sc2MacroPairs[target.pair].endVariant ? 2 : 3), close.end)
 						);
 					}
 				});
@@ -130,22 +130,22 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 		,
-		vscode.window.onDidChangeActiveTextEditor(editor => {
+		vscode.window.onDidChangeActiveTextEditor(async editor => {
 			if (editor) {
 				updateDiagnostics(editor.document, collection);
-				if (editor.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = sc2m.collect(editor.document.getText());
+				if (editor.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = (await sc2m.collect(editor.document.getText())).macros;
 			}
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
-			changeStoryFormat(document).then(() => {
-				if (document.languageId === "twee3-sugarcube-2") sc2MacroPairs = sc2m.collect(document.getText());
+			changeStoryFormat(document).then(async () => {
+				if (document.languageId === "twee3-sugarcube-2") sc2MacroPairs = (await sc2m.collect(document.getText())).macros;
 			});
 			updateDiagnostics(document, collection);
 		})
 		,
-		vscode.workspace.onDidChangeTextDocument(e => {
-			if (e.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = sc2m.collect(e.document.getText());
+		vscode.workspace.onDidChangeTextDocument(async e => {
+			if (e.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = (await sc2m.collect(e.document.getText())).macros;
 			updateDiagnostics(e.document, collection);
 		})
 		,

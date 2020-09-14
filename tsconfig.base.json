@@ -4,6 +4,7 @@
 		"noImplicitReturns": true,
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
-		"strict": true
+		"strict": true,
+		"resolveJsonModule": true
 	}
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.4.0
+
+Adds:
+
+- SugarCube:
+	- The following diagnostics:
+		- *`Error`* Container macros with opening tags but no closes (and vice-versa) for the core SugarCube library,
+		- *`Warning`* Deprecated macros from the core SugarCube library,
+		- *`Warning`* Deprecated `<<end...>>` macros,
+		- *`Warning`* Unrecognized macros. This warning can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting.
+
+---
+
 ## v0.3.8
 
 Adds:

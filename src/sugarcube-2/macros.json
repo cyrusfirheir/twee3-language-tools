@@ -1,0 +1,323 @@
+{
+	"append": {
+		"name": "append",
+		"container": true
+	},
+	"button": {
+		"name": "button",
+		"container": true
+	},
+	"capture": {
+		"name": "capture",
+		"container": true
+	},
+	"createaudiogroup": {
+		"name": "createaudiogroup",
+		"container": true
+	},
+	"createplaylist": {
+		"name": "createplaylist",
+		"container": true
+	},
+	"cycle": {
+		"name": "cycle",
+		"children": [
+			"option",
+			"optionsfrom"
+		],
+		"container": true
+	},
+	"for": {
+		"name": "for",
+		"children": [
+			"break",
+			"continue"
+		],
+		"container": true
+	},
+	"if": {
+		"name": "if",
+		"children": [
+			"else",
+			"elseif"
+		],
+		"container": true
+	},
+	"link": {
+		"name": "link",
+		"container": true
+	},
+	"linkappend": {
+		"name": "linkappend",
+		"container": true
+	},
+	"linkprepend": {
+		"name": "linkprepend",
+		"container": true
+	},
+	"linkreplace": {
+		"name": "linkreplace",
+		"container": true
+	},
+	"listbox": {
+		"name": "listbox",
+		"children": [
+			"option",
+			"optionsfrom"
+		],
+		"container": true
+	},
+	"nobr": {
+		"name": "nobr",
+		"container": true
+	},
+	"prepend": {
+		"name": "prepend",
+		"container": true
+	},
+	"repeat": {
+		"name": "repeat",
+		"children": [
+			"stop"
+		],
+		"container": true
+	},
+	"replace": {
+		"name": "replace",
+		"container": true
+	},
+	"silently": {
+		"name": "silently",
+		"container": true
+	},
+	"script": {
+		"name": "script",
+		"container": true
+	},
+	"switch": {
+		"name": "switch",
+		"children": [
+			"case",
+			"default"
+		],
+		"container": true
+	},
+	"timed": {
+		"name": "timed",
+		"children": [
+			"next"
+		],
+		"container": true
+	},
+	"type": {
+		"name": "type",
+		"container": true
+	},
+	"widget": {
+		"name": "widget",
+		"container": true
+	},
+
+
+
+
+
+	"=": {
+		"name": "="
+	},
+	"-": {
+		"name": "-"
+	},
+	"actions": {
+		"name": "actions"
+	},
+	"addclass": {
+		"name": "addclass"
+	},
+	"audio": {
+		"name": "audio"
+	},
+	"back": {
+		"name": "back"
+	},
+	"break": {
+		"name": "break",
+		"parents": [
+			"for"
+		]
+	},
+	"cacheaudio": {
+		"name": "cacheaudio"
+	},
+	"case": {
+		"name": "case",
+		"parents": [
+			"switch"
+		]
+	},
+	"checkbox": {
+		"name": "checkbox"
+	},
+	"choice": {
+		"name": "choice"
+	},
+	"continue": {
+		"name": "continue",
+		"parents": [
+			"for"
+		]
+	},
+	"copy": {
+		"name": "copy"
+	},
+	"default": {
+		"name": "default",
+		"parents": [
+			"switch"
+		]
+	},
+	"else": {
+		"name": "else",
+		"parents": [
+			"if"
+		]
+	},
+	"elseif": {
+		"name": "elseif",
+		"parents": [
+			"if"
+		]
+	},
+	"goto": {
+		"name": "goto"
+	},
+	"include": {
+		"name": "include"
+	},
+	"masteraudio": {
+		"name": "masteraudio"
+	},
+	"next": {
+		"name": "next",
+		"parents": [
+			"timed"
+		]
+	},
+	"numberbox": {
+		"name": "numberbox"
+	},
+	"option": {
+		"name": "option",
+		"parents": [
+			"cycle",
+			"listbox"
+		]
+	},
+	"optionsfrom": {
+		"name": "optionsfrom",
+		"parents": [
+			"cycle",
+			"listbox"
+		]
+	},
+	"playlist": {
+		"name": "playlist"
+	},
+	"print": {
+		"name": "print"
+	},
+	"radiobutton": {
+		"name": "radiobutton"
+	},
+	"remove": {
+		"name": "remove"
+	},
+	"removeclass": {
+		"name": "removeclass"
+	},
+	"removeplaylist": {
+		"name": "removeplaylist"
+	},
+	"return": {
+		"name": "return"
+	},
+	"run": {
+		"name": "run"
+	},
+	"set": {
+		"name": "set"
+	},
+	"stop": {
+		"name": "stop",
+		"parents": [
+			"repeat"
+		]
+	},
+	"textarea": {
+		"name": "textarea"
+	},
+	"textbox": {
+		"name": "textbox"
+	},
+	"toggleclass": {
+		"name": "toggleclass"
+	},
+	"track": {
+		"name": "track"
+	},
+	"unset": {
+		"name": "unset"
+	},
+	"waitforaudio": {
+		"name": "waitforaudio"
+	},
+
+
+
+
+
+	"click": {
+		"name": "click",
+		"container": true,
+		"deprecated": true,
+		"deprecatedSuggestion": [
+			"macro: <<link>>"
+		]
+	},
+	"display": {
+		"name": "display",
+		"deprecated": true,
+		"deprecatedSuggestion": [
+			"macro: <<include>>"
+		]
+	},
+	"forget": {
+		"name": "forget",
+		"deprecated": true,
+		"deprecatedSuggestion": [
+			"function: forget()"
+		]
+	},
+	"remember": {
+		"name": "remember",
+		"deprecated": true,
+		"deprecatedSuggestion": [
+			"function: memorize()",
+			"function: recall()"
+		]
+	},
+	"setplaylist": {
+		"name": "setplaylist",
+		"deprecated": true,
+		"deprecatedSuggestion": [
+			"macro: <<createplaylist>>"
+		]
+	},
+	"stopallaudio": {
+		"name": "stopallaudio",
+		"deprecated": true,
+		"deprecatedSuggestion": [
+			"macro: <<audio>> (<<audio ':all' stop>>)"
+		]
+	}
+}

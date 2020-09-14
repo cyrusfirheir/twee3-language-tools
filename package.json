@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.3.11",
+	"version": "0.4.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -177,6 +177,11 @@
 					"type": "boolean",
 					"default": false,
 					"markdownDescription": "Collect passage names to display a list of quick 'jump' links?"
+				},
+				"twee3LanguageTools.sugarcube-2.undefinedMacroWarnings": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library?"
 				}
 			}
 		},
@@ -264,6 +269,7 @@
 	"dependencies": {
 		"@types/uuid": "^8.3.0",
 		"comment-parser": "^0.7.5",
-		"uuid": "^8.3.0"
+		"uuid": "^8.3.0",
+		"yaml": "^1.10.0"
 	}
 }
