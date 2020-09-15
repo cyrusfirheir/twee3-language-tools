@@ -27,14 +27,10 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 - Container macro pair highlights.
 	![SC macro pairs](https://imgur.com/qjcr3ZK.png)
 - Diagnostics:
-	- Macros with opening tags but no closes (and vice-versa):
-		![SC open-close diagnostics](https://imgur.com/ReJBG4p.png)
-	- Deprecated macros:
-		![SC deprecated diagnostics](https://imgur.com/KS14xHZ.png)
-	- Deprecated `<<end...>>` closing macros:
-		![SC deprecated end tag diagnostics](https://imgur.com/VaXZorc.png)
-	- Unrecognized macros. New/custom macros can be defined manually ([see custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
-		![SC unrecognized diagnostics](https://imgur.com/gv3OJ4i.png)
+	- Macros with opening tags but no closes (and vice-versa): [screencap - SC open-close diagnostics](https://imgur.com/ReJBG4p.png)
+	- Deprecated macros: [screencap - SC deprecated diagnostics](https://imgur.com/KS14xHZ.png)
+	- Deprecated `<<end...>>` closing macros: [screencap - SC deprecated end tag diagnostics](https://imgur.com/VaXZorc.png)
+	- Unrecognized macros. New/custom macros can be defined manually ([see custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)): [screencap - SC unrecognized diagnostics)](https://imgur.com/gv3OJ4i.png)
 
 
 ---
@@ -67,9 +63,9 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
 The extension adds diagnostics for erroneous usage of macros in TwineScript for the `sugarcube-2` storyformat. By default, only the definitions for the core SugarCube library are present, but custom definitions can be added. The process is as follows:
 
-1. Add a `*.twee-config.yaml` **OR** `*.twee-config.json` (`*` represents any valid file name) file to your project folder (or anywhere in the workspace.)
+1. Add a `*.twee-config.yaml` (or `.yml`) **OR** `*.twee-config.json` (`*` represents any valid file name) file to your project folder (or anywhere in the workspace.)
 2. Define custom macros as follows:
-	- If using `*.twee-config.yaml` (indentation is important for `.yaml` files):
+	- If using `*.twee-config.yaml` (indentation is important for YAML files):
 		```yaml
 		sugarcube-2:
 
