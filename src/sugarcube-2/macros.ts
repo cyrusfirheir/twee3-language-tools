@@ -58,12 +58,22 @@ export const collect = async function (raw: string) {
 		let re = macroRegex;
 		let ex;
 		while((ex = re.exec(line)) !== null) {
-			let open = !ex[1];
-			let endVariant = ex[1] === "end" && list[ex[2]];
-			let pair = id;
-			let name = ex[1] === "end" && !list[ex[2]]
-				? ex[1] + ex[2]
-				: ex[2];
+			let open = true,
+				endVariant = false,
+				pair = id,
+				name = ex[2];
+
+			if (ex[1] === "end") {
+				if (list[ex[2]]) {
+					endVariant = true;
+					open = false;
+				} else {
+					name = ex[1] + ex[2];
+				}
+			}
+
+			if (ex[1] === "/" || endVariant) open = false;
+
 			let range = new vscode.Range(i, ex.index, i, ex.index + ex[0].length);
 
 			opened[name] = opened[name] || [];
@@ -115,7 +125,7 @@ export const diagnostics = async function (raw: string) {
 					source: 'sc2-ex',
 					code: 104
 				});
-			} else if (el.endVariant) {
+			} else if (el.endVariant && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("endMacroWarnings")) {
 				d.push({
 					severity: vscode.DiagnosticSeverity.Warning,
 					range: el.range,
@@ -123,7 +133,7 @@ export const diagnostics = async function (raw: string) {
 					source: 'sc2-ex',
 					code: 102
 				});
-			} else if (cur.deprecated) {
+			} else if (cur.deprecated && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("deprecatedMacroWarnings")) {
 				let suggestions = cur.deprecatedSuggestion?.reduce((a, c) => {
 					return a + `- ${c}\n`
 				}, "");

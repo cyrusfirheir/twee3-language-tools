@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -182,6 +182,16 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library?"
+				},
+				"twee3LanguageTools.sugarcube-2.deprecatedMacroWarnings": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Warn about deprecated macros/widgets?"
+				},
+				"twee3LanguageTools.sugarcube-2.endMacroWarnings": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Warn about the deprecated `<<end...>>` closing tag syntax?"
 				}
 			}
 		},
