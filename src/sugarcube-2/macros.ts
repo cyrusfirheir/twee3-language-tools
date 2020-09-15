@@ -107,6 +107,14 @@ export const diagnostics = async function (raw: string) {
 					source: 'sc2-ex',
 					code: 101
 				});
+			} else if (!cur.container && !el.open) {
+				d.push({
+					severity: vscode.DiagnosticSeverity.Error,
+					range: el.range,
+					message: `\nIllegal closing tag! '${el.name}' is not a container macro!\n\n`,
+					source: 'sc2-ex',
+					code: 104
+				});
 			} else if (el.endVariant) {
 				d.push({
 					severity: vscode.DiagnosticSeverity.Warning,
