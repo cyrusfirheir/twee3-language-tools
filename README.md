@@ -111,6 +111,8 @@ Manual settings:
 - `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`.
 - `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links? (`false` by default.)
 - `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)
+- `twee3LanguageTools.sugarcube-2.deprecatedMacroWarnings`: Warn about deprecated macros/widgets?
+- `twee3LanguageTools.sugarcube-2.endMacroWarnings`: Warn about the deprecated `<<end...>>` closing tag syntax?
 
 ---
 
