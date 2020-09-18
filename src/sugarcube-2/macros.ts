@@ -12,7 +12,7 @@ export interface macro {
 }
 
 export interface macroDef {
-	name: string;
+	name?: string;
 	container?: boolean;
 	children?: string[];
 	parents?: string[];
