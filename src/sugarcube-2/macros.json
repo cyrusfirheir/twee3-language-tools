@@ -280,28 +280,28 @@
 		"name": "click",
 		"container": true,
 		"deprecated": true,
-		"deprecatedSuggestion": [
+		"deprecatedSuggestions": [
 			"macro: <<link>>"
 		]
 	},
 	"display": {
 		"name": "display",
 		"deprecated": true,
-		"deprecatedSuggestion": [
+		"deprecatedSuggestions": [
 			"macro: <<include>>"
 		]
 	},
 	"forget": {
 		"name": "forget",
 		"deprecated": true,
-		"deprecatedSuggestion": [
+		"deprecatedSuggestions": [
 			"function: forget()"
 		]
 	},
 	"remember": {
 		"name": "remember",
 		"deprecated": true,
-		"deprecatedSuggestion": [
+		"deprecatedSuggestions": [
 			"function: memorize()",
 			"function: recall()"
 		]
@@ -309,14 +309,14 @@
 	"setplaylist": {
 		"name": "setplaylist",
 		"deprecated": true,
-		"deprecatedSuggestion": [
+		"deprecatedSuggestions": [
 			"macro: <<createplaylist>>"
 		]
 	},
 	"stopallaudio": {
 		"name": "stopallaudio",
 		"deprecated": true,
-		"deprecatedSuggestion": [
+		"deprecatedSuggestions": [
 			"macro: <<audio>> (<<audio ':all' stop>>)"
 		]
 	}

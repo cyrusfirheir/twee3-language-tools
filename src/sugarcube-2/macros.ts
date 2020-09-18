@@ -17,7 +17,7 @@ export interface macroDef {
 	children?: string[];
 	parents?: string[];
 	deprecated?: boolean;
-	deprecatedSuggestion?: string[];
+	deprecatedSuggestions?: string[];
 }
 
 export const decor = vscode.window.createTextEditorDecorationType({
@@ -134,7 +134,7 @@ export const diagnostics = async function (raw: string) {
 					code: 102
 				});
 			} else if (cur.deprecated && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("deprecatedMacroWarnings")) {
-				let suggestions = cur.deprecatedSuggestion?.reduce((a, c) => {
+				let suggestions = cur.deprecatedSuggestions?.reduce((a, c) => {
 					return a + `- ${c}\n`
 				}, "");
 				d.push({

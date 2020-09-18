@@ -95,7 +95,7 @@ The following properties are currently programmed, even though not all of them a
 - **children** `(string array)` *optional*: If the macro has children, specify their names as an array (currently unused in code.)
 - **parents** `(string array)` *optional*: If the macro is a child macro, specify the names of its parents as an array (currently unused in code.)
 - **deprecated** `(boolean)` *optional*: If the macro is deprecated or not. `false` by default.
-- **deprecatedSuggestion** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array. 
+- **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array. 
 
 **NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following files can also be used as examples):
 - `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml)),
