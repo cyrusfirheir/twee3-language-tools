@@ -37,10 +37,10 @@ export const macroList = async function () {
 		let file = await vscode.workspace.openTextDocument(v);
 		try {
 			customList = yaml.parse(file.getText())["sugarcube-2"]?.macros || {};
-			list = Object.assign(list, customList);
 		} catch(ex) {
-			throw new Error(`\nCouldn't parse ${file.fileName}!\n\n${ex}\n\n`);
+			vscode.window.showErrorMessage(`\nCouldn't parse ${file.fileName}!\n\n${ex}\n\n`);
 		}
+		list = Object.assign(list, customList);
 	}
 
 	return list;
