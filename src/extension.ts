@@ -9,7 +9,6 @@ import { updateDiagnostics } from './diagnostics';
 import { PassageListProvider, Passage } from './tree-view';
 
 import * as sc2m from './sugarcube-2/macros';
-let sc2MacroPairs: sc2m.macro[] = [];
 
 let ctx: vscode.ExtensionContext;
 
@@ -82,8 +81,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
-	if (vscode.window.activeTextEditor) sc2MacroPairs = (await sc2m.collect(vscode.window.activeTextEditor.document.getText())).macros;
-
 	await Promise.all([
 		ctx.workspaceState.update("passages", undefined),
 		vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").update("current", "")
@@ -109,43 +106,35 @@ export async function activate(context: vscode.ExtensionContext) {
 			pattern: "**/*.tw*"
 		}, new DocumentSemanticTokensProvider(), legend)
 		,
-		vscode.window.onDidChangeTextEditorSelection(e => {
+		vscode.window.onDidChangeTextEditorSelection(async e => {
 			if (e.textEditor.document.languageId === "twee3-sugarcube-2") {
+				let collected = await sc2m.collect(e.textEditor.document.getText());
 				let r: vscode.Range[] = [];
 				e.selections.forEach(sel => {
 					let pos = sel.active;
-					let target = sc2MacroPairs
+					let target = collected.macros
 						.filter(el => el.open && el.id !== el.pair).reverse()
-						.find(el => (new vscode.Range(el.range.start, sc2MacroPairs[el.pair].range.end)).contains(pos));
+						.find(el => (new vscode.Range(el.range.start, collected.macros[el.pair].range.end)).contains(pos));
 					if (target) {
-						let open = target.range;
-						let close = sc2MacroPairs[target.pair].range;
-						r.push(
-							new vscode.Range(open.start.translate(0, 2), open.end),
-							new vscode.Range(close.start.translate(0, sc2MacroPairs[target.pair].endVariant ? 2 : 3), close.end)
-						);
+						r.push(target.range, collected.macros[target.pair].range);
 					}
 				});
 				e.textEditor.setDecorations(sc2m.decor, r);
 			}
 		})
 		,
-		vscode.window.onDidChangeActiveTextEditor(async editor => {
+		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
 				updateDiagnostics(editor.document, collection);
-				if (editor.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = (await sc2m.collect(editor.document.getText())).macros;
 			}
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
-			changeStoryFormat(document).then(async () => {
-				if (document.languageId === "twee3-sugarcube-2") sc2MacroPairs = (await sc2m.collect(document.getText())).macros;
-			});
+			changeStoryFormat(document);
 			updateDiagnostics(document, collection);
 		})
 		,
-		vscode.workspace.onDidChangeTextDocument(async e => {
-			if (e.document.languageId === "twee3-sugarcube-2") sc2MacroPairs = (await sc2m.collect(e.document.getText())).macros;
+		vscode.workspace.onDidChangeTextDocument(e => {
 			updateDiagnostics(e.document, collection);
 		})
 		,
@@ -155,7 +144,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					vscode.workspace.openTextDocument(file).then(doc => {
 						changeStoryFormat(doc);
 						updateDiagnostics(doc, collection);
-					})
+					});
 				}));
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
@@ -174,10 +163,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			e.files.forEach(file => vscode.workspace.openTextDocument(file).then((doc) => changeStoryFormat(doc)));
 		})
 		,
-		vscode.workspace.onDidDeleteFiles(async e => {
+		vscode.workspace.onDidDeleteFiles(e => {
 			for (let file of e.files) {
 				const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
-				const passages = Array.from(oldPassages).filter(el => el.__origin__ !== file.path);
+				const passages = oldPassages.filter(el => el.__origin__ !== file.path);
 				ctx.workspaceState.update("passages", passages);
 				passageListProvider.refresh();
 			}
@@ -187,7 +176,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			for (let file of e.files) {
 				let doc = await vscode.workspace.openTextDocument(file.newUri);
 				changeStoryFormat(doc);
-				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await parseText(ctx, doc, passageListProvider);
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) parseText(ctx, doc, passageListProvider);
 			}
 		})
 		,
@@ -223,4 +212,4 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(uuidv4().toUpperCase()));
 		})
 	);
-}
+};

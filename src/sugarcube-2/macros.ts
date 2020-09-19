@@ -21,12 +21,16 @@ export interface macroDef {
 }
 
 export const decor = vscode.window.createTextEditorDecorationType({
-	backgroundColor: new vscode.ThemeColor("editor.wordHighlightBackground"),
+	backgroundColor: new vscode.ThemeColor("editorBracketMatch.background"),
 	borderRadius: "0.25rem",
-	textDecoration: "underline"
+	textDecoration: "underline",
+	fontWeight: "bold",
+	overviewRulerLane: vscode.OverviewRulerLane.Center,
+	overviewRulerColor: new vscode.ThemeColor("minimap.findMatchHighlight"),
+	rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
 });
 
-export const macroRegex = /<<(\/|end)?([A-Za-z][\w-]*|[=-])/g;
+export const macroRegex = /<<(\/|end)?([A-Za-z][\w-]*|[=-])(?:\s*)((?:(?:`(?:\\.|[^`\\])*`)|(?:"(?:\\.|[^"\\])*")|(?:'(?:\\.|[^'\\])*')|(?:\[(?:[<>]?[Ii][Mm][Gg])?\[[^\r\n]*?\]\]+)|[^>]|(?:>(?!>)))*)>>/gm;
 
 export const macroList = async function () {
 	let list: any = Object.assign(Object.create(null), macroListCore);

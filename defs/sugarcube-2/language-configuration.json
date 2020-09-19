@@ -50,7 +50,23 @@
 		},
 		{
 			"open": "<!--",
-			"close": "-->",
+			"close": " -->",
+			"notIn": [
+				"comment",
+				"string"
+			]
+		},
+		{
+			"open": "/*",
+			"close": " */",
+			"notIn": [
+				"comment",
+				"string"
+			]
+		},
+		{
+			"open": "/%",
+			"close": " %/",
 			"notIn": [
 				"comment",
 				"string"
@@ -59,7 +75,7 @@
 		{
 			"open": "<",
 			"close": ">"
-		}
+		},
 	],
 	"surroundingPairs": [
 		{

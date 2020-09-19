@@ -117,11 +117,6 @@
 		"name": "widget",
 		"container": true
 	},
-
-
-
-
-
 	"=": {
 		"name": "="
 	},
@@ -271,11 +266,6 @@
 	"waitforaudio": {
 		"name": "waitforaudio"
 	},
-
-
-
-
-
 	"click": {
 		"name": "click",
 		"container": true,

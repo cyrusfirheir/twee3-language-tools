@@ -39,6 +39,9 @@
 					"include": "#sc-comments"
 				},
 				{
+					"include": "#sc-comments-tiddly"
+				},
+				{
 					"include": "#sc-script-tag"
 				},
 				{
@@ -55,6 +58,11 @@
 		"sc-comments": {
 			"begin": "\\/\\*",
 			"end": "\\*\\/",
+			"name": "comment.block"
+		},
+		"sc-comments-tiddly": {
+			"begin": "\\/%",
+			"end": "%\\/",
 			"name": "comment.block"
 		},
 		"sc-script-tag": {
