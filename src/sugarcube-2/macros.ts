@@ -57,43 +57,47 @@ export const collect = async function (raw: string) {
 	let id = 0;
 	let opened: any = {};
 
-	let lines = raw.split(/\r?\n/);
-	lines.forEach((line, i) => {
-		let re = macroRegex;
-		let ex;
-		while((ex = re.exec(line)) !== null) {
-			let open = true,
-				endVariant = false,
-				pair = id,
-				name = ex[2];
+	let lines = raw.replace(/\r/g, "R").split(/\n/); // used only for keeping count
 
-			if (ex[1] === "end") {
-				if (list[ex[2]]) {
-					endVariant = true;
-					open = false;
-				} else {
-					name = ex[1] + ex[2];
-				}
+	let re = macroRegex;
+	let ex;
+	while((ex = re.exec(raw)) !== null) {
+		let open = true,
+			endVariant = false,
+			pair = id,
+			name = ex[2];
+
+		if (ex[1] === "end") {
+			if (list[ex[2]]) {
+				endVariant = true;
+				open = false;
+			} else {
+				name = ex[1] + ex[2];
 			}
-
-			if (ex[1] === "/" || endVariant) open = false;
-
-			let range = new vscode.Range(i, ex.index, i, ex.index + ex[0].length);
-
-			opened[name] = opened[name] || [];
-			if (open) opened[name].push(id);
-			else {
-				if (opened[name].length) {
-					pair = opened[name].pop();
-					macros[pair].pair = id;
-				}
-			}
-			
-			macros.push({ id, pair, name, open, range, endVariant });
-
-			id++;
 		}
-	});
+
+		if (ex[1] === "/" || endVariant) open = false;
+
+		let lineStart = raw.substring(0, ex.index).split(/\r?\n/).length - 1;
+		let lineEnd = lineStart + ex[0].split(/\r?\n/).length - 1;
+		let charStart = ex.index - lines.slice(0, lineStart).join("\n").length - 1;
+		let charEnd = charStart + ex[0].length;
+
+		let range = new vscode.Range(lineStart, charStart, lineEnd, charEnd);
+
+		opened[name] = opened[name] || [];
+		if (open) opened[name].push(id);
+		else {
+			if (opened[name].length) {
+				pair = opened[name].pop();
+				macros[pair].pair = id;
+			}
+		}
+		
+		macros.push({ id, pair, name, open, range, endVariant });
+
+		id++;
+	}
 
 	return { list, macros };
 };
