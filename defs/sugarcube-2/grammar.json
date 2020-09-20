@@ -266,7 +266,7 @@
 			]
 		},
 		"script-tag": {
-			"begin": "(<)(script)\\b(?=[^>]*(?:(?:type=('text/javascript'|\"text/javascript\")|lang=(javascript|'javascript'|\"javascript\")))?)(?![^/>]*/>\\s*$)",
+			"begin": "(?i)(<)(script)\\b(?=[^>]*(?:(?:type=('text/javascript'|\"text/javascript\")|lang=(javascript|'javascript'|\"javascript\")))?)(?![^/>]*/>\\s*$)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -275,7 +275,7 @@
 					"name": "entity.name.tag.html"
 				}
 			},
-			"end": "(</)(script)(>)",
+			"end": "(?i)(</)(script)(>)",
 			"endCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -299,7 +299,7 @@
 							"name": "punctuation.definition.tag.end.html"
 						}
 					},
-					"end": "(?=</script>)",
+					"end": "(?i)(?=</script>)",
 					"patterns": [
 						{
 							"include": "source.js"
@@ -309,7 +309,7 @@
 			]
 		},
 		"style-tag": {
-			"begin": "(<)(style)\\b(?=[^>]*(?:(?:type=('text/css'|\"text/css\")|lang=(css|'css'|\"css\")))?)(?![^/>]*/>\\s*$)",
+			"begin": "(?i)(<)(style)\\b(?=[^>]*(?:(?:type=('text/css'|\"text/css\")|lang=(css|'css'|\"css\")))?)(?![^/>]*/>\\s*$)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -318,7 +318,7 @@
 					"name": "entity.name.tag.html"
 				}
 			},
-			"end": "(</)(style)(>)",
+			"end": "(?i)(</)(style)(>)",
 			"endCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -342,7 +342,7 @@
 							"name": "punctuation.definition.tag.end.html"
 						}
 					},
-					"end": "(?=</style>)",
+					"end": "(?i)(?=</style>)",
 					"patterns": [
 						{
 							"include": "source.css"
@@ -352,7 +352,7 @@
 			]
 		},
 		"html": {
-			"begin": "(</?)([a-z][a-zA-Z0-9:-]*)",
+			"begin": "(?i)(</?)([a-z][a-z0-9:-]*)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"

@@ -52,16 +52,35 @@ export const macroList = async function () {
 
 export const collect = async function (raw: string) {
 	const list = await macroList();
+	const cleanList = [
+		[ "/\\*", "\\*/" ],
+		[ "/%", "%/" ],
+		[ "<!--", "-->" ],
+		[ "{{3}", "}{3}" ],
+		[ "\"{3}", "\"{3}" ],
+		[ "<nowiki>", "</nowiki>" ],
+		[ "<script>", "</script>" ],
+		[ "<style>", "</style>" ]
+	];
 	
 	let macros: macro[] = [];
 	let id = 0;
 	let opened: any = {};
 
-	let lines = raw.replace(/\r/g, "R").split(/\n/); // used only for keeping count
+	let lines = raw.split(/\n/); // used only for keeping count
+
+	let cleaned = raw;
+
+	cleanList.forEach(el => {
+		let searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;
+		cleaned = cleaned.replace(new RegExp(searchString, "gmi"), function(match, p1, p2, p3) {
+			return p1 + p2.replace(/<</g, "MO") + p3;
+		});
+	});
 
 	let re = macroRegex;
 	let ex;
-	while((ex = re.exec(raw)) !== null) {
+	while((ex = re.exec(cleaned)) !== null) {
 		let open = true,
 			endVariant = false,
 			pair = id,
@@ -78,8 +97,8 @@ export const collect = async function (raw: string) {
 
 		if (ex[1] === "/" || endVariant) open = false;
 
-		let lineStart = raw.substring(0, ex.index).split(/\r?\n/).length - 1;
-		let lineEnd = lineStart + ex[0].split(/\r?\n/).length - 1;
+		let lineStart = cleaned.substring(0, ex.index).split(/\n/).length - 1;
+		let lineEnd = lineStart + ex[0].split(/\n/).length - 1;
 		let charStart = ex.index - lines.slice(0, lineStart).join("\n").length - 1;
 		let charEnd = charStart + ex[0].length;
 
