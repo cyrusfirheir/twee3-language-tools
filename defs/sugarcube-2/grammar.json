@@ -45,7 +45,7 @@
 					"include": "#sc-script-tag"
 				},
 				{
-					"include": "#sc-set-run-print-macro"
+					"include": "#sc-js-macro"
 				},
 				{
 					"include": "#sc-macro"
@@ -108,8 +108,8 @@
 				}
 			]
 		},
-		"sc-set-run-print-macro": {
-			"begin": "(<<)(\\=|\\-|print|run|set)",
+		"sc-js-macro": {
+			"begin": "(<<)(\\=|\\-|print|run|set|if|elseif)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
