@@ -95,7 +95,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 				}
 
 				if (list) {
-					let passage = new Passage(document.uri.path, passageName);
+					let passage = new Passage(document.uri.path, passageName, vscode.TreeItemCollapsibleState.None);
 
 					passage.tags = passageTags?.split(" ");
 					passage.description = passage.tags?.join(", ") || "";

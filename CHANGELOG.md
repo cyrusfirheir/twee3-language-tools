@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.5.0
+
+Adds:
+
+- Grouping for the passage list tree view.
+
+Fixes:
+
+- Passage list not getting updated properly when files are renamed.
+
+---
+
 ## v0.4.0
 
 Adds:

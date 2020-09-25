@@ -7,7 +7,7 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 ### Twee
 - Syntax highlighting.  
 - Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default) and search for "IFID".  
-- A list of passages for quick jumps.  
+- A list of passages for quick jumps (can be grouped by files or passage tags. See [extension-settings](#extension-settings).)  
     ![Passage List](https://imgur.com/3WObntl.png)
 
 ### Chapbook
@@ -113,6 +113,7 @@ Automatically set by the `StoryData` special passage (if it exists):
 Manual settings:
 - `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`.
 - `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links? (`false` by default.)
+- `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin or passage tags.)
 - `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)
 - `twee3LanguageTools.sugarcube-2.deprecatedMacroWarnings`: Warn about deprecated macros/widgets?
 - `twee3LanguageTools.sugarcube-2.endMacroWarnings`: Warn about the deprecated `<<end...>>` closing tag syntax?

@@ -167,8 +167,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			for (let file of e.files) {
 				const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
 				const passages = oldPassages.filter(el => el.__origin__ !== file.path);
-				ctx.workspaceState.update("passages", passages);
-				passageListProvider.refresh();
+				ctx.workspaceState.update("passages", passages).then(() => passageListProvider.refresh());
 			}
 		})
 		,
@@ -176,7 +175,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			for (let file of e.files) {
 				let doc = await vscode.workspace.openTextDocument(file.newUri);
 				changeStoryFormat(doc);
-				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) parseText(ctx, doc, passageListProvider);
+				let passages: Passage[] = ctx.workspaceState.get("passages", []);
+				passages.forEach(el => {
+					if (el.__origin__ === file.oldUri.path) el.__origin__ = file.newUri.path;
+				});
+				await ctx.workspaceState.update("passages", passages);
+				passageListProvider.refresh();
 			}
 		})
 		,
@@ -206,6 +210,18 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("twee3LanguageTools.passage.list", () => {
 			const config = vscode.workspace.getConfiguration("twee3LanguageTools.passage");
 			config.update("list", !config.get("list"));
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.groupNone", () => {
+			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "None");
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.groupFile", () => {
+			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "File");
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.groupTag", () => {
+			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "Tag");
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.ifid.generate", () => {

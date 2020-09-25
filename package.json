@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.4.12",
+	"version": "0.5.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -178,6 +178,21 @@
 					"default": false,
 					"markdownDescription": "Collect passage names to display a list of quick 'jump' links?"
 				},
+				"twee3LanguageTools.passage.group": {
+					"type": "string",
+					"enum": [
+						"None",
+						"File",
+						"Tag"
+					],
+					"markdownEnumDescriptions": [
+						"`None`: Passage are not grouped.",
+						"`File`: Passages are grouped by the files they originate from.",
+						"`Tag`: Passages are grouped by tags."
+					],
+					"default": "None",
+					"markdownDescription": "Group passages by:"
+				},
 				"twee3LanguageTools.sugarcube-2.undefinedMacroWarnings": {
 					"type": "boolean",
 					"default": true,
@@ -229,6 +244,18 @@
 				"title": "Toggle listing"
 			},
 			{
+				"command": "twee3LanguageTools.passage.groupNone",
+				"title": "Group: None"
+			},
+			{
+				"command": "twee3LanguageTools.passage.groupFile",
+				"title": "Group: File"
+			},
+			{
+				"command": "twee3LanguageTools.passage.groupTag",
+				"title": "Group: Tag"
+			},
+			{
 				"command": "twee3LanguageTools.ifid.generate",
 				"title": "Generate IFID",
 				"category": "Twee3 Language Tools"
@@ -240,6 +267,18 @@
 					"command": "twee3LanguageTools.passage.list",
 					"when": "view == t3lt-passages-list",
 					"group": "navigation"
+				},
+				{
+					"command": "twee3LanguageTools.passage.groupNone",
+					"when": "view == t3lt-passages-list"
+				},
+				{
+					"command": "twee3LanguageTools.passage.groupFile",
+					"when": "view == t3lt-passages-list"
+				},
+				{
+					"command": "twee3LanguageTools.passage.groupTag",
+					"when": "view == t3lt-passages-list"
 				}
 			],
 			"view/item/context": [
