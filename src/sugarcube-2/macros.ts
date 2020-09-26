@@ -152,7 +152,7 @@ export const diagnostics = async function (raw: string) {
 					source: 'sc2-ex',
 					code: 104
 				});
-			} else if (el.endVariant && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("endMacroWarnings")) {
+			} else if (el.endVariant && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("endMacro")) {
 				d.push({
 					severity: vscode.DiagnosticSeverity.Warning,
 					range: el.range,
@@ -160,7 +160,7 @@ export const diagnostics = async function (raw: string) {
 					source: 'sc2-ex',
 					code: 102
 				});
-			} else if (cur.deprecated && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("deprecatedMacroWarnings")) {
+			} else if (cur.deprecated && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("deprecatedMacro")) {
 				let suggestions = cur.deprecatedSuggestions?.reduce((a, c) => {
 					return a + `- ${c}\n`
 				}, "");
@@ -174,7 +174,7 @@ export const diagnostics = async function (raw: string) {
 					code: 103
 				});
 			}
-		} else if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("undefinedMacroWarnings")) {
+		} else if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("undefinedMacro")) {
 			d.push({
 				severity: vscode.DiagnosticSeverity.Warning,
 				range: el.range,

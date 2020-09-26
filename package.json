@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -25,7 +25,7 @@
 	"keywords": [
 		"twee",
 		"twee3",
-		"vscode"
+		"twine"
 	],
 	"activationEvents": [
 		"onLanguage:twee3",
@@ -193,17 +193,17 @@
 					"default": "None",
 					"markdownDescription": "Group passages by:"
 				},
-				"twee3LanguageTools.sugarcube-2.undefinedMacroWarnings": {
+				"twee3LanguageTools.sugarcube-2.warning.undefinedMacro": {
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library?"
 				},
-				"twee3LanguageTools.sugarcube-2.deprecatedMacroWarnings": {
+				"twee3LanguageTools.sugarcube-2.warning.deprecatedMacro": {
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Warn about deprecated macros/widgets?"
 				},
-				"twee3LanguageTools.sugarcube-2.endMacroWarnings": {
+				"twee3LanguageTools.sugarcube-2.warning.endMacro": {
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Warn about the deprecated `<<end...>>` closing tag syntax?"
@@ -244,15 +244,15 @@
 				"title": "Toggle listing"
 			},
 			{
-				"command": "twee3LanguageTools.passage.groupNone",
+				"command": "twee3LanguageTools.passage.group.none",
 				"title": "Group: None"
 			},
 			{
-				"command": "twee3LanguageTools.passage.groupFile",
+				"command": "twee3LanguageTools.passage.group.file",
 				"title": "Group: File"
 			},
 			{
-				"command": "twee3LanguageTools.passage.groupTag",
+				"command": "twee3LanguageTools.passage.group.tag",
 				"title": "Group: Tag"
 			},
 			{
@@ -269,15 +269,15 @@
 					"group": "navigation"
 				},
 				{
-					"command": "twee3LanguageTools.passage.groupNone",
+					"command": "twee3LanguageTools.passage.group.none",
 					"when": "view == t3lt-passages-list"
 				},
 				{
-					"command": "twee3LanguageTools.passage.groupFile",
+					"command": "twee3LanguageTools.passage.group.file",
 					"when": "view == t3lt-passages-list"
 				},
 				{
-					"command": "twee3LanguageTools.passage.groupTag",
+					"command": "twee3LanguageTools.passage.group.tag",
 					"when": "view == t3lt-passages-list"
 				}
 			],

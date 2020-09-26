@@ -212,15 +212,15 @@ export async function activate(context: vscode.ExtensionContext) {
 			config.update("list", !config.get("list"));
 		})
 		,
-		vscode.commands.registerCommand("twee3LanguageTools.passage.groupNone", () => {
+		vscode.commands.registerCommand("twee3LanguageTools.passage.group.none", () => {
 			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "None");
 		})
 		,
-		vscode.commands.registerCommand("twee3LanguageTools.passage.groupFile", () => {
+		vscode.commands.registerCommand("twee3LanguageTools.passage.group.file", () => {
 			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "File");
 		})
 		,
-		vscode.commands.registerCommand("twee3LanguageTools.passage.groupTag", () => {
+		vscode.commands.registerCommand("twee3LanguageTools.passage.group.tag", () => {
 			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "Tag");
 		})
 		,
