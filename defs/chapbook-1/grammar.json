@@ -174,11 +174,11 @@
 					"name": "keyword.operator"
 				},
 				{
-					"match": "('[^']*')",
+					"match": "('.*(?<!\\\\)')",
 					"name": "string.quoted.single.html"
 				},
 				{
-					"match": "(\"[^\"]*\")",
+					"match": "(\".*(?<!\\\\)\")",
 					"name": "string.quoted.double.html"
 				},
 				{
