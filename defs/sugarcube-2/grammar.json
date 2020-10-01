@@ -238,16 +238,16 @@
 		},
 		"link-markup": {
 			"name": "meta.markup.underline.link.twee3",
-			"begin": "(\\[\\[)",
+			"begin": "(\\[(?:img)?\\[)",
 			"beginCaptures": {
 				"1": {
-					"name": "punctuation.definition.comment.begin.twee3"
+					"name": "punctuation.definition.tag.begin.html"
 				}
 			},
 			"end": "(\\]\\])",
 			"endCaptures": {
 				"1": {
-					"name": "punctuation.definition.comment.end.twee3"
+					"name": "punctuation.definition.tag.end.html"
 				}
 			},
 			"contentName": "entity.name.function.twee3",
@@ -256,7 +256,7 @@
 					"match": "((?<!\\\\)(?:\\||\\]\\[|->|<-))",
 					"captures": {
 						"1": {
-							"name": "comment.block.punctuation.definition.link.divider.twee3"
+							"name": "punctuation.definition.tag.begin.html"
 						}
 					}
 				}
