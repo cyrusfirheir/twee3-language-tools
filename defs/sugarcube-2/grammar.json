@@ -253,13 +253,10 @@
 			"contentName": "entity.name.function.twee3",
 			"patterns": [
 				{
-					"match": "(\\b\\|\\b)([^\\]]*)",
+					"match": "((?<!\\\\)(?:\\||\\]\\[|->|<-))",
 					"captures": {
 						"1": {
 							"name": "comment.block.punctuation.definition.link.divider.twee3"
-						},
-						"2": {
-							"name": "entity.other.attribute-name.link.twee3"
 						}
 					}
 				}
