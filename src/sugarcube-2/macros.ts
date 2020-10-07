@@ -37,7 +37,7 @@ export const macroList = async function () {
 
 	let customList: any = {};
 	
-	for (let v of await vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}")) {
+	for (let v of await vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/node_modules/**")) {
 		let file = await vscode.workspace.openTextDocument(v);
 		try {
 			customList = yaml.parse(file.getText())["sugarcube-2"]?.macros || {};

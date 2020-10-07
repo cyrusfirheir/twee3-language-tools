@@ -1,4 +1,3 @@
-import { unwatchFile } from 'fs';
 import * as vscode from 'vscode';
 
 export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
@@ -18,23 +17,25 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 	getChildren(element?: Passage): Thenable<Passage[]> {
 		const passages: Passage[] = this.context.workspaceState.get("passages", []);
 
+		if (!vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) return Promise.resolve([]);
+
 		switch (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("group")) {
 
 			case "File": {
 				let origins: string[] = [];
 				let files: Passage[] = [];
 				passages.forEach(el => {
-					if (!origins.includes(el.__origin__)) {
-						origins.push(el.__origin__);
-						let wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.__origin__))?.uri.path || "";
-						let p = new Passage(el.__origin__,  el.__origin__.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
-						p.tooltip =  el.__origin__.replace(wF, "").substring(1);
+					if (!origins.includes(el.origin)) {
+						origins.push(el.origin);
+						let wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
+						let p = new Passage(el.origin,  el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
+						p.tooltip =  el.origin.replace(wF, "").substring(1);
 						files.push(p);
 					}
 				});
 
 				if (element) {
-					return Promise.resolve(passages.filter(el => el.__origin__ === element.__origin__).sort((a, b) => a.name.localeCompare(b.name)));
+					return Promise.resolve(passages.filter(el => el.origin === element.origin).sort((a, b) => a.name.localeCompare(b.name)));
 				} else return Promise.resolve(files.sort((a, b) => a.name.localeCompare(b.name)));
 			}
 
@@ -45,7 +46,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					el.tags?.forEach(elem => {
 						if (!tags.includes(elem)) {
 							tags.push(elem);
-							let p = new Passage(el.__origin__,  elem, vscode.TreeItemCollapsibleState.Expanded);
+							let p = new Passage(el.origin,  elem, vscode.TreeItemCollapsibleState.Expanded);
 							groups.push(p);
 						}
 					});
@@ -73,7 +74,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 export class Passage extends vscode.TreeItem {
 	constructor(
-		public __origin__: string,
+		public origin: string,
 		public name: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public tags?: string[],

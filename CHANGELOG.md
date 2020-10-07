@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.8
+
+Adds:
+
+- Settings to include/exclude directories from the search for twee files. See [Readme](README.md#extension-settings) for more details.
+
+---
+
 ## v0.5.0
 
 Adds:

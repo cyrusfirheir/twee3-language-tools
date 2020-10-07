@@ -15,7 +15,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 	if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
 		list = true;
 		const old: Passage[] = context.workspaceState.get("passages", []);
-		passages = old.filter(el => el.__origin__ !== document.uri.path);
+		passages = old.filter(el => el.origin !== document.uri.path);
 	}
 	const r: IParsedToken[] = [];
 	const lines = document.getText().split(/\r?\n/);

@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.5.7",
+	"version": "0.5.8",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -173,6 +173,16 @@
 					"default": "",
 					"markdownDescription": "Identifier of the storyformat to override the format set by `StoryData`."
 				},
+				"twee3LanguageTools.directories.include": {
+					"type": "array",
+					"default": [],
+					"markdownDescription": "Directories in which to look for twee files. Use glob patterns *relative* to the root of the workspace folders (e.g. `src/unprocessed/twee`, `src/static`, `external`). (Searches the entire workspace by default.)"
+				},
+				"twee3LanguageTools.directories.exclude": {
+					"type": "array",
+					"default": ["**/node_modules/**"],
+					"markdownDescription": "Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened."
+				},
 				"twee3LanguageTools.passage.list": {
 					"type": "boolean",
 					"default": false,
@@ -310,8 +320,10 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"dependencies": {
+		"@types/glob": "^7.1.3",
 		"@types/uuid": "^8.3.0",
 		"comment-parser": "^0.7.5",
+		"glob": "^7.1.6",
 		"uuid": "^8.3.0",
 		"yaml": "^1.10.0"
 	}
