@@ -4,12 +4,13 @@ import * as glob from 'glob';
 
 import headsplit from './headsplit';
 
-import { parseText } from './parseText';
+import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
 
 import { PassageListProvider, Passage } from './tree-view';
 
 import * as sc2m from './sugarcube-2/macros';
+import * as sc2ca from './sugarcube-2/code-actions';
 
 let ctx: vscode.ExtensionContext;
 
@@ -80,12 +81,12 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 export async function activate(context: vscode.ExtensionContext) {
 	ctx = context;
 
-	let passageListProvider = new PassageListProvider(ctx);
-	let collection = vscode.languages.createDiagnosticCollection();
+	const passageListProvider = new PassageListProvider(ctx);
+	const collection = vscode.languages.createDiagnosticCollection();
 
 	async function start() {
 		collection.clear();
-		await Promise.all([
+		return Promise.all([
 			ctx.workspaceState.update("passages", undefined),
 			vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").update("current", "")
 		]);
@@ -218,6 +219,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			passageListProvider
 		)
 		,
+		vscode.commands.registerCommand("twee3LanguageTools.refreshDiagnostics", () => {
+			let doc = vscode.window.activeTextEditor?.document;
+			if (doc) updateDiagnostics(doc, collection);
+		})
+		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {
 			vscode.window.showTextDocument(vscode.Uri.file(item.origin)).then(editor => {
 				const regexp = new RegExp(
@@ -250,6 +256,16 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.ifid.generate", () => {
 			vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(uuidv4().toUpperCase()));
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.defineMacro", sc2ca.unrecognizedMacroFixCommand)
+		,
+		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
+			providedCodeActionKinds: sc2ca.EndMacro.providedCodeActionKinds
+		})
+		,
+		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.Unrecognized(), {
+			providedCodeActionKinds: sc2ca.Unrecognized.providedCodeActionKinds
 		})
 	);
 };

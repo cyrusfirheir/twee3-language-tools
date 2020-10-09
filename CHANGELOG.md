@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.0
+
+Adds:
+
+- Quick fixes:
+	- Deprecated `<<end...>>` SC macros can be converted to the `<</...>>` form.
+	- Unrecognized macros can now be defined and added to a local file (`t3lt.twee-config.yml`) with a quick fix. If the macro has been closed anywhere within the source file, the extension assumes the macro is a container and sets that property to `true`.
+
+---
+
 ## v0.5.8
 
 Adds:
