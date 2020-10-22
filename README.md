@@ -128,6 +128,8 @@ Manual settings:
 - `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links? (`false` by default.)
 - `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin or passage tags.)  
 ⠀
+- `twee3LanguageTools.twee-3.warning.spaceAfterStartToken`: Warn about missing space after the start token (`::`) in passage headers? (`true` by default.)  
+⠀
 - `twee3LanguageTools.sugarcube-2.warning.undefinedMacro`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)
 - `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets?
 - `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax?

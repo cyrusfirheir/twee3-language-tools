@@ -60,7 +60,9 @@ export const collect = async function (raw: string) {
 		[ "\"{3}", "\"{3}" ],
 		[ "<nowiki>", "</nowiki>" ],
 		[ "<script>", "</script>" ],
-		[ "<style>", "</style>" ]
+		[ "<style>", "</style>" ],
+		[ "^::.*?\\[\\s*script\\s*\\]", "^(?=::)" ],
+		[ "^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)" ]
 	];
 	
 	let macros: macro[] = [];
@@ -69,7 +71,7 @@ export const collect = async function (raw: string) {
 
 	let lines = raw.split(/\n/); // used only for keeping count
 
-	let cleaned = raw;
+	let cleaned = raw + "\n::";
 
 	cleanList.forEach(el => {
 		let searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;

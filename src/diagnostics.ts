@@ -12,7 +12,7 @@ export const updateDiagnostics = async function (document: vscode.TextDocument, 
 
 		if (line.startsWith("::")) {
 
-			if (!/\s/.test(line[2])) {
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.twee-3.warning").get("spaceAfterStartToken") && !/\s/.test(line[2])) {
 				diagnostics.push({
 					severity: vscode.DiagnosticSeverity.Warning,
 					range: new vscode.Range(i, 0, i, 3),

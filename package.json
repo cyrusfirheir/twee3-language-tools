@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -202,6 +202,11 @@
 					],
 					"default": "None",
 					"markdownDescription": "Group passages by:"
+				},
+				"twee3LanguageTools.twee-3.warning.spaceAfterStartToken": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Warn about missing space after the start token (`::`) in passage headers?"
 				},
 				"twee3LanguageTools.sugarcube-2.warning.undefinedMacro": {
 					"type": "boolean",

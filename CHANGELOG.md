@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.6.1
+
+Adds:
+
+- Setting:
+	- `twee3LanguageTools.twee-3.warning.spaceAfterStartToken`: See [Issue #4](https://github.com/cyrusfirheir/twee3-language-tools/issues/4) (warning about no space between start token `::` and passage name).
+
+Fixes:
+
+- [Issue #3](https://github.com/cyrusfirheir/twee3-language-tools/issues/3) - False positives of SugarCube diagnostics in `script` and `stylesheet` tagged passages.
+
+---
+
 ## v0.6.0
 
 Adds:
