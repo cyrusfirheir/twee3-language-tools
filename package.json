@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -193,11 +193,13 @@
 					"enum": [
 						"None",
 						"File",
+						"Folder",
 						"Tag"
 					],
 					"markdownEnumDescriptions": [
 						"`None`: Passage are not grouped.",
 						"`File`: Passages are grouped by the files they originate from.",
+						"`Folder`: Passages are grouped by the folder they originate from.",
 						"`Tag`: Passages are grouped by tags."
 					],
 					"default": "None",
@@ -267,6 +269,10 @@
 				"title": "Group: File"
 			},
 			{
+				"command": "twee3LanguageTools.passage.group.folder",
+				"title": "Group: Folder"
+			},
+			{
 				"command": "twee3LanguageTools.passage.group.tag",
 				"title": "Group: Tag"
 			},
@@ -289,6 +295,10 @@
 				},
 				{
 					"command": "twee3LanguageTools.passage.group.file",
+					"when": "view == t3lt-passages-list"
+				},
+				{
+					"command": "twee3LanguageTools.passage.group.folder",
 					"when": "view == t3lt-passages-list"
 				},
 				{

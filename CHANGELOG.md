@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.2
+
+Adds:
+
+- Passage grouping strategy:
+	- Group by folder: Groups passages by the folders they originate from.
+
+---
+
 ## v0.6.1
 
 Adds:

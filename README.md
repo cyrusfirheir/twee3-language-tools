@@ -7,7 +7,7 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 ### Twee
 - Syntax highlighting.  
 - Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default) and search for "IFID".  
-- A list of passages for quick jumps (can be grouped by files or passage tags. See [extension-settings](#extension-settings).)  
+- A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).)  
     ![Passage List](https://imgur.com/3WObntl.png)
 
 ### Chapbook
@@ -126,7 +126,7 @@ Manual settings:
 - `twee3LanguageTools.directories.exclude`: Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened.  
 ⠀
 - `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links? (`false` by default.)
-- `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin or passage tags.)  
+- `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin, folder of origin, or passage tags.)  
 ⠀
 - `twee3LanguageTools.twee-3.warning.spaceAfterStartToken`: Warn about missing space after the start token (`::`) in passage headers? (`true` by default.)  
 ⠀

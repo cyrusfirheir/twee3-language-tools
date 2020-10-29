@@ -27,7 +27,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				passages.forEach(el => {
 					if (!origins.includes(el.origin)) {
 						origins.push(el.origin);
-						let wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
+						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
 						let p = new Passage(el.origin,  el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
 						p.tooltip =  el.origin.replace(wF, "").substring(1);
 						files.push(p);
@@ -35,8 +35,33 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				});
 
 				if (element) {
-					return Promise.resolve(passages.filter(el => el.origin === element.origin).sort((a, b) => a.name.localeCompare(b.name)));
+					return Promise.resolve(passages
+						.filter(el => el.origin === element.origin)
+						.sort((a, b) => a.name.localeCompare(b.name))
+					);
 				} else return Promise.resolve(files.sort((a, b) => a.name.localeCompare(b.name)));
+			}
+
+			case "Folder": {
+				let origins: string[] = [];
+				let folders: Passage[] = [];
+				passages.forEach(el => {
+					const _origin = el.origin.split("/").slice(0, -1).join("/");
+					if (!origins.includes(_origin)) {
+						origins.push(_origin);
+						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
+						let p = new Passage(_origin,  _origin.replace(wF, ""), vscode.TreeItemCollapsibleState.Expanded);
+						p.tooltip =  _origin.replace(wF, "");
+						folders.push(p);
+					}
+				});
+
+				if (element) {
+					return Promise.resolve(passages
+						.filter(el => el.origin.split("/").slice(0, -1).join("/") === element.origin)
+						.sort((a, b) => a.name.localeCompare(b.name))
+					);
+				} else return Promise.resolve(folders.sort((a, b) => a.name.localeCompare(b.name)));
 			}
 
 			case "Tag": {
@@ -57,9 +82,15 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 				if (element) {
 					if (element.name) {
-						return Promise.resolve(passages.filter(el => el.tags?.includes(element.name)).sort((a, b) => a.name.localeCompare(b.name)));
+						return Promise.resolve(passages
+							.filter(el => el.tags?.includes(element.name))
+							.sort((a, b) => a.name.localeCompare(b.name))
+						);
 					} else {
-						return Promise.resolve(passages.filter(el => !el.tags?.length).sort((a, b) => a.name.localeCompare(b.name)));
+						return Promise.resolve(passages
+							.filter(el => !el.tags?.length)
+							.sort((a, b) => a.name.localeCompare(b.name))
+						);
 					}
 				} else return Promise.resolve(groups);
 			}

@@ -84,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
-	async function start() {
+	function start() {
 		collection.clear();
 		return Promise.all([
 			ctx.workspaceState.update("passages", undefined),
@@ -248,6 +248,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.group.file", () => {
 			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "File");
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.group.folder", () => {
+			vscode.workspace.getConfiguration("twee3LanguageTools.passage").update("group", "Folder");
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.group.tag", () => {
