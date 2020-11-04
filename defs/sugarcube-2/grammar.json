@@ -159,6 +159,9 @@
 			},
 			"patterns": [
 				{
+					"include": "#link-markup"
+				},
+				{
 					"include": "#sc-variables"
 				},
 				{
