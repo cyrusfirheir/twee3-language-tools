@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.6.3",
+	"version": "0.6.4",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -224,6 +224,16 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Warn about the deprecated `<<end...>>` closing tag syntax?"
+				},
+				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "Enable self-closing syntax for container macros? [Read here](https://github.com/cyrusfirheir/twee3-language-tools/blob/master/README.md#sugarcube-2-self-closing-macros) for more information."
+				},
+				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.warning.irrationalSelfClose": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Warn about self-closed instances of content focused macros (e.g. `<<script />>`)?"
 				}
 			}
 		},

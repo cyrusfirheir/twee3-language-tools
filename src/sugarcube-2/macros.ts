@@ -7,6 +7,7 @@ export interface macro {
 	pair: number;
 	name: string;
 	open: boolean;
+	selfClosed: boolean;
 	endVariant: boolean;
 	range: vscode.Range;
 }
@@ -14,6 +15,7 @@ export interface macro {
 export interface macroDef {
 	name?: string;
 	container?: boolean;
+	selfClose?: boolean;
 	children?: string[];
 	parents?: string[];
 	deprecated?: boolean;
@@ -30,7 +32,7 @@ export const decor = vscode.window.createTextEditorDecorationType({
 	rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
 });
 
-export const macroRegex = /<<(\/|end)?([A-Za-z][\w-]*|[=-])(?:\s*)((?:(?:`(?:\\.|[^`\\])*`)|(?:"(?:\\.|[^"\\])*")|(?:'(?:\\.|[^'\\])*')|(?:\[(?:[<>]?[Ii][Mm][Gg])?\[[^\r\n]*?\]\]+)|[^>]|(?:>(?!>)))*)>>/gm;
+export const macroRegex = /<<(\/|end)?([A-Za-z][\w-]*|[=-])(?:\s*)((?:(?:`(?:\\.|[^`\\])*`)|(?:"(?:\\.|[^"\\])*")|(?:'(?:\\.|[^'\\])*')|(?:\[(?:[<>]?[Ii][Mm][Gg])?\[[^\r\n]*?\]\]+)|[^>]|(?:>(?!>)))*?)(\/)?>>/gm;
 
 export const macroList = async function () {
 	let list: any = Object.assign(Object.create(null), macroListCore);
@@ -86,7 +88,10 @@ export const collect = async function (raw: string) {
 		let open = true,
 			endVariant = false,
 			pair = id,
-			name = ex[2];
+			name = ex[2],
+			selfClosed = false;
+		
+		let selfCloseMacro = undefined;
 
 		if (ex[1] === "end") {
 			if (list[ex[2]]) {
@@ -106,16 +111,32 @@ export const collect = async function (raw: string) {
 
 		let range = new vscode.Range(lineStart, charStart, lineEnd, charEnd);
 
-		opened[name] = opened[name] || [];
-		if (open) opened[name].push(id);
-		else {
-			if (opened[name].length) {
-				pair = opened[name].pop();
-				macros[pair].pair = id;
+		if (ex[4] === "/" && vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros").get("enable")) {
+			selfClosed = true;
+			selfCloseMacro = {
+				id: id + 1, pair: pair,
+				name, open: false,
+				range: new vscode.Range(lineEnd, charEnd, lineEnd, charEnd),
+				endVariant, selfClosed
+			};
+			pair++;
+		} else {
+			opened[name] = opened[name] || [];
+			if (open) opened[name].push(id);
+			else {
+				if (opened[name].length) {
+					pair = opened[name].pop();
+					macros[pair].pair = id;
+				}
 			}
 		}
-		
-		macros.push({ id, pair, name, open, range, endVariant });
+
+		macros.push({ id, pair, name, open, range, endVariant, selfClosed });
+
+		if (selfCloseMacro) {
+			macros.push(selfCloseMacro);
+			id++;
+		}
 
 		id++;
 	}
@@ -138,23 +159,52 @@ export const diagnostics = async function (raw: string) {
 		}
 
 		if (cur) {
-			if (cur.container && el.id === el.pair) {
-				d.push({
-					severity: vscode.DiagnosticSeverity.Error,
-					range: el.range,
-					message: `\nMalformed container macro! ${el.open ? "Closing" : "Opening"} '${el.name}' tag not found!\n\n`,
-					source: 'sc2-ex',
-					code: 101
-				});
-			} else if (!cur.container && !el.open) {
-				d.push({
-					severity: vscode.DiagnosticSeverity.Error,
-					range: el.range,
-					message: `\nIllegal closing tag! '${el.name}' is not a container macro!\n\n`,
-					source: 'sc2-ex',
-					code: 104
-				});
-			} else if (el.endVariant && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("endMacro")) {
+			if (cur.container) {
+				if (el.id === el.pair) {
+					d.push({
+						severity: vscode.DiagnosticSeverity.Error,
+						range: el.range,
+						message: `\nMalformed container macro! ${el.open ? "Closing" : "Opening"} '${el.name}' tag not found!\n\n`,
+						source: 'sc2-ex',
+						code: 101
+					});
+				}
+				if (
+					vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros").get("enable") &&
+					vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.warning").get("irrationalSelfClose") &&
+					!cur.selfClose && el.selfClosed
+				) {
+					d.push({
+						severity: vscode.DiagnosticSeverity.Warning,
+						range: el.range,
+						message:
+							`\nIrrational self-close! Self-closing <<${el.name}>> is not recommended.\n\n`,
+						source: 'sc2-ex',
+						code: 106
+					});
+				}
+			} else {
+				if (!el.open) {
+					d.push({
+						severity: vscode.DiagnosticSeverity.Error,
+						range: el.range,
+						message: `\nIllegal closing tag! '${el.name}' is not a container macro!\n\n`,
+						source: 'sc2-ex',
+						code: 104
+					});
+				}
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros").get("enable") && el.selfClosed) {
+					d.push({
+						severity: vscode.DiagnosticSeverity.Error,
+						range: el.range,
+						message: `\nIllegal self-close! '${el.name}' is not a container macro!\n\n`,
+						source: 'sc2-ex',
+						code: 105
+					});
+				}
+			}
+
+			if (el.endVariant && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("endMacro")) {
 				d.push({
 					severity: vscode.DiagnosticSeverity.Warning,
 					range: el.range,
@@ -162,7 +212,9 @@ export const diagnostics = async function (raw: string) {
 					source: 'sc2-ex',
 					code: 102
 				});
-			} else if (cur.deprecated && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("deprecatedMacro")) {
+			}
+
+			if (cur.deprecated && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("deprecatedMacro")) {
 				let suggestions = cur.deprecatedSuggestions?.reduce((a, c) => {
 					return a + `- ${c}\n`
 				}, "");
@@ -176,6 +228,7 @@ export const diagnostics = async function (raw: string) {
 					code: 103
 				});
 			}
+
 		} else if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("undefinedMacro")) {
 			d.push({
 				severity: vscode.DiagnosticSeverity.Warning,

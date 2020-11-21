@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.4
+
+Adds:
+
+- Experimental:
+	- Self-closing macro syntax detection for SugarCube 2.
+
+---
+
 ## v0.6.2
 
 Adds:

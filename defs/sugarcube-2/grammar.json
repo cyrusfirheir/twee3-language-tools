@@ -151,7 +151,7 @@
 					"name": "keyword.control.flow.js"
 				}
 			},
-			"end": "(>>)",
+			"end": "(/?>>)",
 			"endCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.end.html"

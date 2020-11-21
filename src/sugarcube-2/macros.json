@@ -5,7 +5,8 @@
 	},
 	"button": {
 		"name": "button",
-		"container": true
+		"container": true,
+		"selfClose": true
 	},
 	"capture": {
 		"name": "capture",
@@ -45,7 +46,8 @@
 	},
 	"link": {
 		"name": "link",
-		"container": true
+		"container": true,
+		"selfClose": true
 	},
 	"linkappend": {
 		"name": "linkappend",
@@ -269,6 +271,7 @@
 	"click": {
 		"name": "click",
 		"container": true,
+		"selfClose": true,
 		"deprecated": true,
 		"deprecatedSuggestions": [
 			"macro: <<link>>"
