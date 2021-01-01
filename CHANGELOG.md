@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.5
+
+Adds:
+
+- Setting:
+	- `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)
+
+---
+
 ## v0.6.4
 
 Adds:

@@ -135,6 +135,8 @@ Manual settings:
 - `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax? (`true` by default.)  
 ⠀
+- `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)  
+⠀
 - `twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable`: Enable self-closing syntax for container macros? [Read here](#sugarcube-2-self-closing-macros) for more information. (`false` by default.)  
 - `twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.warning.irrationalSelfClose`: Warn about self-closed instances of content focused macros (e.g. `<<script />>`)? (`true` by default.)  
 

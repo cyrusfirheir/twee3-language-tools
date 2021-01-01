@@ -129,7 +129,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, new DocumentSemanticTokensProvider(), legend)
 		,
 		vscode.window.onDidChangeTextEditorSelection(async e => {
-			if (e.textEditor.document.languageId === "twee3-sugarcube-2") {
+			if (e.textEditor.document.languageId === "twee3-sugarcube-2" && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.features").get("macroTagMatching")) {
 				let collected = await sc2m.collect(e.textEditor.document.getText());
 				let r: vscode.Range[] = [];
 				e.selections.forEach(sel => {

@@ -114,12 +114,11 @@ export const collect = async function (raw: string) {
 		if (ex[4] === "/" && vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros").get("enable")) {
 			selfClosed = true;
 			selfCloseMacro = {
-				id: id + 1, pair: pair,
+				id: id + 1, pair: pair++,
 				name, open: false,
 				range: new vscode.Range(lineEnd, charEnd, lineEnd, charEnd),
 				endVariant, selfClosed
 			};
-			pair++;
 		} else {
 			opened[name] = opened[name] || [];
 			if (open) opened[name].push(id);
