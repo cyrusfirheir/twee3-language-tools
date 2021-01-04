@@ -78,6 +78,10 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 	else return new Promise(res => res(document));
 };
 
+const documentSelector: vscode.DocumentSelector = {
+	pattern: "**/*.tw*",
+};
+
 export async function activate(context: vscode.ExtensionContext) {
 	ctx = context;
 
@@ -124,9 +128,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	ctx.subscriptions.push(
-		vscode.languages.registerDocumentSemanticTokensProvider({
-			pattern: "**/*.tw*"
-		}, new DocumentSemanticTokensProvider(), legend)
+		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
+		,
+		vscode.languages.registerHoverProvider(documentSelector, {
+			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+				if (document.languageId == "twee3-sugarcube-2") {
+					return sc2m.hover(document, position);
+				} else {
+					return null;
+				}
+			}
+		})
 		,
 		vscode.window.onDidChangeTextEditorSelection(async e => {
 			if (e.textEditor.document.languageId === "twee3-sugarcube-2" && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.features").get("macroTagMatching")) {
