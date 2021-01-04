@@ -97,6 +97,7 @@ The extension adds diagnostics for erroneous usage of macros in TwineScript for 
 		```
 The following properties are currently programmed, even though not all of them are used as of now:
 - **name** `(string)` *optional*: Name of the macro (currently unused in code; the name of the object suffices for now.)
+- **description** `(string)` *optional*: Description of macro. Shown on hover.
 - **container** `(boolean)` *optional*: If the macro is a container (i.e. requires a closing tag) or not. `false` by default.
 - **selfClose** `(boolean)` *optional*: If the macro is a self-closable. Requires macro to be a container first. `false` by default.
 - **children** `(string array)` *optional*: If the macro has children, specify their names as an array (currently unused in code.)

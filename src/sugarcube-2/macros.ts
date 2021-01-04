@@ -14,6 +14,7 @@ export interface macro {
 
 export interface macroDef {
 	name?: string;
+	description?: string,
 	container?: boolean;
 	selfClose?: boolean;
 	children?: string[];
@@ -241,3 +242,63 @@ export const diagnostics = async function (raw: string) {
 
 	return d;
 };
+
+/**
+ * Provides hover information for macros.
+ */
+export const hover = async function(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | null> {
+	// Acquire list of macros in the file.
+	const collected = await collect(document.getText());
+
+	const angle_start_length = '<<'.length;
+	const angle_end_length = '>>'.length;
+
+	// Find the macro with which our position intersects with
+	for (let i = 0; i < collected.macros.length; i++) {
+		const macro = collected.macros[i];
+		// Check if the macro exists in the definitions.
+		// If it doesn't then we know it can't have a description.
+		// This also keeps out maliciously named macros such as `__proto__`, just-in-case
+		// The reason we have to use Object.prototype is that the list was constructed with a null 
+		// prototype, (which admittedly stops the problem of a maliciously named macro )
+		if (!Object.prototype.hasOwnProperty.call(collected.list, macro.name)) continue;
+		const macroDefinition = collected.list[macro.name];
+		if (!macroDefinition) continue;
+
+		// Whether the position intersects with hoverable parts of the macro.
+		let contained_in = false;
+		if (!macroDefinition.container || macro.open) {
+			// If it is not a container (and thus we are in the opening) or if it is the opening
+			// Ex: in `<<linkreplace "Testing">>Text<</linkreplace>>` we want to match
+			// `<<linkreplace` and the first `>>`
+			const start_range = new vscode.Range(macro.range.start, macro.range.start.translate(0, macro.name.length));
+			const end_range = new vscode.Range(macro.range.end.translate(0, -angle_end_length), macro.range.end);
+			contained_in = start_range.contains(position) || end_range.contains(position);
+		} else if (macroDefinition.container && !macro.open) {
+			// We are a container, and we are on the closing end.
+			// This means that we simply want to match all of it.
+			// Ex: in `<<linkreplace "Testing>>Text<</linkreplace>>"` we want to match
+			// `<</linkreplace>>` and since there is no arguments on the closing, we can just
+			// check the given range.
+			contained_in = macro.range.contains(position);
+		}
+
+		// If the position is on a hoverable part of the macro
+		// And if the macro exists
+		// We have to use the ugly prototype.hasOwnProperty because the macroList is constructed
+		// with a null prototype.
+		if (contained_in && Object.prototype.hasOwnProperty.call(collected.list, macro.name)) {
+			let macroDefinition = collected.list[macro.name];
+			if (typeof(macroDefinition.description) === "string") {
+				return new vscode.Hover(macroDefinition.description);
+			} else {
+				// We found the macro the user is hovering over, but there is no description.
+				// Thus, there is no need to continue looking for it.
+				return null;
+			}
+		}
+	}
+
+	// There was no macro intersecting, thus we have no hover result.
+	return null;
+}
