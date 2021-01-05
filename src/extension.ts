@@ -95,7 +95,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").update("current", "")
 		]);
 	}
-	
+
 	await start();
 
 	function fileGlob() {
@@ -105,7 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		let files: string[] = [];
 		vscode.workspace.workspaceFolders?.forEach(el => {
 			include.forEach(elem => {
-				files = [ ...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.tw*", { ignore: exclude }) ];
+				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.tw*", { ignore: exclude })];
 			})
 		});
 		return files;
@@ -182,7 +182,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
-				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list"))  {
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
 					fileGlob().forEach(file => {
 						vscode.workspace.openTextDocument(file).then(doc => parseText(ctx, doc, passageListProvider));
 					});

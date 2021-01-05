@@ -28,8 +28,8 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					if (!origins.includes(el.origin)) {
 						origins.push(el.origin);
 						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
-						let p = new Passage(el.origin,  el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
-						p.tooltip =  el.origin.replace(wF, "").substring(1);
+						let p = new Passage(el.origin, el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
+						p.tooltip = el.origin.replace(wF, "").substring(1);
 						files.push(p);
 					}
 				});
@@ -50,8 +50,8 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					if (!origins.includes(_origin)) {
 						origins.push(_origin);
 						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
-						let p = new Passage(_origin,  _origin.replace(wF, ""), vscode.TreeItemCollapsibleState.Expanded);
-						p.tooltip =  _origin.replace(wF, "");
+						let p = new Passage(_origin, _origin.replace(wF, ""), vscode.TreeItemCollapsibleState.Expanded);
+						p.tooltip = _origin.replace(wF, "");
 						folders.push(p);
 					}
 				});
@@ -71,7 +71,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					el.tags?.forEach(elem => {
 						if (!tags.includes(elem)) {
 							tags.push(elem);
-							let p = new Passage(el.origin,  elem, vscode.TreeItemCollapsibleState.Expanded);
+							let p = new Passage(el.origin, elem, vscode.TreeItemCollapsibleState.Expanded);
 							groups.push(p);
 						}
 					});
