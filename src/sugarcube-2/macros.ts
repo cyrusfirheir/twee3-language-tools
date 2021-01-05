@@ -39,12 +39,12 @@ export const macroList = async function () {
 	let list: any = Object.assign(Object.create(null), macroListCore);
 
 	let customList: any = {};
-	
+
 	for (let v of await vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/node_modules/**")) {
 		let file = await vscode.workspace.openTextDocument(v);
 		try {
 			customList = yaml.parse(file.getText())["sugarcube-2"]?.macros || {};
-		} catch(ex) {
+		} catch (ex) {
 			vscode.window.showErrorMessage(`\nCouldn't parse ${file.fileName}!\n\n${ex}\n\n`);
 		}
 		list = Object.assign(list, customList);
@@ -56,18 +56,18 @@ export const macroList = async function () {
 export const collect = async function (raw: string) {
 	const list = await macroList();
 	const cleanList = [
-		[ "/\\*", "\\*/" ],
-		[ "/%", "%/" ],
-		[ "<!--", "-->" ],
-		[ "{{3}", "}{3}" ],
-		[ "\"{3}", "\"{3}" ],
-		[ "<nowiki>", "</nowiki>" ],
-		[ "<script>", "</script>" ],
-		[ "<style>", "</style>" ],
-		[ "^::.*?\\[\\s*script\\s*\\]", "^(?=::)" ],
-		[ "^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)" ]
+		["/\\*", "\\*/"],
+		["/%", "%/"],
+		["<!--", "-->"],
+		["{{3}", "}{3}"],
+		["\"{3}", "\"{3}"],
+		["<nowiki>", "</nowiki>"],
+		["<script>", "</script>"],
+		["<style>", "</style>"],
+		["^::.*?\\[\\s*script\\s*\\]", "^(?=::)"],
+		["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"]
 	];
-	
+
 	let macros: macro[] = [];
 	let id = 0;
 	let opened: any = {};
@@ -78,20 +78,20 @@ export const collect = async function (raw: string) {
 
 	cleanList.forEach(el => {
 		let searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;
-		cleaned = cleaned.replace(new RegExp(searchString, "gmi"), function(match, p1, p2, p3) {
+		cleaned = cleaned.replace(new RegExp(searchString, "gmi"), function (match, p1, p2, p3) {
 			return p1 + p2.replace(/<</g, "MO") + p3;
 		});
 	});
 
 	let re = macroRegex;
 	let ex;
-	while((ex = re.exec(cleaned)) !== null) {
+	while ((ex = re.exec(cleaned)) !== null) {
 		let open = true,
 			endVariant = false,
 			pair = id,
 			name = ex[2],
 			selfClosed = false;
-		
+
 		let selfCloseMacro = undefined;
 
 		if (ex[1] === "end") {
@@ -148,7 +148,7 @@ export const diagnostics = async function (raw: string) {
 	let d: vscode.Diagnostic[] = [];
 
 	let collected = await collect(raw);
-	
+
 	collected.macros.forEach(el => {
 		let cur: macroDef;
 		if (el.name.startsWith("end") && collected.list[el.name.substring(3)]) {
@@ -246,7 +246,7 @@ export const diagnostics = async function (raw: string) {
 /**
  * Provides hover information for macros.
  */
-export const hover = async function(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | null> {
+export const hover = async function (document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | null> {
 	// Acquire list of macros in the file.
 	const collected = await collect(document.getText());
 
@@ -256,13 +256,9 @@ export const hover = async function(document: vscode.TextDocument, position: vsc
 	// Find the macro with which our position intersects with
 	for (let i = 0; i < collected.macros.length; i++) {
 		const macro = collected.macros[i];
+		const macroDefinition = collected.list[macro.name];
 		// Check if the macro exists in the definitions.
 		// If it doesn't then we know it can't have a description.
-		// This also keeps out maliciously named macros such as `__proto__`, just-in-case
-		// The reason we have to use Object.prototype is that the list was constructed with a null 
-		// prototype, (which admittedly stops the problem of a maliciously named macro )
-		if (!Object.prototype.hasOwnProperty.call(collected.list, macro.name)) continue;
-		const macroDefinition = collected.list[macro.name];
 		if (!macroDefinition) continue;
 
 		// Whether the position intersects with hoverable parts of the macro.
@@ -289,7 +285,7 @@ export const hover = async function(document: vscode.TextDocument, position: vsc
 		// with a null prototype.
 		if (contained_in && Object.prototype.hasOwnProperty.call(collected.list, macro.name)) {
 			let macroDefinition = collected.list[macro.name];
-			if (typeof(macroDefinition.description) === "string") {
+			if (typeof (macroDefinition.description) === "string") {
 				return new vscode.Hover(macroDefinition.description);
 			} else {
 				// We found the macro the user is hovering over, but there is no description.
