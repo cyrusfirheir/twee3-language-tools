@@ -241,6 +241,11 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Warn about self-closed instances of content focused macros (e.g. `<<script />>`)?"
+				},
+				"twee3LanguageTools.sugarcube-2.error.argumentParsing": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Provide errors about invalid argument syntax being passed into macros."
 				}
 			}
 		},

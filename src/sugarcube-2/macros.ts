@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
+import { parseArguments } from './arguments';
 import * as macroListCore from './macros.json';
 
 export interface macro {
@@ -21,6 +22,7 @@ export interface macroDef {
 	parents?: string[];
 	deprecated?: boolean;
 	deprecatedSuggestions?: string[];
+	skipArgs?: boolean,
 }
 
 export const decor = vscode.window.createTextEditorDecorationType({
@@ -144,10 +146,10 @@ export const collect = async function (raw: string) {
 	return { list, macros };
 };
 
-export const diagnostics = async function (raw: string) {
+export const diagnostics = async function (document: vscode.TextDocument) {
 	let d: vscode.Diagnostic[] = [];
 
-	let collected = await collect(raw);
+	let collected = await collect(document.getText());
 
 	collected.macros.forEach(el => {
 		let cur: macroDef;
@@ -229,6 +231,20 @@ export const diagnostics = async function (raw: string) {
 				});
 			}
 
+			if (el.open && !cur.skipArgs && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("argumentParsing")) {
+				let parsedArguments = parseArguments(document, el, cur);
+				// Add any errors that we've found just from parsing to the diagnostics.
+				for (let i = 0; i < parsedArguments.errors.length; i++) {
+					let error = parsedArguments.errors[i];
+					d.push({
+						severity: vscode.DiagnosticSeverity.Error,
+						range: error.range,
+						message: error.message || "Unknown argument parsing failure",
+						source: 'sc2-ex',
+						code: 107,
+					});
+				}
+			}
 		} else if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("undefinedMacro")) {
 			d.push({
 				severity: vscode.DiagnosticSeverity.Warning,

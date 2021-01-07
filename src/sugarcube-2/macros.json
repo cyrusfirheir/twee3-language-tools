@@ -10,7 +10,8 @@
 	},
 	"capture": {
 		"name": "capture",
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"createaudiogroup": {
 		"name": "createaudiogroup",
@@ -34,7 +35,8 @@
 			"break",
 			"continue"
 		],
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"if": {
 		"name": "if",
@@ -42,7 +44,8 @@
 			"else",
 			"elseif"
 		],
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"link": {
 		"name": "link",
@@ -71,7 +74,8 @@
 	},
 	"nobr": {
 		"name": "nobr",
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"prepend": {
 		"name": "prepend",
@@ -90,11 +94,13 @@
 	},
 	"silently": {
 		"name": "silently",
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"script": {
 		"name": "script",
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"switch": {
 		"name": "switch",
@@ -102,7 +108,8 @@
 			"case",
 			"default"
 		],
-		"container": true
+		"container": true,
+		"skipArgs": true
 	},
 	"timed": {
 		"name": "timed",
@@ -120,10 +127,12 @@
 		"container": true
 	},
 	"=": {
-		"name": "="
+		"name": "=",
+		"skipArgs": true
 	},
 	"-": {
-		"name": "-"
+		"name": "-",
+		"skipArgs": true
 	},
 	"actions": {
 		"name": "actions"
@@ -141,7 +150,8 @@
 		"name": "break",
 		"parents": [
 			"for"
-		]
+		],
+		"skipArgs": true
 	},
 	"cacheaudio": {
 		"name": "cacheaudio"
@@ -150,7 +160,8 @@
 		"name": "case",
 		"parents": [
 			"switch"
-		]
+		],
+		"skipArgs": true
 	},
 	"checkbox": {
 		"name": "checkbox"
@@ -162,7 +173,8 @@
 		"name": "continue",
 		"parents": [
 			"for"
-		]
+		],
+		"skipArgs": true
 	},
 	"copy": {
 		"name": "copy"
@@ -171,19 +183,22 @@
 		"name": "default",
 		"parents": [
 			"switch"
-		]
+		],
+		"skipArgs": true
 	},
 	"else": {
 		"name": "else",
 		"parents": [
 			"if"
-		]
+		],
+		"skipArgs": true
 	},
 	"elseif": {
 		"name": "elseif",
 		"parents": [
 			"if"
-		]
+		],
+		"skipArgs": true
 	},
 	"goto": {
 		"name": "goto"
@@ -215,13 +230,15 @@
 		"parents": [
 			"cycle",
 			"listbox"
-		]
+		],
+		"skipArgs": true
 	},
 	"playlist": {
 		"name": "playlist"
 	},
 	"print": {
-		"name": "print"
+		"name": "print",
+		"skipArgs": true
 	},
 	"radiobutton": {
 		"name": "radiobutton"
@@ -239,10 +256,12 @@
 		"name": "return"
 	},
 	"run": {
-		"name": "run"
+		"name": "run",
+		"skipArgs": true
 	},
 	"set": {
-		"name": "set"
+		"name": "set",
+		"skipArgs": true
 	},
 	"stop": {
 		"name": "stop",
@@ -263,10 +282,12 @@
 		"name": "track"
 	},
 	"unset": {
-		"name": "unset"
+		"name": "unset",
+		"skipArgs": true
 	},
 	"waitforaudio": {
-		"name": "waitforaudio"
+		"name": "waitforaudio",
+		"skipArgs": true
 	},
 	"click": {
 		"name": "click",
@@ -289,7 +310,8 @@
 		"deprecated": true,
 		"deprecatedSuggestions": [
 			"function: forget()"
-		]
+		],
+		"skipArgs": true
 	},
 	"remember": {
 		"name": "remember",
@@ -297,7 +319,8 @@
 		"deprecatedSuggestions": [
 			"function: memorize()",
 			"function: recall()"
-		]
+		],
+		"skipArgs": true
 	},
 	"setplaylist": {
 		"name": "setplaylist",
@@ -311,6 +334,7 @@
 		"deprecated": true,
 		"deprecatedSuggestions": [
 			"macro: <<audio>> (<<audio ':all' stop>>)"
-		]
+		],
+		"skipArgs": true
 	}
 }

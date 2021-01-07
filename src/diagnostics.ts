@@ -41,7 +41,7 @@ export const updateDiagnostics = async function (document: vscode.TextDocument, 
 		}
 	});
 
-	if (document.languageId === "twee3-sugarcube-2") diagnostics = diagnostics.concat(await sc2(document.getText()));
+	if (document.languageId === "twee3-sugarcube-2") diagnostics = diagnostics.concat(await sc2(document));
 
 	collection.set(document.uri, diagnostics);
 };
