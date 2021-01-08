@@ -1,0 +1,43 @@
+<!-- special passage name tests -->
+
+:: StoryTitle
+Twee 3 Language Tools tests
+
+:: StoryData
+{
+  "ifid": "1A9D1134-9D13-4677-BCA1-36E3B42AB8FF",
+  "format": "SugarCube",
+  "format-version": "2.33.4"
+}
+
+:: Start
+
+
+<!-- twee passage name validation tests - all of the following should be valid and highlighted -->
+
+:: Passage Name [tags] { "meta" : "data" }
+:: Passage -\ this i$ a va(l)iD_ name\{ [tags multiple] { "meta" : "data" }
+::    Pass\[age Name [tags tag lol]
+:: Pass\}age N\{ame { "meta" : "data" }
+
+
+<!--
+	the following should not be valid passage names, hence not highlighted
+	TODO: Report what exactly is wrong
+-->
+
+:: Passage Name [ta[g]
+:: Pas[sage name
+:: Passage na{me [] {}
+:: Passage name {} []
+
+
+<!-- special tag name test -->
+
+:: Script passage [script]
+console.log("This is a script passage.");
+
+:: Style passage [stylesheet]
+.this-is a .stylesheet {
+	position: absolute;
+}

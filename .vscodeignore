@@ -10,3 +10,5 @@ tsconfig.base.json
 webpack.config.js
 defs/_language_template/**
 .res.ignore/**
+*.bat
+tests/**

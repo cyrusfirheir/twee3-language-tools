@@ -1,0 +1,25 @@
+:: Harlowe
+
+|hookname>[...Hook content..]
+
+<div id="stuff" class="forest">
+  (print: "String".split("").join(" "))
+</div>
+
+Naked $story and _temporary variables
+
+(macroName: "String Args", 123, false)
+
+(link: "Link Text")[
+	(go-to: "Target Passage")
+]
+
+(cycling-link: bind $variable, ...$array)
+(for: each _item, ...$array)[
+	...
+]
+(history: where "Intermission" is in its name)
+
+<script>
+	setup.someFunction.orSomething();
+</script>

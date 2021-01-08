@@ -2,7 +2,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.6.5",
+	"version": "0.7.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -245,7 +245,7 @@
 				"twee3LanguageTools.sugarcube-2.error.argumentParsing": {
 					"type": "boolean",
 					"default": true,
-					"markdownDescription": "Provide errors about invalid argument syntax being passed into macros."
+					"markdownDescription": "Provide errors about invalid argument syntax being passed into macros?"
 				}
 			}
 		},

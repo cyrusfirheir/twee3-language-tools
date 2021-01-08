@@ -24,6 +24,8 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 *(id: `sugarcube-2`)*
 - Syntax highlighting.  
     ![SugarCube syntax](https://imgur.com/9Z94sM4.png)
+- Macro documentation on hover. (Contributed by [@MinusGix](https://github.com/MinusGix)) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube))
+	![Screenshot](https://imgur.com/6Q2AR83.png)
 - Container macro pair highlights.
 	![SC macro pairs](https://imgur.com/qjcr3ZK.png)
 - Diagnostics:
@@ -34,9 +36,11 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 	- Deprecated `<<end...>>` closing macros:
 		- [Screenshot - diagnostic](https://imgur.com/VaXZorc.png)
 		- [Screenshot - quick fix](https://imgur.com/A3MAZG2.png)
-	- Unrecognized macros. New/custom macros can be defined manually ([see custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
+	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
 		- [Screenshot - diagnostic](https://imgur.com/gv3OJ4i.png)
 		- [Screenshot - quick fix](https://imgur.com/RX5ztR8.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
+	- Invalid argument syntax in macros (Contributed by [@MinusGix](https://github.com/MinusGix)):
+		- [Screenshot - diagnostics](https://imgur.com/xw1OFUt.png)
 
 
 ---
@@ -97,7 +101,7 @@ The extension adds diagnostics for erroneous usage of macros in TwineScript for 
 		```
 The following properties are currently programmed, even though not all of them are used as of now:
 - **name** `(string)` *optional*: Name of the macro (currently unused in code; the name of the object suffices for now.)
-- **description** `(string)` *optional*: Description of macro. Shown on hover.
+- **description** `(string)` *optional*: Description of macro. Shown on hover. Supports markdown.
 - **container** `(boolean)` *optional*: If the macro is a container (i.e. requires a closing tag) or not. `false` by default.
 - **selfClose** `(boolean)` *optional*: If the macro is a self-closable. Requires macro to be a container first. `false` by default.
 - **children** `(string array)` *optional*: If the macro has children, specify their names as an array (currently unused in code.)
@@ -105,9 +109,8 @@ The following properties are currently programmed, even though not all of them a
 - **deprecated** `(boolean)` *optional*: If the macro is deprecated or not. `false` by default.
 - **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array. 
 
-**NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following files can also be used as examples):
-- `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml)),
-- `live-update.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/live-update/live-update.twee-config.yaml))
+**NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following file can also be used as an example):
+- `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml))
 
 ---
 
@@ -135,6 +138,8 @@ Manual settings:
 - `twee3LanguageTools.sugarcube-2.warning.undefinedMacro`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax? (`true` by default.)  
+⠀
+- `twee3LanguageTools.sugarcube-2.error.argumentParsing`: Provide errors about invalid argument syntax being passed into macros? (`true` by default.)  
 ⠀
 - `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)  
 ⠀

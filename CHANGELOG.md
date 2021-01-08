@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.7.0
+
+Adds:
+
+- SugarCube: (both thanks to [@MinusGix](https://github.com/MinusGix)!)
+	- Macro documentation on hover.  
+	- Diagnostics for invalid argument syntax in macros.
+
+---
+
 ## v0.6.5
 
 Adds:

@@ -4,3 +4,4 @@ npm-debug.log
 .vscode-test
 *.vsix
 .res.ignore
+publish.bat

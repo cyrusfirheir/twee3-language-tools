@@ -1,0 +1,120 @@
+:: SugarCube diagnostics
+
+/* diagnostic tests */
+
+/* custom definitions - should not throw because defined as a container macro in t3lt.twee-config.yml */
+<<macroName "String Args" keywords and stuff>><</macroName>>
+<<macroName "String Args" keywords and stuff>>
+	<!-- Stuff -->
+<</macroName>>
+
+/* self closed test */
+/* needs twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable = true */
+<<macroName "String Args" keywords and stuff />>
+
+/* should throw unrecognized macro error */
+<<widgetName "lol">>
+
+
+
+/* container tag matching highlights */
+
+/* inline */
+<<button "lol">><</button>>
+
+/* multiline */
+<<link "<!-- <<if>> <</if>> -->">>
+	<!-- <<if>> -->
+<</link>>
+
+/* nested */
+<<if>>
+	<<if>>
+
+	<</if>>
+<</if>>
+
+
+
+/* skip parsing */
+
+/* <<if>> */
+/% <<if>> %/
+{{{ <<if>> }}}
+""" <<if>> """
+<nowiki> <<if>> </nowiki>
+<nOwIkI> <<if>> </NoWiKi> /* case-insensitive */
+
+/* inside quotes */
+<<script>>
+	let x = 2;
+	"<<if>>"
+<</script>>
+
+<ScRiPt>
+	let x = 2;
+	"<<if>>"
+</script>
+
+<stYle>
+	.something {
+		background: url("./path/<<if>>.png");
+	}
+</sTyLe>
+
+
+
+/* hover tips tests */
+
+<<capture>><</capture>>
+<<set>> <<unset>>
+
+<<run>>
+<<script>><</script>>
+
+<<include>>
+<<=>> <<->> <<print>>
+<<type>><</type>>
+
+<<nobr>><</nobr>>
+<<silently>><</silently>>
+
+<<if>><</if>>
+<<for>>
+	<<break>> <<continue>>
+<</for>>
+<<switch>><</switch>>
+
+<<cycle>><</cycle>>
+<<listbox>><</listbox>>
+
+<<radiobutton>> <<checkbox>> <<numberbox>> <<textbox>> <<textarea>>
+
+<<button>><</button>>
+<<link>><</link>>
+<<linkappend>><</linkappend>>
+<<linkprepend>><</linkprepend>>
+<<linkreplace>><</linkreplace>>
+
+<<actions>> <<choice>>
+<<back>> <<return>>
+
+<<addclass>> <<removeclass>> <<toggleclass>>
+
+<<copy>> <<remove>>
+<<append>><</append>>
+<<prepend>><</prepend>>
+<<replace>><</replace>>
+
+<<goto>>
+<<repeat>>
+	<<stop>>
+<</repeat>>
+<<timed>><</timed>>
+<<widget>><</widget>>
+
+<<cacheaudio>> <<audio>> <<masteraudio>> <<playlist>>
+<<createaudiogroup>><</createaudiogroup>>
+<<createplaylist>><</createplaylist>>
+<<removeaudiogroup>> <<removeplaylist>>
+<<waitforaudio>>

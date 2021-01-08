@@ -1,0 +1,46 @@
+:: Chapbook
+This_is_the_Variable_Section: true
+MyStringVariable: "Text"
+MyIntVariable: 123
+_test: "MyClass"
+--
+
+End of Var Section and Start of the Passage
+
+<div id="stuff" class="{_test}">
+	[JavaScript]
+			write("String".split("").join(" "));
+	[Continued]
+</div>
+
+{MyStringVariable} and text and stuff.
+
+<!-- Modifiers -->
+[ModifierName Arguments and Keywords]
+	<!-- Stuff -->
+[continued]
+
+<!-- Inserts -->
+{InsertName: "String Args", VarName1: value1, VarNameN: valueN}
+
+<!-- Extending the Engine -->
+[javascript]
+engine.extend("1.0.0", () => {
+
+	config.template.inserts =[{
+		match: /^smiley face$/i,
+		render: () => {YourFunction}
+	}, ...config.templates.inserts];
+
+	config.template.modifiers = [{
+		match: /^uppercase$/i,
+		process(output) {
+			output.text = output.text.toUpperCase();
+		}
+	}, ...config.template.modifiers];
+
+	engine.state.setLookup("MyLookupName", () => {});
+
+	engine.state.get("MyLookupName");
+});
+[continued]

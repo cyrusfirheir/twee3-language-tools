@@ -1,0 +1,6 @@
+sugarcube-2:
+  macros:
+    macroName:
+      name: macroName
+      container: true
+      selfClose: true

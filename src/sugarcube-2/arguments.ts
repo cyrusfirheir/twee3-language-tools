@@ -1,32 +1,3 @@
-/*
-(BSD-2-Clause). Much of this code _in this file_ is under this License which is essentially compatible with the MIT License that this project uses.
-(From SugarCube-2: https://github.com/tmedwards/sugarcube-2/ )
-
-Copyright (c) 2013-2020, Thomas Michael Edwards <thomasmedwards@gmail.com>.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- */
-
 import * as vscode from 'vscode';
 import { macro, macroDef } from "./macros";
 
@@ -34,13 +5,13 @@ import { macro, macroDef } from "./macros";
 
 type LexerState<T> = (lexer: Lexer<T>) => null | LexerState<T>;
 interface LexerEntry<T> {
-    type: T,
-    text: string,
-    start: number,
-    position: number,
+	type: T,
+	text: string,
+	start: number,
+	position: number,
 }
 interface LexerError<T> extends LexerEntry<T> {
-    message: string,
+	message: string,
 }
 type LexerItem<T> = LexerEntry<T> | LexerError<T>;
 
@@ -48,149 +19,149 @@ type LexerItem<T> = LexerEntry<T> | LexerError<T>;
 type EOFT = -1;
 const EOF: EOFT = -1;
 class Lexer<T> {
-    /**
-     * The text that is being lexed
-     */
-    readonly source: string;
-    /**
-     * A function that is the active state, essentially forming a state machine.
-     */
-    state: LexerState<T> | null;
-    /**
-     * The start of an entry
-     */
-    start: number = 0;
-    /**
-     * Position within the source
-     */
-    pos: number = 0;
-    /**
-     * Current nesting depth of ()/{}/[]
-     */
-    depth: number = 0;
-    /**
-     * Parsed entries/errors.
-     */
-    items: LexerItem<T>[] = [];
-    /**
-     * Data
-     */
-    data: Record<string, any> = {};
+	/**
+	 * The text that is being lexed
+	 */
+	readonly source: string;
+	/**
+	 * A function that is the active state, essentially forming a state machine.
+	 */
+	state: LexerState<T> | null;
+	/**
+	 * The start of an entry
+	 */
+	start: number = 0;
+	/**
+	 * Position within the source
+	 */
+	pos: number = 0;
+	/**
+	 * Current nesting depth of ()/{}/[]
+	 */
+	depth: number = 0;
+	/**
+	 * Parsed entries/errors.
+	 */
+	items: LexerItem<T>[] = [];
+	/**
+	 * Data
+	 */
+	data: Record<string, any> = {};
 
-    constructor(source: string, initial: LexerState<T>) {
-        this.source = source;
-        this.state = initial;
-    }
+	constructor(source: string, initial: LexerState<T>) {
+		this.source = source;
+		this.state = initial;
+	}
 
-    /**
-     * Run the lexer on the source.
-     * @returns {LexerItem<T>} The items that were parsed (`this.items`)
-     */
-    run(): LexerItem<T>[] {
-        while (this.state !== null) {
-            this.state = this.state(this);
-        }
+	/**
+	 * Run the lexer on the source.
+	 * @returns {LexerItem<T>} The items that were parsed (`this.items`)
+	 */
+	run(): LexerItem<T>[] {
+		while (this.state !== null) {
+			this.state = this.state(this);
+		}
 
-        return this.items;
-    }
+		return this.items;
+	}
 
-    /**
-     * Acquire next character, or receive EOF.
-     * Advances position.
-     */
-    next(): EOFT | string {
-        let ch = this.peek();
-        this.pos++;
-        return ch;
-    }
+	/**
+	 * Acquire next character, or receive EOF.
+	 * Advances position.
+	 */
+	next(): EOFT | string {
+		let ch = this.peek();
+		this.pos++;
+		return ch;
+	}
 
-    /**
-     * Acquire next character, or receive EOF.
-     * Does not advance position.
-     */
-    peek(): EOFT | string {
-        if (this.pos >= this.source.length) {
-            return EOF;
-        }
-        return this.source[this.pos];
-    }
+	/**
+	 * Acquire next character, or receive EOF.
+	 * Does not advance position.
+	 */
+	peek(): EOFT | string {
+		if (this.pos >= this.source.length) {
+			return EOF;
+		}
+		return this.source[this.pos];
+	}
 
-    backup(num?: number) {
-        this.pos -= num || 1;
-    }
+	backup(num?: number) {
+		this.pos -= num || 1;
+	}
 
-    forward(num?: number) {
-        this.pos += num || 1;
-    }
+	forward(num?: number) {
+		this.pos += num || 1;
+	}
 
-    ignore() {
-        this.start = this.pos;
-    }
+	ignore() {
+		this.start = this.pos;
+	}
 
-    accept(valid: string): boolean {
-        const ch = this.next();
+	accept(valid: string): boolean {
+		const ch = this.next();
 
-        if (ch == EOF) {
-            return false;
-        } else if (valid.includes(ch as string)) {
-            return true;
-        } else {
-            this.backup();
-            return false;
-        }
-    }
+		if (ch == EOF) {
+			return false;
+		} else if (valid.includes(ch as string)) {
+			return true;
+		} else {
+			this.backup();
+			return false;
+		}
+	}
 
-    acceptRun(valid: string) {
-        for (; ;) {
-            const ch = this.next();
+	acceptRun(valid: string) {
+		for (; ;) {
+			const ch = this.next();
 
-            if (ch == EOF) {
-                return;
-            } else if (!valid.includes(ch as string)) {
-                break;
-            }
-        }
+			if (ch == EOF) {
+				return;
+			} else if (!valid.includes(ch as string)) {
+				break;
+			}
+		}
 
-        this.backup();
-    }
+		this.backup();
+	}
 
-    emit(type: T) {
-        this.items.push({
-            type,
-            text: this.source.slice(this.start, this.pos),
-            start: this.start,
-            position: this.pos,
-        });
-        this.start = this.pos;
-    }
+	emit(type: T) {
+		this.items.push({
+			type,
+			text: this.source.slice(this.start, this.pos),
+			start: this.start,
+			position: this.pos,
+		});
+		this.start = this.pos;
+	}
 
-    error(type: T, message: string): null {
-        this.items.push({
-            type,
-            message,
-            text: this.source.slice(this.start, this.pos),
-            start: this.start,
-            position: this.pos,
-        });
-        return null;
-    }
+	error(type: T, message: string): null {
+		this.items.push({
+			type,
+			message,
+			text: this.source.slice(this.start, this.pos),
+			start: this.start,
+			position: this.pos,
+		});
+		return null;
+	}
 }
 
 export interface ParsedArguments {
-    /// Errors encountered whilst parsing
-    /// If this has entries then it may mean that the rest of the arguments were not parsed
-    errors: ArgumentParseError[],
-    arguments: Arg[],
+	/// Errors encountered whilst parsing
+	/// If this has entries then it may mean that the rest of the arguments were not parsed
+	errors: ArgumentParseError[],
+	arguments: Arg[],
 }
 export enum ArgumentParseErrorKind {
-    Failure,
-    SquareBracketFailure,
-    SquareBracketExpectedCharacter,
+	Failure,
+	SquareBracketFailure,
+	SquareBracketExpectedCharacter,
 }
 export interface ArgumentParseError {
-    kind: ArgumentParseErrorKind,
-    message?: string,
-    range: vscode.Range,
+	kind: ArgumentParseErrorKind,
+	message?: string,
+	range: vscode.Range,
 }
 
 /**
@@ -199,91 +170,91 @@ export interface ArgumentParseError {
  * `B`: The original type (usually string).
  */
 export interface Evaluatable<T, B> {
-    original: B,
-    isEvaluated: boolean,
-    value?: T
+	original: B,
+	isEvaluated: boolean,
+	value?: T
 }
 
 export enum ArgType {
-    // These are from link
-    Link,
-    Image,
-    // These are from Bareword
-    Variable,
-    SettingsSetupAccess,
-    Null,
-    Undefined,
-    True,
-    False,
-    NaN,
-    Number,
-    // Unknown Bareword.
-    Bareword,
-    // These are from Expression
-    EmptyExpression,
-    Expression,
-    // These are from String
-    String,
+	// These are from link
+	Link,
+	Image,
+	// These are from Bareword
+	Variable,
+	SettingsSetupAccess,
+	Null,
+	Undefined,
+	True,
+	False,
+	NaN,
+	Number,
+	// Unknown Bareword.
+	Bareword,
+	// These are from Expression
+	EmptyExpression,
+	Expression,
+	// These are from String
+	String,
 }
 export type Arg = LinkArgument | ImageArgument | VariableArgument | SettingsSetupAccessArgument | LoneArg<ArgType.Null> | LoneArg<ArgType.Undefined> | LoneArg<ArgType.True> | LoneArg<ArgType.False> | LoneArg<ArgType.NaN> | NumberArgument | BarewordArgument | LoneArg<ArgType.EmptyExpression> | ExpressionArgument | StringArgument;
 // For arguments that are simply their variant.
 type LoneArg<T> = { type: T };
 interface LinkArgument {
-    type: ArgType.Link,
-    // The passage (or an expression to calculate it)
-    passage?: Evaluatable<string, string>,
-    syntax: LinkSyntax,
-    // The text that is displayed
-    // If this is not set then the text is the passage name.
-    text?: string,
-    setter?: string,
-    // Note: currently no support for external (bool for whether it is an external link)
-    // because it requires evaluating the passage
-    // external: boolean,
+	type: ArgType.Link,
+	// The passage (or an expression to calculate it)
+	passage?: Evaluatable<string, string>,
+	syntax: LinkSyntax,
+	// The text that is displayed
+	// If this is not set then the text is the passage name.
+	text?: string,
+	setter?: string,
+	// Note: currently no support for external (bool for whether it is an external link)
+	// because it requires evaluating the passage
+	// external: boolean,
 }
 enum LinkSyntax {
-    // Known as count: 1 in SugarCube
-    // [[alpha]]
-    Wiki,
-    // Known as count: 2 in SugarCube
-    // [[alpha|beta]]
-    Pretty,
+	// Known as count: 1 in SugarCube
+	// [[alpha]]
+	Wiki,
+	// Known as count: 2 in SugarCube
+	// [[alpha|beta]]
+	Pretty,
 }
 interface ImageArgument {
-    type: ArgType.Image,
-    image: Evaluatable<string, string>,
-    passage?: Evaluatable<string, string>,
-    align?: 'left' | 'right',
-    // TODO: This could be evaluatable
-    title?: string,
-    setter?: string,
-    // See: linkArgument for why this does not currently exist.
-    // external: boolean,
+	type: ArgType.Image,
+	image: Evaluatable<string, string>,
+	passage?: Evaluatable<string, string>,
+	align?: 'left' | 'right',
+	// TODO: This could be evaluatable
+	title?: string,
+	setter?: string,
+	// See: linkArgument for why this does not currently exist.
+	// external: boolean,
 }
 interface VariableArgument {
-    type: ArgType.Variable,
-    // Just the name, so the argument.
-    variable: string,
+	type: ArgType.Variable,
+	// Just the name, so the argument.
+	variable: string,
 }
 interface SettingsSetupAccessArgument {
-    type: ArgType.SettingsSetupAccess,
-    access: string,
+	type: ArgType.SettingsSetupAccess,
+	access: string,
 }
 interface NumberArgument {
-    type: ArgType.Number,
-    value: number,
+	type: ArgType.Number,
+	value: number,
 }
 interface BarewordArgument {
-    type: ArgType.Bareword,
-    value: string,
+	type: ArgType.Bareword,
+	value: string,
 }
 interface ExpressionArgument {
-    type: ArgType.Expression,
-    expression: string,
+	type: ArgType.Expression,
+	expression: string,
 }
 interface StringArgument {
-    type: ArgType.String,
-    text: string,
+	type: ArgType.String,
+	text: string,
 }
 /**
  * Parses the arguments passed into an ParsedArguments structure.
@@ -295,293 +266,293 @@ interface StringArgument {
  * @throws {Error}
  */
 export function parseArguments(document: vscode.TextDocument, macro: macro, macroDefinition: macroDef): ParsedArguments {
-    if (!macro.open) {
-        throw new Error("Expected opening macro to parse arguments of.");
-    }
+	if (!macro.open) {
+		throw new Error("Expected opening macro to parse arguments of.");
+	}
 
-    const afterMacroName = macro.range.start.translate(0, '<<'.length + macro.name.length);
-    const beforeMacroClose = macro.range.end.translate(0, -('>>'.length));
-    // Constrain text to the macro, so we don't accidentally start parsing the entire file due to a
-    // mistake
-    // Note: this means later places where we use positions within the text need to be offset to get
-    // accurate results.
-    let lexRange = new vscode.Range(afterMacroName, beforeMacroClose);
-    let source = document.getText(lexRange);
+	const afterMacroName = macro.range.start.translate(0, '<<'.length + macro.name.length);
+	const beforeMacroClose = macro.range.end.translate(0, -('>>'.length));
+	// Constrain text to the macro, so we don't accidentally start parsing the entire file due to a
+	// mistake
+	// Note: this means later places where we use positions within the text need to be offset to get
+	// accurate results.
+	let lexRange = new vscode.Range(afterMacroName, beforeMacroClose);
+	let source = document.getText(lexRange);
 
-    function makeError(kind: ArgumentParseErrorKind, item: LexerItem<MacroParse.Item>, message: string): ArgumentParseError {
-        // Note: Since we only ran the parser on a portion of the macro, we have to offset it
-        // in order to get the valid range.
-        let start = lexRange.start.translate(0, item.start);
-        let end = lexRange.start.translate(0, item.position);
-        return {
-            kind,
-            message,
-            range: new vscode.Range(start, end),
-        };
-    }
+	function makeError(kind: ArgumentParseErrorKind, item: LexerItem<MacroParse.Item>, message: string): ArgumentParseError {
+		// Note: Since we only ran the parser on a portion of the macro, we have to offset it
+		// in order to get the valid range.
+		let start = lexRange.start.translate(0, item.start);
+		let end = lexRange.start.translate(0, item.position);
+		return {
+			kind,
+			message,
+			range: new vscode.Range(start, end),
+		};
+	}
 
-    let args: ParsedArguments = {
-        errors: [],
-        arguments: [],
-    };
+	let args: ParsedArguments = {
+		errors: [],
+		arguments: [],
+	};
 
-    const lexer: Lexer<MacroParse.Item> = new Lexer(source, MacroParse.lexSpace);
-    const items = lexer.run();
-    // Note: For now, we don't try to continue if there was an error in parsing.
-    // It may be possible (?, at least in a few cases) to evaluate multiple errors
-    // but we're more likely to just spit out more errors due to the same garbage input.
-    loop: for (let i = 0; i < items.length; i++) {
-        let item = items[i];
-        let arg = item.text;
+	const lexer: Lexer<MacroParse.Item> = new Lexer(source, MacroParse.lexSpace);
+	const items = lexer.run();
+	// Note: For now, we don't try to continue if there was an error in parsing.
+	// It may be possible (?, at least in a few cases) to evaluate multiple errors
+	// but we're more likely to just spit out more errors due to the same garbage input.
+	loop: for (let i = 0; i < items.length; i++) {
+		let item = items[i];
+		let arg = item.text;
 
-        switch (item.type) {
-            case MacroParse.Item.Error:
-                args.errors.push(makeError(ArgumentParseErrorKind.Failure, item, `unable to parse macro argument: "${arg}": ${(item as LexerError<MacroParse.Item>).message}`));
-                break loop;
-            case MacroParse.Item.Bareword:
-                // This imitates the parsing of Barewords in the original code
-                // Though, we turn them into unique Argument types
-                if (varTestRegexp.test(arg)) {
-                    // SugarCube would access the variable within the state here.
-                    args.arguments.push({
-                        type: ArgType.Variable,
-                        variable: arg,
-                    });
-                } else if (settingsSetupAccessRegexp.test(arg)) {
-                    // SugarCube would evaluate this, throwing an error if it was invalid.
-                    // Thus it is deemed safe to turn it into an argument
-                    args.arguments.push({
-                        type: ArgType.SettingsSetupAccess,
-                        access: arg,
-                    });
-                } else if (arg === 'null') {
-                    args.arguments.push({
-                        type: ArgType.Null
-                    });
-                } else if (arg === 'undefined') {
-                    args.arguments.push({
-                        type: ArgType.Undefined,
-                    });
-                } else if (arg === 'true') {
-                    args.arguments.push({
-                        type: ArgType.True,
-                    });
-                } else if (arg === 'false') {
-                    args.arguments.push({
-                        type: ArgType.False,
-                    });
-                } else if (arg === 'NaN') {
-                    args.arguments.push({
-                        type: ArgType.NaN,
-                    });
-                } else {
-                    const argAsNum = Number(arg);
+		switch (item.type) {
+			case MacroParse.Item.Error:
+				args.errors.push(makeError(ArgumentParseErrorKind.Failure, item, `unable to parse macro argument: "${arg}": ${(item as LexerError<MacroParse.Item>).message}`));
+				break loop;
+			case MacroParse.Item.Bareword:
+				// This imitates the parsing of Barewords in the original code
+				// Though, we turn them into unique Argument types
+				if (varTestRegexp.test(arg)) {
+					// SugarCube would access the variable within the state here.
+					args.arguments.push({
+						type: ArgType.Variable,
+						variable: arg,
+					});
+				} else if (settingsSetupAccessRegexp.test(arg)) {
+					// SugarCube would evaluate this, throwing an error if it was invalid.
+					// Thus it is deemed safe to turn it into an argument
+					args.arguments.push({
+						type: ArgType.SettingsSetupAccess,
+						access: arg,
+					});
+				} else if (arg === 'null') {
+					args.arguments.push({
+						type: ArgType.Null
+					});
+				} else if (arg === 'undefined') {
+					args.arguments.push({
+						type: ArgType.Undefined,
+					});
+				} else if (arg === 'true') {
+					args.arguments.push({
+						type: ArgType.True,
+					});
+				} else if (arg === 'false') {
+					args.arguments.push({
+						type: ArgType.False,
+					});
+				} else if (arg === 'NaN') {
+					args.arguments.push({
+						type: ArgType.NaN,
+					});
+				} else {
+					const argAsNum = Number(arg);
 
-                    if (!Number.isNaN(argAsNum)) {
-                        args.arguments.push({
-                            type: ArgType.Number,
-                            value: argAsNum,
-                        });
-                    } else {
-                        args.arguments.push({
-                            type: ArgType.Bareword,
-                            value: arg,
-                        });
-                    }
-                }
-                break;
-            case MacroParse.Item.Expression:
-                // Remove backspaces and remove extraneous whitespace.
-                arg = arg.slice(1, -1).trim();
+					if (!Number.isNaN(argAsNum)) {
+						args.arguments.push({
+							type: ArgType.Number,
+							value: argAsNum,
+						});
+					} else {
+						args.arguments.push({
+							type: ArgType.Bareword,
+							value: arg,
+						});
+					}
+				}
+				break;
+			case MacroParse.Item.Expression:
+				// Remove backspaces and remove extraneous whitespace.
+				arg = arg.slice(1, -1).trim();
 
-                if (arg === '') {
-                    args.arguments.push({
-                        type: ArgType.EmptyExpression,
-                    });
-                } else {
-                    // Normally the code would be evaluated here.
-                    args.arguments.push({
-                        type: ArgType.Expression,
-                        expression: arg,
-                    });
-                }
-                break;
-            case MacroParse.Item.String:
-                // All SugarCube does is try evaluating the string as javascript to handle escaped
-                // characters.
-                // TODO: technically we could handle escaped characters (if that is all it does,
-                // but I am uncertain about that) manually.
-                args.arguments.push({
-                    type: ArgType.String,
-                    text: arg,
-                });
-                break;
-            case MacroParse.Item.SquareBracket:
-                {
-                    const markup = parseSquareBracketedMarkup({
-                        source: arg,
-                        matchStart: 0,
-                    });
+				if (arg === '') {
+					args.arguments.push({
+						type: ArgType.EmptyExpression,
+					});
+				} else {
+					// Normally the code would be evaluated here.
+					args.arguments.push({
+						type: ArgType.Expression,
+						expression: arg,
+					});
+				}
+				break;
+			case MacroParse.Item.String:
+				// All SugarCube does is try evaluating the string as javascript to handle escaped
+				// characters.
+				// TODO: technically we could handle escaped characters (if that is all it does,
+				// but I am uncertain about that) manually.
+				args.arguments.push({
+					type: ArgType.String,
+					text: arg,
+				});
+				break;
+			case MacroParse.Item.SquareBracket:
+				{
+					const markup = parseSquareBracketedMarkup({
+						source: arg,
+						matchStart: 0,
+					});
 
-                    if (markup.hasOwnProperty('error')) {
-                        args.errors.push(makeError(ArgumentParseErrorKind.SquareBracketFailure, item, markup.error as string));
-                        break loop;
-                    }
-                    if (markup.position < arg.length) {
-                        args.errors.push(makeError(ArgumentParseErrorKind.SquareBracketExpectedCharacter, item, `unable to parse macro argument "${arg}": unexpected character(s) "${arg.slice(markup.position)}"(pos: ${markup.position})`));
-                        break loop;
-                    }
+					if (markup.hasOwnProperty('error')) {
+						args.errors.push(makeError(ArgumentParseErrorKind.SquareBracketFailure, item, markup.error as string));
+						break loop;
+					}
+					if (markup.position < arg.length) {
+						args.errors.push(makeError(ArgumentParseErrorKind.SquareBracketExpectedCharacter, item, `unable to parse macro argument "${arg}": unexpected character(s) "${arg.slice(markup.position)}"(pos: ${markup.position})`));
+						break loop;
+					}
 
-                    // It is a link or an image
-                    if (markup.isLink) {
-                        let arg: LinkArgument = {
-                            type: ArgType.Link,
-                            syntax: LinkSyntax.Wiki,
-                        };
-                        if (markup.hasOwnProperty('text')) {
-                            arg.text = markup.text;
-                            arg.syntax = LinkSyntax.Pretty;
-                        }
-                        if (markup.setter) {
-                            arg.setter = markup.setter;
-                        }
-                        if (markup.link) {
-                            arg.passage = evalPassageId(markup.link);
-                        }
-                        args.arguments.push(arg);
-                    } else if (markup.isImage) {
-                        let arg: ImageArgument = {
-                            type: ArgType.Image,
-                            // TODO: should we assume that source is a string?
-                            image: evalPassageId(markup.source as string),
-                        };
+					// It is a link or an image
+					if (markup.isLink) {
+						let arg: LinkArgument = {
+							type: ArgType.Link,
+							syntax: LinkSyntax.Wiki,
+						};
+						if (markup.hasOwnProperty('text')) {
+							arg.text = markup.text;
+							arg.syntax = LinkSyntax.Pretty;
+						}
+						if (markup.setter) {
+							arg.setter = markup.setter;
+						}
+						if (markup.link) {
+							arg.passage = evalPassageId(markup.link);
+						}
+						args.arguments.push(arg);
+					} else if (markup.isImage) {
+						let arg: ImageArgument = {
+							type: ArgType.Image,
+							// TODO: should we assume that source is a string?
+							image: evalPassageId(markup.source as string),
+						};
 
-                        if (markup.hasOwnProperty('align')) {
-                            arg.align = markup.align;
-                        }
+						if (markup.hasOwnProperty('align')) {
+							arg.align = markup.align;
+						}
 
-                        if (markup.hasOwnProperty('text')) {
-                            arg.title = markup.text;
-                        }
+						if (markup.hasOwnProperty('text')) {
+							arg.title = markup.text;
+						}
 
-                        if (markup.hasOwnProperty('link')) {
-                            arg.passage = evalPassageId(markup.link as string);
-                        }
+						if (markup.hasOwnProperty('link')) {
+							arg.passage = evalPassageId(markup.link as string);
+						}
 
-                        if (markup.hasOwnProperty('setter')) {
-                            arg.setter = markup.setter;
-                        }
-                        args.arguments.push(arg);
-                    }
-                }
-                break;
-        }
-    }
-    return args;
+						if (markup.hasOwnProperty('setter')) {
+							arg.setter = markup.setter;
+						}
+						args.arguments.push(arg);
+					}
+				}
+				break;
+		}
+	}
+	return args;
 }
 
 
 interface MarkupInput {
-    source: string,
-    matchStart: number,
+	source: string,
+	matchStart: number,
 }
 
 interface MarkupData {
-    error?: string,
-    isImage: boolean,
-    isLink: boolean,
-    align?: 'left' | 'right',
-    position: number,
-    forceInternal?: boolean,
-    link?: string,
-    setter?: string,
-    source?: string,
-    text?: string,
+	error?: string,
+	isImage: boolean,
+	isLink: boolean,
+	align?: 'left' | 'right',
+	position: number,
+	forceInternal?: boolean,
+	link?: string,
+	setter?: string,
+	source?: string,
+	text?: string,
 }
 
 // Parse function.
 function parseSquareBracketedMarkup(w: MarkupInput): MarkupData {
-    // Initialize the lexer.
-    const lexer = new Lexer(w.source, SquareBracketParsing.lexLeftMeta);
+	// Initialize the lexer.
+	const lexer = new Lexer(w.source, SquareBracketParsing.lexLeftMeta);
 
-    // Set the initial positions within the source string.
-    lexer.start = lexer.pos = w.matchStart;
+	// Set the initial positions within the source string.
+	lexer.start = lexer.pos = w.matchStart;
 
-    // Lex the raw argument string.
-    const markup: Partial<MarkupData> = {
-        isImage: false,
-        isLink: false,
-    };
-    const items = lexer.run();
-    const last = items[items.length - 1];
+	// Lex the raw argument string.
+	const markup: Partial<MarkupData> = {
+		isImage: false,
+		isLink: false,
+	};
+	const items = lexer.run();
+	const last = items[items.length - 1];
 
-    if (last && last.type === SquareBracketParsing.Item.Error) {
-        markup.error = (last as LexerError<SquareBracketParsing.Item>).message;
-    } else {
-        items.forEach(item => {
-            const text = item.text.trim();
+	if (last && last.type === SquareBracketParsing.Item.Error) {
+		markup.error = (last as LexerError<SquareBracketParsing.Item>).message;
+	} else {
+		items.forEach(item => {
+			const text = item.text.trim();
 
-            switch (item.type) {
-                case SquareBracketParsing.Item.ImageMeta:
-                    markup.isImage = true;
+			switch (item.type) {
+				case SquareBracketParsing.Item.ImageMeta:
+					markup.isImage = true;
 
-                    if (text[1] === '<') {
-                        markup.align = 'left';
-                    }
-                    else if (text[1] === '>') {
-                        markup.align = 'right';
-                    }
-                    break;
+					if (text[1] === '<') {
+						markup.align = 'left';
+					}
+					else if (text[1] === '>') {
+						markup.align = 'right';
+					}
+					break;
 
-                case SquareBracketParsing.Item.LinkMeta:
-                    markup.isLink = true;
-                    break;
+				case SquareBracketParsing.Item.LinkMeta:
+					markup.isLink = true;
+					break;
 
-                case SquareBracketParsing.Item.Link:
-                    if (text[0] === '~') {
-                        markup.forceInternal = true;
-                        markup.link = text.slice(1);
-                    }
-                    else {
-                        markup.link = text;
-                    }
-                    break;
+				case SquareBracketParsing.Item.Link:
+					if (text[0] === '~') {
+						markup.forceInternal = true;
+						markup.link = text.slice(1);
+					}
+					else {
+						markup.link = text;
+					}
+					break;
 
-                case SquareBracketParsing.Item.Setter:
-                    markup.setter = text;
-                    break;
+				case SquareBracketParsing.Item.Setter:
+					markup.setter = text;
+					break;
 
-                case SquareBracketParsing.Item.Source:
-                    markup.source = text;
-                    break;
+				case SquareBracketParsing.Item.Source:
+					markup.source = text;
+					break;
 
-                case SquareBracketParsing.Item.Text:
-                    markup.text = text;
-                    break;
-            }
-        });
-    }
+				case SquareBracketParsing.Item.Text:
+					markup.text = text;
+					break;
+			}
+		});
+	}
 
-    markup.position = lexer.pos;
-    return markup as MarkupData;
+	markup.position = lexer.pos;
+	return markup as MarkupData;
 }
 
 function isExternalLink(link: string) {
-    // TODO: check if it is a passage
-    // if (Story.has(link)) {
-    //     return false;
-    // }
+	// TODO: check if it is a passage
+	// if (Story.has(link)) {
+	//     return false;
+	// }
 
-    const urlRegExp = /^(?:file|https?|mailto|ftp|javascript|irc|news|data):[^\s'"]+/gim;
-    return urlRegExp.test(link) || /[/.?#]/.test(link);
+	const urlRegExp = /^(?:file|https?|mailto|ftp|javascript|irc|news|data):[^\s'"]+/gim;
+	return urlRegExp.test(link) || /[/.?#]/.test(link);
 }
 
 function evalPassageId(passage: string): Evaluatable<string, string> {
-    // TODO: check if the passage exists.
-    return {
-        original: passage,
-        isEvaluated: false,
-    };
+	// TODO: check if the passage exists.
+	return {
+		original: passage,
+		isEvaluated: false,
+	};
 }
 
 // Much of the code following this is essentially modified SugarCube code, though
@@ -595,162 +566,162 @@ const varTestRegexp: RegExp = /^[$_][$A-Z_a-z][$0-9A-Z_a-z]*/;
 const settingsSetupAccessRegexp: RegExp = /^(?:settings|setup)[.[]/;
 
 namespace MacroParse {
-    export enum Item {
-        Error,
-        Bareword,
-        Expression,
-        String,
-        SquareBracket,
-    };
+	export enum Item {
+		Error,
+		Bareword,
+		Expression,
+		String,
+		SquareBracket,
+	};
 
-    // Lexing functions.
-    function slurpQuote(lexer: Lexer<Item>, endQuote: string): EOFT | number {
-        loop: for (; ;) {
-            /* eslint-disable indent */
-            switch (lexer.next()) {
-                case '\\':
-                    {
-                        const ch = lexer.next();
+	// Lexing functions.
+	function slurpQuote(lexer: Lexer<Item>, endQuote: string): EOFT | number {
+		loop: for (; ;) {
+			/* eslint-disable indent */
+			switch (lexer.next()) {
+				case '\\':
+					{
+						const ch = lexer.next();
 
-                        if (ch !== EOF && ch !== '\n') {
-                            break;
-                        }
-                    }
-                /* falls through */
-                case EOF:
-                case '\n':
-                    return EOF;
+						if (ch !== EOF && ch !== '\n') {
+							break;
+						}
+					}
+				/* falls through */
+				case EOF:
+				case '\n':
+					return EOF;
 
-                case endQuote:
-                    break loop;
-            }
-            /* eslint-enable indent */
-        }
+				case endQuote:
+					break loop;
+			}
+			/* eslint-enable indent */
+		}
 
-        return lexer.pos;
-    }
+		return lexer.pos;
+	}
 
-    export function lexSpace(lexer: Lexer<Item>): LexerState<Item> | null {
-        const offset = lexer.source.slice(lexer.pos).search(notSpaceRegex);
+	export function lexSpace(lexer: Lexer<Item>): LexerState<Item> | null {
+		const offset = lexer.source.slice(lexer.pos).search(notSpaceRegex);
 
-        if (offset === EOF) {
-            // no non-whitespace characters, so bail
-            return null;
-        }
-        else if (offset !== 0) {
-            lexer.pos += offset;
-            lexer.ignore();
-        }
+		if (offset === EOF) {
+			// no non-whitespace characters, so bail
+			return null;
+		}
+		else if (offset !== 0) {
+			lexer.pos += offset;
+			lexer.ignore();
+		}
 
-        // determine what the next state is
-        switch (lexer.next()) {
-            case '`':
-                return lexExpression;
-            case '"':
-                return lexDoubleQuote;
-            case "'":
-                return lexSingleQuote;
-            case '[':
-                return lexSquareBracket;
-            default:
-                return lexBareword;
-        }
-    }
+		// determine what the next state is
+		switch (lexer.next()) {
+			case '`':
+				return lexExpression;
+			case '"':
+				return lexDoubleQuote;
+			case "'":
+				return lexSingleQuote;
+			case '[':
+				return lexSquareBracket;
+			default:
+				return lexBareword;
+		}
+	}
 
-    function lexExpression(lexer: Lexer<Item>): LexerState<Item> | null {
-        if (slurpQuote(lexer, '`') === EOF) {
-            return lexer.error(Item.Error, 'unterminated backquote expression');
-        }
+	function lexExpression(lexer: Lexer<Item>): LexerState<Item> | null {
+		if (slurpQuote(lexer, '`') === EOF) {
+			return lexer.error(Item.Error, 'unterminated backquote expression');
+		}
 
-        lexer.emit(Item.Expression);
-        return lexSpace;
-    }
+		lexer.emit(Item.Expression);
+		return lexSpace;
+	}
 
-    function lexDoubleQuote(lexer: Lexer<Item>): LexerState<Item> | null {
-        if (slurpQuote(lexer, '"') === EOF) {
-            return lexer.error(Item.Error, 'unterminated double quoted string');
-        }
+	function lexDoubleQuote(lexer: Lexer<Item>): LexerState<Item> | null {
+		if (slurpQuote(lexer, '"') === EOF) {
+			return lexer.error(Item.Error, 'unterminated double quoted string');
+		}
 
-        lexer.emit(Item.String);
-        return lexSpace;
-    }
+		lexer.emit(Item.String);
+		return lexSpace;
+	}
 
-    function lexSingleQuote(lexer: Lexer<Item>): LexerState<Item> | null {
-        if (slurpQuote(lexer, "'") === EOF) {
-            return lexer.error(Item.Error, 'unterminated single quoted string');
-        }
+	function lexSingleQuote(lexer: Lexer<Item>): LexerState<Item> | null {
+		if (slurpQuote(lexer, "'") === EOF) {
+			return lexer.error(Item.Error, 'unterminated single quoted string');
+		}
 
-        lexer.emit(Item.String);
-        return lexSpace;
-    }
+		lexer.emit(Item.String);
+		return lexSpace;
+	}
 
-    function lexSquareBracket(lexer: Lexer<Item>): LexerState<Item> | null {
-        const imgMeta = '<>IiMmGg';
-        let what;
+	function lexSquareBracket(lexer: Lexer<Item>): LexerState<Item> | null {
+		const imgMeta = '<>IiMmGg';
+		let what;
 
-        if (lexer.accept(imgMeta)) {
-            what = 'image';
-            lexer.acceptRun(imgMeta);
-        }
-        else {
-            what = 'link';
-        }
+		if (lexer.accept(imgMeta)) {
+			what = 'image';
+			lexer.acceptRun(imgMeta);
+		}
+		else {
+			what = 'link';
+		}
 
-        if (!lexer.accept('[')) {
-            return lexer.error(Item.Error, `malformed ${what} markup`);
-        }
+		if (!lexer.accept('[')) {
+			return lexer.error(Item.Error, `malformed ${what} markup`);
+		}
 
-        lexer.depth = 2; // account for both initial left square brackets
+		lexer.depth = 2; // account for both initial left square brackets
 
-        loop: for (; ;) {
-            /* eslint-disable indent */
-            switch (lexer.next()) {
-                case '\\':
-                    {
-                        const ch = lexer.next();
+		loop: for (; ;) {
+			/* eslint-disable indent */
+			switch (lexer.next()) {
+				case '\\':
+					{
+						const ch = lexer.next();
 
-                        if (ch !== EOF && ch !== '\n') {
-                            break;
-                        }
-                    }
-                /* falls through */
-                case EOF:
-                case '\n':
-                    return lexer.error(Item.Error, `unterminated ${what} markup`);
+						if (ch !== EOF && ch !== '\n') {
+							break;
+						}
+					}
+				/* falls through */
+				case EOF:
+				case '\n':
+					return lexer.error(Item.Error, `unterminated ${what} markup`);
 
-                case '[':
-                    ++lexer.depth;
-                    break;
+				case '[':
+					++lexer.depth;
+					break;
 
-                case ']':
-                    --lexer.depth;
+				case ']':
+					--lexer.depth;
 
-                    if (lexer.depth < 0) {
-                        return lexer.error(Item.Error, "unexpected right square bracket ']'");
-                    }
+					if (lexer.depth < 0) {
+						return lexer.error(Item.Error, "unexpected right square bracket ']'");
+					}
 
-                    if (lexer.depth === 1) {
-                        if (lexer.next() === ']') {
-                            --lexer.depth;
-                            break loop;
-                        }
-                        lexer.backup();
-                    }
-                    break;
-            }
-            /* eslint-enable indent */
-        }
+					if (lexer.depth === 1) {
+						if (lexer.next() === ']') {
+							--lexer.depth;
+							break loop;
+						}
+						lexer.backup();
+					}
+					break;
+			}
+			/* eslint-enable indent */
+		}
 
-        lexer.emit(Item.SquareBracket);
-        return lexSpace;
-    }
+		lexer.emit(Item.SquareBracket);
+		return lexSpace;
+	}
 
-    function lexBareword(lexer: Lexer<Item>): LexerState<Item> | null {
-        const offset = lexer.source.slice(lexer.pos).search(spaceRegex);
-        lexer.pos = offset === EOF ? lexer.source.length : lexer.pos + offset;
-        lexer.emit(Item.Bareword);
-        return offset === EOF ? null : lexSpace;
-    }
+	function lexBareword(lexer: Lexer<Item>): LexerState<Item> | null {
+		const offset = lexer.source.slice(lexer.pos).search(spaceRegex);
+		lexer.pos = offset === EOF ? lexer.source.length : lexer.pos + offset;
+		lexer.emit(Item.Bareword);
+		return offset === EOF ? null : lexSpace;
+	}
 
 }
 
@@ -761,282 +732,282 @@ namespace MacroParse {
 // to provide better typed results, but it is defined above in the file separately to
 // make life somewhat saner if the below needs updating.
 namespace SquareBracketParsing {
-    export enum Item {
-        Error,     // error
-        DelimLTR,  // '|' or '->'
-        DelimRTL,  // '<-'
-        InnerMeta, // ']['
-        ImageMeta, // '[img[', '[<img[', or '[>img['
-        LinkMeta,  // '[['
-        Link,      // link destination
-        RightMeta, // ']]'
-        Setter,    // setter expression
-        Source,    // image source
-        Text       // link text or image alt text
-    }
-    enum Delim {
-        None, // no delimiter encountered
-        LTR,  // '|' or '->'
-        RTL   // '<-'
-    }
+	export enum Item {
+		Error,     // error
+		DelimLTR,  // '|' or '->'
+		DelimRTL,  // '<-'
+		InnerMeta, // ']['
+		ImageMeta, // '[img[', '[<img[', or '[>img['
+		LinkMeta,  // '[['
+		Link,      // link destination
+		RightMeta, // ']]'
+		Setter,    // setter expression
+		Source,    // image source
+		Text       // link text or image alt text
+	}
+	enum Delim {
+		None, // no delimiter encountered
+		LTR,  // '|' or '->'
+		RTL   // '<-'
+	}
 
-    // Lexing functions.
-    function slurpQuote(lexer: Lexer<Item>, endQuote: string): EOFT | number {
-        loop: for (; ;) {
-            switch (lexer.next()) {
-                case '\\':
-                    {
-                        const ch = lexer.next();
+	// Lexing functions.
+	function slurpQuote(lexer: Lexer<Item>, endQuote: string): EOFT | number {
+		loop: for (; ;) {
+			switch (lexer.next()) {
+				case '\\':
+					{
+						const ch = lexer.next();
 
-                        if (ch !== EOF && ch !== '\n') {
-                            break;
-                        }
-                    }
-                /* falls through */
-                case EOF:
-                case '\n':
-                    return EOF;
+						if (ch !== EOF && ch !== '\n') {
+							break;
+						}
+					}
+				/* falls through */
+				case EOF:
+				case '\n':
+					return EOF;
 
-                case endQuote:
-                    break loop;
-            }
-        }
+				case endQuote:
+					break loop;
+			}
+		}
 
-        return lexer.pos;
-    }
+		return lexer.pos;
+	}
 
-    export function lexLeftMeta(lexer: Lexer<Item>) {
-        if (!lexer.accept('[')) {
-            return lexer.error(Item.Error, 'malformed square-bracketed markup');
-        }
+	export function lexLeftMeta(lexer: Lexer<Item>) {
+		if (!lexer.accept('[')) {
+			return lexer.error(Item.Error, 'malformed square-bracketed markup');
+		}
 
-        // Is link markup.
-        if (lexer.accept('[')) {
-            lexer.data.isLink = true;
-            lexer.emit(Item.LinkMeta);
-        }
+		// Is link markup.
+		if (lexer.accept('[')) {
+			lexer.data.isLink = true;
+			lexer.emit(Item.LinkMeta);
+		}
 
-        // May be image markup.
-        else {
-            lexer.accept('<>'); // aligner syntax
+		// May be image markup.
+		else {
+			lexer.accept('<>'); // aligner syntax
 
-            if (!lexer.accept('Ii') || !lexer.accept('Mm') || !lexer.accept('Gg') || !lexer.accept('[')) {
-                return lexer.error(Item.Error, 'malformed square-bracketed markup');
-            }
+			if (!lexer.accept('Ii') || !lexer.accept('Mm') || !lexer.accept('Gg') || !lexer.accept('[')) {
+				return lexer.error(Item.Error, 'malformed square-bracketed markup');
+			}
 
-            lexer.data.isLink = false;
-            lexer.emit(Item.ImageMeta);
-        }
+			lexer.data.isLink = false;
+			lexer.emit(Item.ImageMeta);
+		}
 
-        lexer.depth = 2; // account for both initial left square brackets
-        return lexCoreComponents;
-    }
+		lexer.depth = 2; // account for both initial left square brackets
+		return lexCoreComponents;
+	}
 
-    function lexCoreComponents(lexer: Lexer<Item>) {
-        const what = lexer.data.isLink ? 'link' : 'image';
-        let delim = Delim.None;
+	function lexCoreComponents(lexer: Lexer<Item>) {
+		const what = lexer.data.isLink ? 'link' : 'image';
+		let delim = Delim.None;
 
-        for (; ;) {
-            switch (lexer.next()) {
-                case EOF:
-                case '\n':
-                    return lexer.error(Item.Error, `unterminated ${what} markup`);
+		for (; ;) {
+			switch (lexer.next()) {
+				case EOF:
+				case '\n':
+					return lexer.error(Item.Error, `unterminated ${what} markup`);
 
-                case '"':
-                    /*
-                        This is not entirely reliable within sections that allow raw strings, since
-                        it's possible, however unlikely, for a raw string to contain unpaired double
-                        quotes.  The likelihood is low enough, however, that I'm deeming the risk as
-                        acceptable—for now, at least.
-                    */
-                    if (slurpQuote(lexer, '"') === EOF) {
-                        return lexer.error(Item.Error, `unterminated double quoted string in ${what} markup`);
-                    }
-                    break;
+				case '"':
+					/*
+						This is not entirely reliable within sections that allow raw strings, since
+						it's possible, however unlikely, for a raw string to contain unpaired double
+						quotes.  The likelihood is low enough, however, that I'm deeming the risk as
+						acceptable—for now, at least.
+					*/
+					if (slurpQuote(lexer, '"') === EOF) {
+						return lexer.error(Item.Error, `unterminated double quoted string in ${what} markup`);
+					}
+					break;
 
-                case '|': // possible pipe ('|') delimiter
-                    if (delim === Delim.None) {
-                        delim = Delim.LTR;
-                        lexer.backup();
-                        lexer.emit(Item.Text);
-                        lexer.forward();
-                        lexer.emit(Item.DelimLTR);
-                        // lexer.ignore();
-                    }
-                    break;
+				case '|': // possible pipe ('|') delimiter
+					if (delim === Delim.None) {
+						delim = Delim.LTR;
+						lexer.backup();
+						lexer.emit(Item.Text);
+						lexer.forward();
+						lexer.emit(Item.DelimLTR);
+						// lexer.ignore();
+					}
+					break;
 
-                case '-': // possible right arrow ('->') delimiter
-                    if (delim === Delim.None && lexer.peek() === '>') {
-                        delim = Delim.LTR;
-                        lexer.backup();
-                        lexer.emit(Item.Text);
-                        lexer.forward(2);
-                        lexer.emit(Item.DelimLTR);
-                        // lexer.ignore();
-                    }
-                    break;
+				case '-': // possible right arrow ('->') delimiter
+					if (delim === Delim.None && lexer.peek() === '>') {
+						delim = Delim.LTR;
+						lexer.backup();
+						lexer.emit(Item.Text);
+						lexer.forward(2);
+						lexer.emit(Item.DelimLTR);
+						// lexer.ignore();
+					}
+					break;
 
-                case '<': // possible left arrow ('<-') delimiter
-                    if (delim === Delim.None && lexer.peek() === '-') {
-                        delim = Delim.RTL;
-                        lexer.backup();
-                        lexer.emit(lexer.data.isLink ? Item.Link : Item.Source);
-                        lexer.forward(2);
-                        lexer.emit(Item.DelimRTL);
-                        // lexer.ignore();
-                    }
-                    break;
+				case '<': // possible left arrow ('<-') delimiter
+					if (delim === Delim.None && lexer.peek() === '-') {
+						delim = Delim.RTL;
+						lexer.backup();
+						lexer.emit(lexer.data.isLink ? Item.Link : Item.Source);
+						lexer.forward(2);
+						lexer.emit(Item.DelimRTL);
+						// lexer.ignore();
+					}
+					break;
 
-                case '[':
-                    ++lexer.depth;
-                    break;
+				case '[':
+					++lexer.depth;
+					break;
 
-                case ']':
-                    --lexer.depth;
+				case ']':
+					--lexer.depth;
 
-                    if (lexer.depth === 1) {
-                        switch (lexer.peek()) {
-                            case '[':
-                                ++lexer.depth;
-                                lexer.backup();
+					if (lexer.depth === 1) {
+						switch (lexer.peek()) {
+							case '[':
+								++lexer.depth;
+								lexer.backup();
 
-                                if (delim === Delim.RTL) {
-                                    lexer.emit(Item.Text);
-                                }
-                                else {
-                                    lexer.emit(lexer.data.isLink ? Item.Link : Item.Source);
-                                }
+								if (delim === Delim.RTL) {
+									lexer.emit(Item.Text);
+								}
+								else {
+									lexer.emit(lexer.data.isLink ? Item.Link : Item.Source);
+								}
 
-                                lexer.forward(2);
-                                lexer.emit(Item.InnerMeta);
-                                // lexer.ignore();
-                                return lexer.data.isLink ? lexSetter : lexImageLink;
+								lexer.forward(2);
+								lexer.emit(Item.InnerMeta);
+								// lexer.ignore();
+								return lexer.data.isLink ? lexSetter : lexImageLink;
 
-                            case ']':
-                                --lexer.depth;
-                                lexer.backup();
+							case ']':
+								--lexer.depth;
+								lexer.backup();
 
-                                if (delim === Delim.RTL) {
-                                    lexer.emit(Item.Text);
-                                }
-                                else {
-                                    lexer.emit(lexer.data.isLink ? Item.Link : Item.Source);
-                                }
+								if (delim === Delim.RTL) {
+									lexer.emit(Item.Text);
+								}
+								else {
+									lexer.emit(lexer.data.isLink ? Item.Link : Item.Source);
+								}
 
-                                lexer.forward(2);
-                                lexer.emit(Item.RightMeta);
-                                // lexer.ignore();
-                                return null;
+								lexer.forward(2);
+								lexer.emit(Item.RightMeta);
+								// lexer.ignore();
+								return null;
 
-                            default:
-                                return lexer.error(Item.Error, `malformed ${what} markup`);
-                        }
-                    }
-                    break;
-            }
-        }
-    }
+							default:
+								return lexer.error(Item.Error, `malformed ${what} markup`);
+						}
+					}
+					break;
+			}
+		}
+	}
 
-    function lexImageLink(lexer: Lexer<Item>) {
-        const what = lexer.data.isLink ? 'link' : 'image';
+	function lexImageLink(lexer: Lexer<Item>) {
+		const what = lexer.data.isLink ? 'link' : 'image';
 
-        for (; ;) {
-            switch (lexer.next()) {
-                case EOF:
-                case '\n':
-                    return lexer.error(Item.Error, `unterminated ${what} markup`);
+		for (; ;) {
+			switch (lexer.next()) {
+				case EOF:
+				case '\n':
+					return lexer.error(Item.Error, `unterminated ${what} markup`);
 
-                case '"':
-                    /*
-                        This is not entirely reliable within sections that allow raw strings, since
-                        it's possible, however unlikely, for a raw string to contain unpaired double
-                        quotes.  The likelihood is low enough, however, that I'm deeming the risk as
-                        acceptable—for now, at least.
-                    */
-                    if (slurpQuote(lexer, '"') === EOF) {
-                        return lexer.error(Item.Error, `unterminated double quoted string in ${what} markup link component`);
-                    }
-                    break;
+				case '"':
+					/*
+						This is not entirely reliable within sections that allow raw strings, since
+						it's possible, however unlikely, for a raw string to contain unpaired double
+						quotes.  The likelihood is low enough, however, that I'm deeming the risk as
+						acceptable—for now, at least.
+					*/
+					if (slurpQuote(lexer, '"') === EOF) {
+						return lexer.error(Item.Error, `unterminated double quoted string in ${what} markup link component`);
+					}
+					break;
 
-                case '[':
-                    ++lexer.depth;
-                    break;
+				case '[':
+					++lexer.depth;
+					break;
 
-                case ']':
-                    --lexer.depth;
+				case ']':
+					--lexer.depth;
 
-                    if (lexer.depth === 1) {
-                        switch (lexer.peek()) {
-                            case '[':
-                                ++lexer.depth;
-                                lexer.backup();
-                                lexer.emit(Item.Link);
-                                lexer.forward(2);
-                                lexer.emit(Item.InnerMeta);
-                                // lexer.ignore();
-                                return lexSetter;
+					if (lexer.depth === 1) {
+						switch (lexer.peek()) {
+							case '[':
+								++lexer.depth;
+								lexer.backup();
+								lexer.emit(Item.Link);
+								lexer.forward(2);
+								lexer.emit(Item.InnerMeta);
+								// lexer.ignore();
+								return lexSetter;
 
-                            case ']':
-                                --lexer.depth;
-                                lexer.backup();
-                                lexer.emit(Item.Link);
-                                lexer.forward(2);
-                                lexer.emit(Item.RightMeta);
-                                // lexer.ignore();
-                                return null;
+							case ']':
+								--lexer.depth;
+								lexer.backup();
+								lexer.emit(Item.Link);
+								lexer.forward(2);
+								lexer.emit(Item.RightMeta);
+								// lexer.ignore();
+								return null;
 
-                            default:
-                                return lexer.error(Item.Error, `malformed ${what} markup`);
-                        }
-                    }
-                    break;
-            }
-        }
-    }
+							default:
+								return lexer.error(Item.Error, `malformed ${what} markup`);
+						}
+					}
+					break;
+			}
+		}
+	}
 
-    function lexSetter(lexer: Lexer<Item>) {
-        const what = lexer.data.isLink ? 'link' : 'image';
+	function lexSetter(lexer: Lexer<Item>) {
+		const what = lexer.data.isLink ? 'link' : 'image';
 
-        for (; ;) {
-            switch (lexer.next()) {
-                case EOF:
-                case '\n':
-                    return lexer.error(Item.Error, `unterminated ${what} markup`);
+		for (; ;) {
+			switch (lexer.next()) {
+				case EOF:
+				case '\n':
+					return lexer.error(Item.Error, `unterminated ${what} markup`);
 
-                case '"':
-                    if (slurpQuote(lexer, '"') === EOF) {
-                        return lexer.error(Item.Error, `unterminated double quoted string in ${what} markup setter component`);
-                    }
-                    break;
+				case '"':
+					if (slurpQuote(lexer, '"') === EOF) {
+						return lexer.error(Item.Error, `unterminated double quoted string in ${what} markup setter component`);
+					}
+					break;
 
-                case "'":
-                    if (slurpQuote(lexer, "'") === EOF) {
-                        return lexer.error(Item.Error, `unterminated single quoted string in ${what} markup setter component`);
-                    }
-                    break;
+				case "'":
+					if (slurpQuote(lexer, "'") === EOF) {
+						return lexer.error(Item.Error, `unterminated single quoted string in ${what} markup setter component`);
+					}
+					break;
 
-                case '[':
-                    ++lexer.depth;
-                    break;
+				case '[':
+					++lexer.depth;
+					break;
 
-                case ']':
-                    --lexer.depth;
+				case ']':
+					--lexer.depth;
 
-                    if (lexer.depth === 1) {
-                        if (lexer.peek() !== ']') {
-                            return lexer.error(Item.Error, `malformed ${what} markup`);
-                        }
+					if (lexer.depth === 1) {
+						if (lexer.peek() !== ']') {
+							return lexer.error(Item.Error, `malformed ${what} markup`);
+						}
 
-                        --lexer.depth;
-                        lexer.backup();
-                        lexer.emit(Item.Setter);
-                        lexer.forward(2);
-                        lexer.emit(Item.RightMeta);
-                        // lexer.ignore();
-                        return null;
-                    }
-                    break;
-            }
-        }
-    }
+						--lexer.depth;
+						lexer.backup();
+						lexer.emit(Item.Setter);
+						lexer.forward(2);
+						lexer.emit(Item.RightMeta);
+						// lexer.ignore();
+						return null;
+					}
+					break;
+			}
+		}
+	}
 }

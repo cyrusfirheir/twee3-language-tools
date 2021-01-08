@@ -1,0 +1,105 @@
+:: SugarCube
+
+/* highlight tests */
+
+<div id="stuff" @class="_test"></div>
+
+<style>
+	.lol {
+		color: red;
+	}
+</style>
+
+$variablesAndStuff and text and stuff.
+
+?template or summin.
+
+<<link `'"That doesn\'t even make any sense!"'.sQ()`>> <</link>>
+
+
+
+/* custom style markup tests */
+
+//emphasis// ''strong''
+
+//nesting ''works'' a bit different//
+''the containing style //takes// over''
+
+//
+Multi line
+//
+''
+Multi line
+''
+
+> quote
+>> deeper quote
+ > not quite...
+> //emphasis// is ''strong''
+
+* list item
+# ordered list item
+ * broken list item
+ # also broken
+
+! Heading!
+!!!!! Smaller HEADINGS!
+ ! no heading
+
+
+
+/* JS highlights inside print, set, run, and script */
+
+<<print "String".split("").join(" ")>>
+<<= "String".split("").join(" ")>>
+
+<<set something.fromSomewhere("with this", "and this")>>
+
+<<script>>
+	// stuff
+	setup.someFunction.orSomething();
+<</script>>
+
+<<run [
+	"speaker"
+].forEach(el => {
+	let esc = el.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+	_dialogue = _dialogue.replace(new RegExp("\\/\\*\\s*" + esc + ":(.*)\\*\\/"), function(match, p1) {
+		temporary()[el] = p1.trim() || "";
+		return "";
+	});
+})>>
+
+
+
+/* link markup */
+
+[[this markup...]]
+[[Arrive][Game 0]]
+[[Arrive|Game 0]]
+[[Arrive.|Game 0]]
+[[Arrive->Game 0]]
+[[Arrive<-Game 0]]
+
+<<actions [[Lol I've->been fixed']] [[ANotha' one-> lol]]>>
+
+/* image markup */
+
+[img[Image]]
+[img[home.png]]
+[img[$src]]
+[img[Image][Link]]
+[img[home.png][Home]]
+[img[$src][$go]]
+[img[Image][Link][Setter]]
+[img[home.png][Home][$done to true]]
+[img[$src][$go][$done to true]]
+[img[Title|Image]]
+[img[Go home|home.png]]
+[img[$show|$src]]
+[img[Title|Image][Link]]
+[img[Go home|home.png][Home]]
+[img[$show|$src][$go]]
+[img[Title|Image][Link][Setter]]
+[img[Go home|home.png][Home][$done to true]]
+[img[$show|$src][$go][$done to true]]
