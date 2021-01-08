@@ -37,7 +37,47 @@ export const decor = vscode.window.createTextEditorDecorationType({
 
 export const macroRegex = /<<(\/|end)?([A-Za-z][\w-]*|[=-])(?:\s*)((?:(?:`(?:\\.|[^`\\])*`)|(?:"(?:\\.|[^"\\])*")|(?:'(?:\\.|[^'\\])*')|(?:\[(?:[<>]?[Ii][Mm][Gg])?\[[^\r\n]*?\]\]+)|[^>]|(?:>(?!>)))*?)(\/)?>>/gm;
 
-export const macroList = async function () {
+const macroFileWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+	"**/*.twee-config.{json,yaml,yml}",
+	false,
+	false,
+	false,
+);
+macroFileWatcher.onDidChange(async (e) => {
+	await updateMacroCache();
+});
+macroFileWatcher.onDidCreate(async (e) => {
+	await updateMacroCache();
+});
+macroFileWatcher.onDidDelete(async (e) => {
+	await updateMacroCache();
+});
+
+/**
+ * Cache of macro definitions.
+ * Updated whenever the files change.
+ */
+let macroCache: Record<string, macroDef> | null = null;
+export const macroList = async function (): Promise<Record<string, macroDef>> {
+	if (macroCache === null) {
+		await updateMacroCache();
+	}
+
+	// After updating macro list, it should not be null.
+	return macroCache as Record<string, macroDef>;
+}
+
+/**
+ * Update the cache with by parsing the files.
+ */
+const updateMacroCache = async function () {
+	macroCache = await parseMacroList();
+}
+
+/**
+ * Parses the macros from the files without caching.
+ */
+const parseMacroList = async function () {
 	let list: any = Object.assign(Object.create(null), macroListCore);
 
 	let customList: any = {};
