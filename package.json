@@ -1,367 +1,393 @@
 {
-	"name": "twee3-language-tools",
-	"displayName": "Twee 3 Language Tools",
-	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.7.2",
-	"author": "Cyrus Firheir",
-	"publisher": "cyrusfirheir",
-	"icon": "res/icon.png",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/cyrusfirheir/twee3-language-tools.git"
-	},
-	"bugs": {
-		"url": "https://github.com/cyrusfirheir/twee3-language-tools/issues"
-	},
-	"license": "MIT",
-	"engines": {
-		"vscode": "^1.42.0"
-	},
-	"categories": [
-		"Language Packs",
-		"Extension Packs",
-		"Snippets"
-	],
-	"keywords": [
-		"twee",
-		"twee3",
-		"twine"
-	],
-	"activationEvents": [
-		"onLanguage:twee3",
-		"onLanguage:twee3-chapbook-1",
-		"onLanguage:twee3-harlowe-3",
-		"onLanguage:twee3-sugarcube-2"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"languages": [
-			{
-				"id": "twee3",
-				"extensions": [
-					".tw",
-					".twee"
-				],
-				"configuration": "./defs/language-configuration.json"
-			},
-			{
-				"id": "twee3-chapbook-1",
-				"aliases": [
-					"twee3-cb1",
-					"twee3-chapbook-1"
-				],
-				"configuration": "./defs/chapbook-1/language-configuration.json"
-			},
-			{
-				"id": "twee3-harlowe-3",
-				"aliases": [
-					"twee3-h3",
-					"twee3-harlowe-3"
-				],
-				"configuration": "./defs/harlowe-3/language-configuration.json"
-			},
-			{
-				"id": "twee3-sugarcube-2",
-				"aliases": [
-					"twee3-sc2",
-					"twee3-sugarcube-2"
-				],
-				"configuration": "./defs/sugarcube-2/language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "twee3",
-				"scopeName": "source.twee3",
-				"path": "./defs/grammar.json",
-				"embeddedLanguages": {
-					"source.json.twee3": "json",
-					"source.js.twee3": "javascript",
-					"source.css.twee3": "css",
-					"source.html.twee3": "html"
-				}
-			},
-			{
-				"language": "twee3-chapbook-1",
-				"scopeName": "source.chapbook-1.twee3",
-				"path": "./defs/chapbook-1/grammar.json",
-				"embeddedLanguages": {
-					"source.json.twee3": "json",
-					"source.js.twee3": "javascript",
-					"source.css.twee3": "css",
-					"source.html.twee3": "html"
-				}
-			},
-			{
-				"language": "twee3-harlowe-3",
-				"scopeName": "source.harlowe-3.twee3",
-				"path": "./defs/harlowe-3/grammar.json",
-				"embeddedLanguages": {
-					"source.json.twee3": "json",
-					"source.js.twee3": "javascript",
-					"source.css.twee3": "css",
-					"source.html.twee3": "html"
-				}
-			},
-			{
-				"language": "twee3-sugarcube-2",
-				"scopeName": "source.sugarcube-2.twee3",
-				"path": "./defs/sugarcube-2/grammar.json",
-				"embeddedLanguages": {
-					"source.json.twee3": "json",
-					"source.js.twee3": "javascript",
-					"source.css.twee3": "css",
-					"source.html.twee3": "html"
-				}
-			}
-		],
-		"snippets": [
-			{
-				"language": "twee3",
-				"path": "./defs/snippets.json"
-			},
-			{
-				"language": "twee3-chapbook-1",
-				"path": "./defs/chapbook-1/snippets.json"
-			},
-			{
-				"language": "twee3-harlowe-3",
-				"path": "./defs/harlowe-3/snippets.json"
-			},
-			{
-				"language": "twee3-sugarcube-2",
-				"path": "./defs/sugarcube-2/snippets.json"
-			}
-		],
-		"semanticTokenScopes": [
-			{
-				"scopes": {
-					"startToken": [
-						"punctuation"
-					],
-					"special": [
-						"support.class"
-					],
-					"passageName": [
-						"entity.name.function"
-					],
-					"passageTags": [
-						"constant.language"
-					],
-					"passageMeta": [
-						"punctuation"
-					]
-				}
-			}
-		],
-		"configuration": {
-			"title": "Twee 3 Language Tools",
-			"properties": {
-				"twee3LanguageTools.storyformat.current": {
-					"type": "string",
-					"default": "",
-					"markdownDescription": "Identifier of the storyformat in use. (Managed by the `StoryData` special passage.)"
-				},
-				"twee3LanguageTools.storyformat.override": {
-					"type": "string",
-					"enum": [
-						"",
-						"chapbook-1",
-						"harlowe-3",
-						"sugarcube-2"
-					],
-					"default": "",
-					"markdownDescription": "Identifier of the storyformat to override the format set by `StoryData`."
-				},
-				"twee3LanguageTools.directories.include": {
-					"type": "array",
-					"default": [],
-					"markdownDescription": "Directories in which to look for twee files. Use glob patterns *relative* to the root of the workspace folders (e.g. `src/unprocessed/twee`, `src/static`, `external`). (Searches the entire workspace by default.)"
-				},
-				"twee3LanguageTools.directories.exclude": {
-					"type": "array",
-					"default": [
-						"**/node_modules/**"
-					],
-					"markdownDescription": "Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened."
-				},
-				"twee3LanguageTools.passage.list": {
-					"type": "boolean",
-					"default": false,
-					"markdownDescription": "Collect passage names to display a list of quick 'jump' links?"
-				},
-				"twee3LanguageTools.passage.group": {
-					"type": "string",
-					"enum": [
-						"None",
-						"File",
-						"Folder",
-						"Tag"
-					],
-					"markdownEnumDescriptions": [
-						"`None`: Passage are not grouped.",
-						"`File`: Passages are grouped by the files they originate from.",
-						"`Folder`: Passages are grouped by the folder they originate from.",
-						"`Tag`: Passages are grouped by tags."
-					],
-					"default": "None",
-					"markdownDescription": "Group passages by:"
-				},
-				"twee3LanguageTools.twee-3.warning.spaceAfterStartToken": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Warn about missing space after the start token (`::`) in passage headers?"
-				},
-				"twee3LanguageTools.sugarcube-2.features.macroTagMatching": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Highlight opening and closing tags of container macros?"
-				},
-				"twee3LanguageTools.sugarcube-2.warning.undefinedMacro": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library?"
-				},
-				"twee3LanguageTools.sugarcube-2.warning.deprecatedMacro": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Warn about deprecated macros/widgets?"
-				},
-				"twee3LanguageTools.sugarcube-2.warning.endMacro": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Warn about the deprecated `<<end...>>` closing tag syntax?"
-				},
-				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
-					"type": "boolean",
-					"default": false,
-					"markdownDescription": "Enable self-closing syntax for container macros? [Read here](https://github.com/cyrusfirheir/twee3-language-tools/blob/master/README.md#sugarcube-2-self-closing-macros) for more information."
-				},
-				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.warning.irrationalSelfClose": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Warn about self-closed instances of content focused macros (e.g. `<<script />>`)?"
-				},
-				"twee3LanguageTools.sugarcube-2.error.argumentParsing": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "Provide errors about invalid argument syntax being passed into macros?"
-				}
-			}
-		},
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "twee3-language-tools",
-					"title": "T3LT",
-					"icon": "res/tree-view.svg"
-				}
-			]
-		},
-		"views": {
-			"twee3-language-tools": [
-				{
-					"id": "t3lt-passages-list",
-					"name": "Passages",
-					"when": "config.twee3LanguageTools.passage.list || resourceFilename =~ /.*?\\.tw(?:ee)?$/"
-				}
-			]
-		},
-		"viewsWelcome": [
-			{
-				"view": "t3lt-passages-list",
-				"contents": "Passage list turned off.\n[Enable](command:twee3LanguageTools.passage.list)"
-			}
-		],
-		"commands": [
-			{
-				"command": "twee3LanguageTools.passage.jump",
-				"title": "Jump"
-			},
-			{
-				"command": "twee3LanguageTools.passage.list",
-				"title": "Toggle listing"
-			},
-			{
-				"command": "twee3LanguageTools.passage.group.none",
-				"title": "Group: None"
-			},
-			{
-				"command": "twee3LanguageTools.passage.group.file",
-				"title": "Group: File"
-			},
-			{
-				"command": "twee3LanguageTools.passage.group.folder",
-				"title": "Group: Folder"
-			},
-			{
-				"command": "twee3LanguageTools.passage.group.tag",
-				"title": "Group: Tag"
-			},
-			{
-				"command": "twee3LanguageTools.ifid.generate",
-				"title": "Generate IFID",
-				"category": "Twee3 Language Tools"
-			}
-		],
-		"menus": {
-			"view/title": [
-				{
-					"command": "twee3LanguageTools.passage.list",
-					"when": "view == t3lt-passages-list",
-					"group": "navigation"
-				},
-				{
-					"command": "twee3LanguageTools.passage.group.none",
-					"when": "view == t3lt-passages-list"
-				},
-				{
-					"command": "twee3LanguageTools.passage.group.file",
-					"when": "view == t3lt-passages-list"
-				},
-				{
-					"command": "twee3LanguageTools.passage.group.folder",
-					"when": "view == t3lt-passages-list"
-				},
-				{
-					"command": "twee3LanguageTools.passage.group.tag",
-					"when": "view == t3lt-passages-list"
-				}
-			],
-			"view/item/context": [
-				{
-					"command": "twee3LanguageTools.passage.jump",
-					"when": "view == t3lt-passages-list",
-					"group": "inline"
-				}
-			]
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run clean && webpack --mode production",
-		"webpack": "webpack --mode development",
-		"webpack-dev": "webpack --mode development --watch",
-		"clean": "rimraf out"
-	},
-	"devDependencies": {
-		"@types/mocha": "^7.0.2",
-		"@types/node": "^13.13.38",
-		"@types/vscode": "^1.42.0",
-		"@typescript-eslint/eslint-plugin": "^3.9.0",
-		"@typescript-eslint/parser": "^3.9.0",
-		"mocha": "^7.1.2",
-		"rimraf": "^3.0.2",
-		"ts-loader": "^8.0.13",
-		"typescript": "^3.9.7",
-		"webpack": "^4.44.1",
-		"webpack-cli": "^3.3.12"
-	},
-	"dependencies": {
-		"@types/glob": "^7.1.3",
-		"@types/uuid": "^8.3.0",
-		"comment-parser": "^0.7.5",
-		"glob": "^7.1.6",
-		"uuid": "^8.3.2",
-		"yaml": "^1.10.0"
-	}
+  "name": "twee3-language-tools",
+  "version": "0.7.2",
+  "private": true,
+  "description": "Syntax highlighting and programmatic language tools for Twee 3.",
+  "author": {
+    "name": "Cyrus Firheir"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "clean": "rimraf out",
+    "vscode:prepublish": "npm run clean && webpack --mode production",
+    "webpack": "webpack --mode development",
+    "webpack-dev": "webpack --mode development --watch"
+  },
+  "main": "./out/extension.js",
+  "dependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^3.9.0",
+    "@typescript-eslint/parser": "^3.9.0",
+    "comment-parser": "^0.7.5",
+    "core-js": "^3.6.5",
+    "express": "^4.17.1",
+    "glob": "^7.1.6",
+    "open": "^7.3.1",
+    "socket.io": "^3.0.5",
+    "uuid": "^8.3.2",
+    "vue": "^3.0.0",
+    "yaml": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.9",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.13.38",
+    "@types/vscode": "^1.42.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "mocha": "^7.1.2",
+    "rimraf": "^3.0.2",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2",
+    "ts-loader": "^8.0.13",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "_id": "twee3-language-tools@0.7.2",
+  "activationEvents": [
+    "onLanguage:twee3",
+    "onLanguage:twee3-chapbook-1",
+    "onLanguage:twee3-harlowe-3",
+    "onLanguage:twee3-sugarcube-2",
+    "onCommand:t3lt.startUi"
+  ],
+  "bugs": {
+    "url": "https://github.com/cyrusfirheir/twee3-language-tools/issues"
+  },
+  "categories": [
+    "Language Packs",
+    "Extension Packs",
+    "Snippets"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "twee3",
+        "extensions": [
+          ".tw",
+          ".twee"
+        ],
+        "configuration": "./defs/language-configuration.json"
+      },
+      {
+        "id": "twee3-chapbook-1",
+        "aliases": [
+          "twee3-cb1",
+          "twee3-chapbook-1"
+        ],
+        "configuration": "./defs/chapbook-1/language-configuration.json"
+      },
+      {
+        "id": "twee3-harlowe-3",
+        "aliases": [
+          "twee3-h3",
+          "twee3-harlowe-3"
+        ],
+        "configuration": "./defs/harlowe-3/language-configuration.json"
+      },
+      {
+        "id": "twee3-sugarcube-2",
+        "aliases": [
+          "twee3-sc2",
+          "twee3-sugarcube-2"
+        ],
+        "configuration": "./defs/sugarcube-2/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "twee3",
+        "scopeName": "source.twee3",
+        "path": "./defs/grammar.json",
+        "embeddedLanguages": {
+          "source.json.twee3": "json",
+          "source.js.twee3": "javascript",
+          "source.css.twee3": "css",
+          "source.html.twee3": "html"
+        }
+      },
+      {
+        "language": "twee3-chapbook-1",
+        "scopeName": "source.chapbook-1.twee3",
+        "path": "./defs/chapbook-1/grammar.json",
+        "embeddedLanguages": {
+          "source.json.twee3": "json",
+          "source.js.twee3": "javascript",
+          "source.css.twee3": "css",
+          "source.html.twee3": "html"
+        }
+      },
+      {
+        "language": "twee3-harlowe-3",
+        "scopeName": "source.harlowe-3.twee3",
+        "path": "./defs/harlowe-3/grammar.json",
+        "embeddedLanguages": {
+          "source.json.twee3": "json",
+          "source.js.twee3": "javascript",
+          "source.css.twee3": "css",
+          "source.html.twee3": "html"
+        }
+      },
+      {
+        "language": "twee3-sugarcube-2",
+        "scopeName": "source.sugarcube-2.twee3",
+        "path": "./defs/sugarcube-2/grammar.json",
+        "embeddedLanguages": {
+          "source.json.twee3": "json",
+          "source.js.twee3": "javascript",
+          "source.css.twee3": "css",
+          "source.html.twee3": "html"
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "twee3",
+        "path": "./defs/snippets.json"
+      },
+      {
+        "language": "twee3-chapbook-1",
+        "path": "./defs/chapbook-1/snippets.json"
+      },
+      {
+        "language": "twee3-harlowe-3",
+        "path": "./defs/harlowe-3/snippets.json"
+      },
+      {
+        "language": "twee3-sugarcube-2",
+        "path": "./defs/sugarcube-2/snippets.json"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "scopes": {
+          "startToken": [
+            "punctuation"
+          ],
+          "special": [
+            "support.class"
+          ],
+          "passageName": [
+            "entity.name.function"
+          ],
+          "passageTags": [
+            "constant.language"
+          ],
+          "passageMeta": [
+            "punctuation"
+          ]
+        }
+      }
+    ],
+    "configuration": {
+      "title": "Twee 3 Language Tools",
+      "properties": {
+        "twee3LanguageTools.storyformat.current": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Identifier of the storyformat in use. (Managed by the `StoryData` special passage.)"
+        },
+        "twee3LanguageTools.storyformat.override": {
+          "type": "string",
+          "enum": [
+            "",
+            "chapbook-1",
+            "harlowe-3",
+            "sugarcube-2"
+          ],
+          "default": "",
+          "markdownDescription": "Identifier of the storyformat to override the format set by `StoryData`."
+        },
+        "twee3LanguageTools.directories.include": {
+          "type": "array",
+          "default": [],
+          "markdownDescription": "Directories in which to look for twee files. Use glob patterns *relative* to the root of the workspace folders (e.g. `src/unprocessed/twee`, `src/static`, `external`). (Searches the entire workspace by default.)"
+        },
+        "twee3LanguageTools.directories.exclude": {
+          "type": "array",
+          "default": [
+            "**/node_modules/**"
+          ],
+          "markdownDescription": "Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened."
+        },
+        "twee3LanguageTools.passage.list": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Collect passage names to display a list of quick 'jump' links?"
+        },
+        "twee3LanguageTools.passage.group": {
+          "type": "string",
+          "enum": [
+            "None",
+            "File",
+            "Folder",
+            "Tag"
+          ],
+          "markdownEnumDescriptions": [
+            "`None`: Passage are not grouped.",
+            "`File`: Passages are grouped by the files they originate from.",
+            "`Folder`: Passages are grouped by the folder they originate from.",
+            "`Tag`: Passages are grouped by tags."
+          ],
+          "default": "None",
+          "markdownDescription": "Group passages by:"
+        },
+        "twee3LanguageTools.twee-3.warning.spaceAfterStartToken": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Warn about missing space after the start token (`::`) in passage headers?"
+        },
+        "twee3LanguageTools.sugarcube-2.features.macroTagMatching": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Highlight opening and closing tags of container macros?"
+        },
+        "twee3LanguageTools.sugarcube-2.warning.undefinedMacro": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library?"
+        },
+        "twee3LanguageTools.sugarcube-2.warning.deprecatedMacro": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Warn about deprecated macros/widgets?"
+        },
+        "twee3LanguageTools.sugarcube-2.warning.endMacro": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Warn about the deprecated `<<end...>>` closing tag syntax?"
+        },
+        "twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable self-closing syntax for container macros? [Read here](https://github.com/cyrusfirheir/twee3-language-tools/blob/master/README.md#sugarcube-2-self-closing-macros) for more information."
+        },
+        "twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.warning.irrationalSelfClose": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Warn about self-closed instances of content focused macros (e.g. `<<script />>`)?"
+        },
+        "twee3LanguageTools.sugarcube-2.error.argumentParsing": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Provide errors about invalid argument syntax being passed into macros?"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "twee3-language-tools",
+          "title": "T3LT",
+          "icon": "res/tree-view.svg"
+        }
+      ]
+    },
+    "views": {
+      "twee3-language-tools": [
+        {
+          "id": "t3lt-passages-list",
+          "name": "Passages",
+          "when": "config.twee3LanguageTools.passage.list || resourceFilename =~ /.*?\\.tw(?:ee)?$/"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "t3lt-passages-list",
+        "contents": "Passage list turned off.\n[Enable](command:twee3LanguageTools.passage.list)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "t3lt.startUi",
+        "title": "Show Twee Story-map"
+      },
+      {
+        "command": "twee3LanguageTools.passage.jump",
+        "title": "Jump"
+      },
+      {
+        "command": "twee3LanguageTools.passage.list",
+        "title": "Toggle listing"
+      },
+      {
+        "command": "twee3LanguageTools.passage.group.none",
+        "title": "Group: None"
+      },
+      {
+        "command": "twee3LanguageTools.passage.group.file",
+        "title": "Group: File"
+      },
+      {
+        "command": "twee3LanguageTools.passage.group.folder",
+        "title": "Group: Folder"
+      },
+      {
+        "command": "twee3LanguageTools.passage.group.tag",
+        "title": "Group: Tag"
+      },
+      {
+        "command": "twee3LanguageTools.ifid.generate",
+        "title": "Generate IFID",
+        "category": "Twee3 Language Tools"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "twee3LanguageTools.passage.list",
+          "when": "view == t3lt-passages-list",
+          "group": "navigation"
+        },
+        {
+          "command": "twee3LanguageTools.passage.group.none",
+          "when": "view == t3lt-passages-list"
+        },
+        {
+          "command": "twee3LanguageTools.passage.group.file",
+          "when": "view == t3lt-passages-list"
+        },
+        {
+          "command": "twee3LanguageTools.passage.group.folder",
+          "when": "view == t3lt-passages-list"
+        },
+        {
+          "command": "twee3LanguageTools.passage.group.tag",
+          "when": "view == t3lt-passages-list"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "twee3LanguageTools.passage.jump",
+          "when": "view == t3lt-passages-list",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "displayName": "Twee 3 Language Tools",
+  "engines": {
+    "vscode": "^1.42.0"
+  },
+  "homepage": "https://github.com/cyrusfirheir/twee3-language-tools#readme",
+  "icon": "res/icon.png",
+  "keywords": [
+    "twee",
+    "twee3",
+    "twine"
+  ],
+  "license": "MIT",
+  "publisher": "cyrusfirheir",
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyrusfirheir/twee3-language-tools.git"
+  }
 }

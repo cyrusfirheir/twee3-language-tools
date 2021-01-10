@@ -12,6 +12,10 @@ import { PassageListProvider, Passage } from './tree-view';
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 
+import express from 'express';
+import path from 'path';
+import open from 'open';
+
 let ctx: vscode.ExtensionContext;
 
 const tokenTypes = new Map<string, number>();
@@ -111,6 +115,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		return files;
 	}
 
+	// This seems kind of like an init file
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
@@ -121,13 +126,28 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	fileGlob().forEach(file => prepare(file));
 
+	// Isnt this just going to turn a setting on if its off? why?
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
 			"enabled": true
 		}, true);
 	}
 
+	function startUI() {
+		const port = 42069;
+		const hostUrl = `http://localhost:${port}/`
+		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
+		const app = express();
+		app.use(express.static(storyMapPath));
+		const server = app.listen(port, () => console.log(`Twee Story-map running on ${hostUrl}`));
+		open(hostUrl);
+	}
+
+	// Add a command that can be used to start the twee-gui
+	const guiCommandSubscription = vscode.commands.registerCommand('t3lt.startUi', startUI);
+
 	ctx.subscriptions.push(
+		guiCommandSubscription, // does the order of subscriptions added matter?
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
@@ -157,6 +177,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 		,
+		// Note to self, what is this? Just see when a different file is opened/switched to? or when the window receives focus?
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
 				updateDiagnostics(editor.document, collection);
@@ -172,6 +193,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			updateDiagnostics(e.document, collection);
 		})
 		,
+		// What is this gonna do?
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
 				fileGlob().forEach(file => {
@@ -184,6 +206,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
 					fileGlob().forEach(file => {
+						// are we opening all the files? whats up?
 						vscode.workspace.openTextDocument(file).then(doc => parseText(ctx, doc, passageListProvider));
 					});
 				}
@@ -196,6 +219,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 		,
+		// So when we create a file, we open  it; but then changeStoryFormat? Wut?
 		vscode.workspace.onDidCreateFiles(e => {
 			e.files.forEach(file => vscode.workspace.openTextDocument(file).then((doc) => changeStoryFormat(doc)));
 		})
@@ -206,6 +230,16 @@ export async function activate(context: vscode.ExtensionContext) {
 				const passages = oldPassages.filter(el => el.origin !== file.path);
 				ctx.workspaceState.update("passages", passages).then(() => passageListProvider.refresh());
 			}
+
+			const removedFilePaths = e.files.map((file) => file.path);
+			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
+			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
+			ctx.workspaceState.update("passages", newPassages).then(() => passageListProvider.refresh());
+
+			for (let file of e.files) {
+				const passages = oldPassages.filter(el => el.origin !== file.path);
+			}
+
 		})
 		,
 		vscode.workspace.onDidRenameFiles(async e => {
@@ -216,14 +250,21 @@ export async function activate(context: vscode.ExtensionContext) {
 				passages.forEach(el => {
 					if (el.origin === file.oldUri.path) el.origin = file.newUri.path;
 				});
+				// Do passages get serialized when reading/updating? If not, you shouldn't need to update this right?
 				await ctx.workspaceState.update("passages", passages);
 				passageListProvider.refresh();
 			}
 		})
 		,
 		vscode.workspace.onDidSaveTextDocument(document => {
+			// What does this actually do?
 			tweeProjectConfig(document);
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) parseText(ctx, document, passageListProvider);
+			// okay so this is something to do with parsing the current file for
+			// like some UI element that deals with the on-screen passage?
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
+				// I think your functions should often use return value more often
+				parseText(ctx, document, passageListProvider);
+			}
 		})
 		,
 		vscode.window.registerTreeDataProvider(
@@ -236,6 +277,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (doc) updateDiagnostics(doc, collection);
 		})
 		,
+		// Neat
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {
 			vscode.window.showTextDocument(vscode.Uri.file(item.origin)).then(editor => {
 				const regexp = new RegExp(
@@ -249,6 +291,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			});
 		})
 		,
+		// is this just inverting the value?
 		vscode.commands.registerCommand("twee3LanguageTools.passage.list", () => {
 			const config = vscode.workspace.getConfiguration("twee3LanguageTools.passage");
 			config.update("list", !config.get("list"));
@@ -273,9 +316,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("twee3LanguageTools.ifid.generate", () => {
 			vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(uuidv4().toUpperCase()));
 		})
+		// Do you want the code I have for parsing macros? It actually works quite well
 		,
+		// should I look at what this does?
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.defineMacro", sc2ca.unrecognizedMacroFixCommand)
 		,
+		// what are these code action things? are they like "right click -> add to definiton file"?
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
 			providedCodeActionKinds: sc2ca.EndMacro.providedCodeActionKinds
 		})
