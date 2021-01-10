@@ -5,6 +5,7 @@
 		"target": "es2017",
 		"outDir": "out",
 		"rootDir": "src",
+		"esModuleInterop": true,
 		"lib": [
 			"es2017"
 		],
