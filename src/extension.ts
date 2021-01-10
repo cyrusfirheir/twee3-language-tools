@@ -201,11 +201,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidDeleteFiles(e => {
-			for (let file of e.files) {
-				const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
-				const passages = oldPassages.filter(el => el.origin !== file.path);
-				ctx.workspaceState.update("passages", passages).then(() => passageListProvider.refresh());
-			}
+			const removedFilePaths = e.files.map((file) => file.path);
+			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
+			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
+			ctx.workspaceState.update("passages", newPassages).then(() => passageListProvider.refresh());
 		})
 		,
 		vscode.workspace.onDidRenameFiles(async e => {
