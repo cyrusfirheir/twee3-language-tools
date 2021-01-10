@@ -13,8 +13,11 @@ import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 
 import express from 'express';
+import * as socketio from 'socket.io';
 import path from 'path';
 import open from 'open';
+
+const http = require('http');
 
 let ctx: vscode.ExtensionContext;
 
@@ -134,12 +137,32 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	function startUI() {
+		// Config
 		const port = 42069;
+		// Prep
 		const hostUrl = `http://localhost:${port}/`
 		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
+		// Http server
 		const app = express();
+		const httpServer = http.Server(app);
+		
 		app.use(express.static(storyMapPath));
-		const server = app.listen(port, () => console.log(`Twee Story-map running on ${hostUrl}`));
+		
+		app.listen(port, () => `Server bla ${hostUrl}`);
+		// open browser
+		const io = new socketio.Server(httpServer);
+		io.on('connection', (client) => {
+			console.log('client connected');
+			client.on('event', (data: any) => {
+				console.log('Received data', { data });
+			});
+			client.on('disconnect', () => {
+				console.log('client disconnected');
+				io.close();
+				httpServer.close();
+			})
+		});
+		io.listen(port);
 		open(hostUrl);
 	}
 
