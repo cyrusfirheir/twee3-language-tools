@@ -17,7 +17,7 @@ import * as socketio from 'socket.io';
 import path from 'path';
 import open from 'open';
 
-const http = require('http');
+import { Server } from "http";
 
 let ctx: vscode.ExtensionContext;
 
@@ -144,11 +144,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
 		// Http server
 		const app = express();
-		const httpServer = http.Server(app);
-		
 		app.use(express.static(storyMapPath));
-		
-		app.listen(port, () => `Server bla ${hostUrl}`);
+
+		const httpServer = new Server(app);
+		httpServer.listen(port, () => console.log(`Server bla ${hostUrl}`));
 		// open browser
 		const io = new socketio.Server(httpServer);
 		io.on('connection', (client) => {
