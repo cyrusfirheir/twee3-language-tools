@@ -1,19 +1,21 @@
 <template>
-  <div class="story-map">
+  <div class="story-map" @mousemove="onMousemove($event)" @mouseup="onMouseup($event)">
     <div
-      v-for="passage in passagesWithStyle"
-      :key="passage.name"
-      :style="passage.style"
+      v-for="item in items"
+      :key="item.passage.name"
+      :style="item.style"
+      @mousedown.stop="onPassageMousedown(item.passage, $event)"
+      @dblclick="openPassage(item.passage)"
       class="passage"
     >
-      {{ passage.name }}
+      {{ item.passage.name }}
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import socketio from 'socket.io-client';
+import { socket } from './socket';
 
 interface Vector {
   x: number;
@@ -28,7 +30,14 @@ interface Passage {
   tags: string[];
   position: Vector;
   size: Vector;
-  style?: { [key: string]: any };
+  originalPosition: Vector;
+  originalSize: Vector;
+  zIndex?: number;
+}
+
+interface PassageAndStyle {
+  passage: Passage;
+  style: { [key: string]: any; };
 }
 
 interface RawPassage {
@@ -41,6 +50,9 @@ interface RawPassage {
 interface ComponentData {
   connected: boolean;
   passages: Passage[];
+  draggedPassage: Passage | null;
+  lastDragPosition: Vector | null;
+  highestZIndex: number;
 }
 
 const parseRaw = (passageIn: RawPassage): Passage => {
@@ -48,14 +60,21 @@ const parseRaw = (passageIn: RawPassage): Passage => {
   const meta = JSON.parse(passageIn.meta || '{}');
   const positionArr = (meta.position || '0,0').split(',').map((str: string) => parseFloat(str));
   const sizeArr = (meta.size || '100,100').split(',').map((str: string) => parseFloat(str));
+  const position: Vector = {
+    x: Math.round(Math.max(0, positionArr[0])),
+    y: Math.round(Math.max(0, positionArr[1])),
+  };
+  const size: Vector = { x: sizeArr[0], y: sizeArr[1] };
   return {
     origin: passageIn.origin,
     filename: passageIn.origin.substring(lastIndex + 1),
     path: passageIn.origin.substring(0, lastIndex),
     name: passageIn.name,
     tags: passageIn.tags,
-    position: { x: Math.round(Math.max(0, positionArr[0])), y: Math.round(Math.max(0, positionArr[1])) },
-    size: { x: sizeArr[0], y: sizeArr[1] },
+    position: position,
+    size: size,
+    originalPosition: { ...position },
+    originalSize: { ...size },
   };
 };
 
@@ -64,28 +83,63 @@ export default defineComponent({
   data: (): ComponentData => ({
     connected: false,
     passages: [],
+    draggedPassage: null,
+    lastDragPosition: null,
+    highestZIndex: 0,
   }),
   computed: {
-    passagesWithStyle(): Passage[] {
+    items(): PassageAndStyle[] {
       return this.passages.map((passage) => ({
-        ...passage,
+        passage,
         style: {
           width: `${passage.size.x}px`,
           height: `${passage.size.y}px`,
-          top: `${passage.position.x}px`,
-          left: `${passage.position.y}px`,
+          left: `${passage.position.x}px`,
+          top: `${passage.position.y}px`,
+          ['z-index']: passage.zIndex || 0,
         },
       }));
     },
+    changedPassages(): Passage[] {
+      return this.passages.filter((passage) => {
+        if (passage.position.x !== passage.originalPosition.x) return true;
+        if (passage.position.y !== passage.originalPosition.y) return true;
+        if (passage.size.x !== passage.originalSize.x) return true;
+        if (passage.size.y !== passage.originalSize.y) return true;
+        return false;
+      });
+    },
+  },
+  methods: {
+    openPassage(passage: Passage) {
+      socket.emit('open-passage', { name: passage.name, origin: passage.origin });
+      console.log('passage was doubleclicked', passage);
+    },
+    onPassageMousedown(passage: Passage, event: MouseEvent) {
+      this.highestZIndex++;
+      passage.zIndex = this.highestZIndex;
+      this.draggedPassage = passage;
+      this.lastDragPosition = { x: event.clientX, y: event.clientY };
+      console.log(this.highestZIndex);
+    },
+    onMousemove(event: MouseEvent) {
+      if (this.draggedPassage && this.lastDragPosition) {
+        this.draggedPassage.position.x += event.clientX - this.lastDragPosition.x;
+        this.draggedPassage.position.y += event.clientY - this.lastDragPosition.y;
+        this.lastDragPosition = { x: event.clientX, y: event.clientY };
+      }
+    },
+    onMouseup(event: MouseEvent) {
+      if (this.draggedPassage) {
+        this.draggedPassage = null;
+        this.lastDragPosition = null;
+      }
+    }
   },
   created() {
-    const socket = socketio.io('http://localhost:42069');
+    // TODO: All this code needs to be wrapped and moved to some kind of util that is imported in this file
     socket.on('connect', () => {
-      this.connected = true;
       console.log('connected');
-    });
-    socket.on('data', (data: unknown) => {
-      console.log('Client received data', { data });
     });
     socket.on('passages', (passages: RawPassage[]) => {
       console.log('Client received passages', { passages });
@@ -93,7 +147,7 @@ export default defineComponent({
     });
     socket.on('disconnect', () => {
       console.log('socket disconnected');
-    })
+    });
   },
 });
 </script>
@@ -113,6 +167,7 @@ html, body {
 
 *, *::before, *::after {
   box-sizing: border-box;
+  user-select: none;
 }
 </style>
 

@@ -136,6 +136,19 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
+	function jumpToPassage(item: { name: string; origin: string }) {
+		vscode.window.showTextDocument(vscode.Uri.file(item.origin)).then(editor => {
+			const regexp = new RegExp(
+				"^::\\s*" +
+				item.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+				"\\s*(\\[|\\{|$)"
+			);
+			const lines = editor.document.getText().split(/\r?\n/);
+			const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
+			editor.revealRange(new vscode.Range(start, 0, start, 0), vscode.TextEditorRevealType.AtTop);
+		});
+	}
+
 	function startUI() {
 		// Config
 		const port = 42069;
@@ -164,6 +177,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			}));
 			console.log(`Sending ${passages.length} passages to client`);
 			client.emit('passages', passages);
+			// Listen for stuff
+			client.on('open-passage', (data: { name: string, origin: string }) => {
+				jumpToPassage(data);
+			});
 			// When they disconnect, we're done
 			client.on('disconnect', () => {
 				console.log('client disconnected');
@@ -310,16 +327,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		// Neat
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {
-			vscode.window.showTextDocument(vscode.Uri.file(item.origin)).then(editor => {
-				const regexp = new RegExp(
-					"^::\\s*" +
-					item.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-					"\\s*(\\[|\\{|$)"
-				);
-				const lines = editor.document.getText().split(/\r?\n/);
-				const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
-				editor.revealRange(new vscode.Range(start, 0, start, 0), vscode.TextEditorRevealType.AtTop);
-			});
+			jumpToPassage(item);
 		})
 		,
 		// is this just inverting the value?
