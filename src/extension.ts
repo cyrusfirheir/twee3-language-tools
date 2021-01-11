@@ -149,16 +149,25 @@ export async function activate(context: vscode.ExtensionContext) {
 		const httpServer = new Server(app);
 		httpServer.listen(port, () => console.log(`Server bla ${hostUrl}`));
 		// open browser
-		const io = new socketio.Server(httpServer);
-		io.on('connection', (client) => {
+		const io = new socketio.Server(httpServer, {
+			cors: { origin: '*' }, // This Cors stuff should probably only be on in dev mode
+		});
+		io.on('connection', (client: socketio.Socket) => {
+			// Good to know
 			console.log('client connected');
-			client.on('event', (data: any) => {
-				console.log('Received data', { data });
-			});
+			// Lets give them info
+			const passages = (ctx.workspaceState.get("passages", []) as Passage[]).map((passage) => ({
+				origin: passage.origin,
+				name: passage.name,
+				tags: passage.tags,
+				meta: passage.meta,
+			}));
+			console.log(`Sending ${passages.length} passages to client`);
+			client.emit('passages', passages);
+			// When they disconnect, we're done
 			client.on('disconnect', () => {
 				console.log('client disconnected');
-				io.close();
-				httpServer.close();
+				// io.close(); // I kinda think this is a good idea, but its annoying for dev mode
 			})
 		});
 		io.listen(port);
