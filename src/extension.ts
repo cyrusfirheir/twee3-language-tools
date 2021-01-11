@@ -181,6 +181,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			client.on('open-passage', (data: { name: string, origin: string }) => {
 				jumpToPassage(data);
 			});
+			type Vector = { x: number; y: number; };
+			type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; };
+			client.on('update-passages', (passages: UpdatePassage) => {
+				// TODO: Passages need to be updated, probably first grouped by file, though this is totally Cyrus' job imo
+				// OK Cyrus?
+			});
 			// When they disconnect, we're done
 			client.on('disconnect', () => {
 				console.log('client disconnected');

@@ -10,6 +10,9 @@
     >
       {{ item.passage.name }}
     </div>
+    <div class="save-changes" v-if="unsavedChanges">
+      <button type="button" @click="saveChanges()">Save changes</button>
+    </div>
   </div>
 </template>
 
@@ -109,6 +112,9 @@ export default defineComponent({
         return false;
       });
     },
+    unsavedChanges(): boolean {
+      return this.changedPassages.length > 0;
+    }
   },
   methods: {
     openPassage(passage: Passage) {
@@ -134,7 +140,20 @@ export default defineComponent({
         this.draggedPassage = null;
         this.lastDragPosition = null;
       }
-    }
+    },
+    saveChanges() {
+      socket.emit('update-passages', this.changedPassages.map((passage) => ({
+        name: passage.name,
+        origin: passage.origin,
+        position: passage.position,
+        size: passage.size,
+      })));
+      // This should probably be done differently
+      this.changedPassages.forEach((passage) => {
+        passage.originalPosition = { ...passage.position };
+        passage.originalSize = { ...passage.size };
+      });
+    },
   },
   created() {
     // TODO: All this code needs to be wrapped and moved to some kind of util that is imported in this file
@@ -172,6 +191,32 @@ html, body {
 </style>
 
 <style lang="scss" scoped>
+.story-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.save-changes {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  button {
+    padding: 5px 10px;
+    font-size: 24px;
+    background-color: #234;
+    color: #FFF;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 0;
+
+    &:hover {
+      background-color: #468;
+    }
+  }
+}
+
 .passage {
   position: absolute;
   overflow: hidden;
