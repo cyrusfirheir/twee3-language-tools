@@ -86,7 +86,7 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 };
 
 const documentSelector: vscode.DocumentSelector = {
-	pattern: "**/*.tw*",
+	pattern: "**/*.tw?(ee)",
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -112,7 +112,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		let files: string[] = [];
 		vscode.workspace.workspaceFolders?.forEach(el => {
 			include.forEach(elem => {
-				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.tw*", { ignore: exclude })];
+				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.tw?(ee)", { ignore: exclude })];
 			})
 		});
 		return files;
@@ -123,7 +123,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
 			updateDiagnostics(doc, collection);
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) await parseText(ctx, doc, passageListProvider);
+			await parseText(ctx, doc);
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		})
 	}
 

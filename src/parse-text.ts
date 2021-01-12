@@ -10,13 +10,7 @@ interface IParsedToken {
 }
 
 export const parseText = async function (context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
-	let passages: Passage[] = [];
-	let list = false;
-	if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
-		list = true;
-		const old: Passage[] = context.workspaceState.get("passages", []);
-		passages = old.filter(el => el.origin !== document.uri.path);
-	}
+	let passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin !== document.uri.path);
 	const r: IParsedToken[] = [];
 	const lines = document.getText().split(/\r?\n/);
 	lines.forEach((line, i) => {
@@ -94,35 +88,33 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 					});
 				}
 
-				if (list) {
-					let passage = new Passage(document.uri.path, passageName, vscode.TreeItemCollapsibleState.None);
+				let passage = new Passage(document.uri.path, passageName, vscode.TreeItemCollapsibleState.None);
 
-					passage.tags = passageTags?.split(/\s/);
-					passage.description = passage.tags?.join(", ") || "";
+				passage.tags = passageTags?.split(/\s/);
+				passage.description = passage.tags?.join(", ") || "";
 
-					passage.meta = passageMeta || "";
+				passage.meta = passageMeta || "";
 
-					let icon = "";
+				let icon = "";
 
-					if (specialName) switch (passageName) {
-						case "Start": icon = "rocket"; break;
-						case "StoryTitle": icon = "mention"; break;
-						case "StoryData": icon = "json"; break;
-					}
-					else if (specialTag) switch (passage.tags?.[0]) {
-						case "script": icon = "code"; break;
-						case "stylesheet": icon = "paintcan"; break;
-					}
-
-					passage.iconPath = icon ? new vscode.ThemeIcon(icon) : "";
-
-					passages.push(passage);
+				if (specialName) switch (passageName) {
+					case "Start": icon = "rocket"; break;
+					case "StoryTitle": icon = "mention"; break;
+					case "StoryData": icon = "json"; break;
 				}
+				else if (specialTag) switch (passage.tags?.[0]) {
+					case "script": icon = "code"; break;
+					case "stylesheet": icon = "paintcan"; break;
+				}
+
+				passage.iconPath = icon ? new vscode.ThemeIcon(icon) : "";
+
+				passages.push(passage);
 			}
 		}
 	});
 
-	if (list) await context.workspaceState.update("passages", passages);
+	await context.workspaceState.update("passages", passages);
 	provider?.refresh();
 
 	return Promise.resolve(r);
