@@ -13,3 +13,4 @@ defs/_language_template/**
 *.bat
 tests/**
 src/**
+story-map/**
