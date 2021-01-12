@@ -17,7 +17,7 @@ import * as socketio from 'socket.io';
 import path from 'path';
 import open from 'open';
 
-import { Server } from "http";
+import { Server } from 'http';
 
 let ctx: vscode.ExtensionContext;
 
@@ -86,7 +86,7 @@ const changeStoryFormat = async function (document: vscode.TextDocument) {
 };
 
 const documentSelector: vscode.DocumentSelector = {
-	pattern: "**/*.tw?(ee)",
+	pattern: "**/*.{tw,twee}",
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -112,7 +112,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		let files: string[] = [];
 		vscode.workspace.workspaceFolders?.forEach(el => {
 			include.forEach(elem => {
-				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.tw?(ee)", { ignore: exclude })];
+				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude })];
 			})
 		});
 		return files;
@@ -137,11 +137,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	function jumpToPassage(item: { name: string; origin: string }) {
-		vscode.window.showTextDocument(vscode.Uri.file(item.origin)).then(editor => {
+	function jumpToPassage(passage: { name: string; origin: string }) {
+		vscode.window.showTextDocument(vscode.Uri.file(passage.origin)).then(editor => {
 			const regexp = new RegExp(
 				"^::\\s*" +
-				item.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+				passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
 				"\\s*(\\[|\\{|$)"
 			);
 			const lines = editor.document.getText().split(/\r?\n/);
@@ -184,9 +184,21 @@ export async function activate(context: vscode.ExtensionContext) {
 			});
 			type Vector = { x: number; y: number; };
 			type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; };
-			client.on('update-passages', (passages: UpdatePassage) => {
-				// TODO: Passages need to be updated, probably first grouped by file, though this is totally Cyrus' job imo
-				// OK Cyrus?
+			client.on('update-passages', async (passages: UpdatePassage[]) => {
+				for (let passage of passages) {
+					const doc = await vscode.workspace.openTextDocument(passage.origin);
+					const regexp = new RegExp(
+						"(^::\\s*" +
+						passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+						"\\s*?(?:\\[.*?\\])?\\s*?)(?:\\{.*?\\}\\s*?)?$"
+					, "m");
+
+					let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
+					if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
+
+					const edited = doc.getText().replace(regexp, "$1 " + JSON.stringify(pMeta));
+					await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
+				}
 			});
 			// When they disconnect, we're done
 			client.on('disconnect', () => {
@@ -199,7 +211,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	// Add a command that can be used to start the twee-gui
-	const guiCommandSubscription = vscode.commands.registerCommand('t3lt.startUi', startUI);
+	const guiCommandSubscription = vscode.commands.registerCommand("twee3LanguageTools.UI.show", startUI);
 
 	ctx.subscriptions.push(
 		guiCommandSubscription, // does the order of subscriptions added matter?
