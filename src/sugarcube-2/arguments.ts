@@ -198,9 +198,10 @@ export enum ArgType {
 }
 export type Arg = LinkArgument | ImageArgument | VariableArgument | SettingsSetupAccessArgument | LoneArg<ArgType.Null> | LoneArg<ArgType.Undefined> | LoneArg<ArgType.True> | LoneArg<ArgType.False> | LoneArg<ArgType.NaN> | NumberArgument | BarewordArgument | LoneArg<ArgType.EmptyExpression> | ExpressionArgument | StringArgument;
 // For arguments that are simply their variant.
-type LoneArg<T> = { type: T };
-interface LinkArgument {
+type LoneArg<T> = { type: T, range: vscode.Range, };
+export interface LinkArgument {
 	type: ArgType.Link,
+	range: vscode.Range,
 	// The passage (or an expression to calculate it)
 	passage?: Evaluatable<string, string>,
 	syntax: LinkSyntax,
@@ -212,7 +213,7 @@ interface LinkArgument {
 	// because it requires evaluating the passage
 	// external: boolean,
 }
-enum LinkSyntax {
+export enum LinkSyntax {
 	// Known as count: 1 in SugarCube
 	// [[alpha]]
 	Wiki,
@@ -220,8 +221,9 @@ enum LinkSyntax {
 	// [[alpha|beta]]
 	Pretty,
 }
-interface ImageArgument {
+export interface ImageArgument {
 	type: ArgType.Image,
+	range: vscode.Range,
 	image: Evaluatable<string, string>,
 	passage?: Evaluatable<string, string>,
 	align?: 'left' | 'right',
@@ -231,30 +233,36 @@ interface ImageArgument {
 	// See: linkArgument for why this does not currently exist.
 	// external: boolean,
 }
-interface VariableArgument {
+export interface VariableArgument {
 	type: ArgType.Variable,
 	// Just the name, so the argument.
 	variable: string,
+	range: vscode.Range,
 }
-interface SettingsSetupAccessArgument {
+export interface SettingsSetupAccessArgument {
 	type: ArgType.SettingsSetupAccess,
 	access: string,
+	range: vscode.Range,
 }
-interface NumberArgument {
+export interface NumberArgument {
 	type: ArgType.Number,
 	value: number,
+	range: vscode.Range,
 }
-interface BarewordArgument {
+export interface BarewordArgument {
 	type: ArgType.Bareword,
 	value: string,
+	range: vscode.Range,
 }
-interface ExpressionArgument {
+export interface ExpressionArgument {
 	type: ArgType.Expression,
 	expression: string,
+	range: vscode.Range,
 }
-interface StringArgument {
+export interface StringArgument {
 	type: ArgType.String,
 	text: string,
+	range: vscode.Range,
 }
 /**
  * Parses the arguments passed into an ParsedArguments structure.
@@ -279,15 +287,19 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 	let lexRange = new vscode.Range(afterMacroName, beforeMacroClose);
 	let source = document.getText(lexRange);
 
-	function makeError(kind: ArgumentParseErrorKind, item: LexerItem<MacroParse.Item>, message: string): ArgumentParseError {
+	function makeRange(item: LexerItem<MacroParse.Item>): vscode.Range {
 		// Note: Since we only ran the parser on a portion of the macro, we have to offset it
 		// in order to get the valid range.
 		let start = lexRange.start.translate(0, item.start);
 		let end = lexRange.start.translate(0, item.position);
+		return new vscode.Range(start, end);
+	}
+
+	function makeError(kind: ArgumentParseErrorKind, item: LexerItem<MacroParse.Item>, message: string): ArgumentParseError {
 		return {
 			kind,
 			message,
-			range: new vscode.Range(start, end),
+			range: makeRange(item),
 		};
 	}
 
@@ -304,6 +316,7 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 	loop: for (let i = 0; i < items.length; i++) {
 		let item = items[i];
 		let arg = item.text;
+		let range = makeRange(item);
 
 		switch (item.type) {
 			case MacroParse.Item.Error:
@@ -317,6 +330,7 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 					args.arguments.push({
 						type: ArgType.Variable,
 						variable: arg,
+						range,
 					});
 				} else if (settingsSetupAccessRegexp.test(arg)) {
 					// SugarCube would evaluate this, throwing an error if it was invalid.
@@ -324,26 +338,32 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 					args.arguments.push({
 						type: ArgType.SettingsSetupAccess,
 						access: arg,
+						range,
 					});
 				} else if (arg === 'null') {
 					args.arguments.push({
-						type: ArgType.Null
+						type: ArgType.Null,
+						range,
 					});
 				} else if (arg === 'undefined') {
 					args.arguments.push({
 						type: ArgType.Undefined,
+						range,
 					});
 				} else if (arg === 'true') {
 					args.arguments.push({
 						type: ArgType.True,
+						range,
 					});
 				} else if (arg === 'false') {
 					args.arguments.push({
 						type: ArgType.False,
+						range,
 					});
 				} else if (arg === 'NaN') {
 					args.arguments.push({
 						type: ArgType.NaN,
+						range,
 					});
 				} else {
 					const argAsNum = Number(arg);
@@ -352,11 +372,13 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 						args.arguments.push({
 							type: ArgType.Number,
 							value: argAsNum,
+							range,
 						});
 					} else {
 						args.arguments.push({
 							type: ArgType.Bareword,
 							value: arg,
+							range,
 						});
 					}
 				}
@@ -368,12 +390,14 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 				if (arg === '') {
 					args.arguments.push({
 						type: ArgType.EmptyExpression,
+						range,
 					});
 				} else {
 					// Normally the code would be evaluated here.
 					args.arguments.push({
 						type: ArgType.Expression,
 						expression: arg,
+						range,
 					});
 				}
 				break;
@@ -385,6 +409,7 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 				args.arguments.push({
 					type: ArgType.String,
 					text: arg,
+					range,
 				});
 				break;
 			case MacroParse.Item.SquareBracket:
@@ -408,6 +433,7 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 						let arg: LinkArgument = {
 							type: ArgType.Link,
 							syntax: LinkSyntax.Wiki,
+							range,
 						};
 						if (markup.hasOwnProperty('text')) {
 							arg.text = markup.text;
@@ -425,6 +451,7 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 							type: ArgType.Image,
 							// TODO: should we assume that source is a string?
 							image: evalPassageId(markup.source as string),
+							range,
 						};
 
 						if (markup.hasOwnProperty('align')) {
