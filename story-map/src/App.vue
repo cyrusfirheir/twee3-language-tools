@@ -146,7 +146,8 @@ export default defineComponent({
         name: passage.name,
         origin: passage.origin,
         position: passage.position,
-        size: passage.size,
+		size: passage.size,
+		tags: passage.tags
       })));
       // This should probably be done differently
       this.changedPassages.forEach((passage) => {

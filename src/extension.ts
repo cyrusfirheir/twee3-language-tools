@@ -18,6 +18,7 @@ import path from 'path';
 import open from 'open';
 
 import { Server } from 'http';
+import { emitKeypressEvents } from 'readline';
 
 let ctx: vscode.ExtensionContext;
 
@@ -183,20 +184,28 @@ export async function activate(context: vscode.ExtensionContext) {
 				jumpToPassage(data);
 			});
 			type Vector = { x: number; y: number; };
-			type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; };
+			type UpdatePassage = { name: string; tags: string[]; origin: string; position: Vector; size: Vector; };
 			client.on('update-passages', async (passages: UpdatePassage[]) => {
-				for (let passage of passages) {
-					const doc = await vscode.workspace.openTextDocument(passage.origin);
-					const regexp = new RegExp(
-						"(^::\\s*" +
-						passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-						"\\s*?(?:\\[.*?\\])?\\s*?)(?:\\{.*?\\}\\s*?)?$"
-					, "m");
+				const files = [... new Set(passages.map(passage => passage.origin))];
+				for (const file of files) {
+					const doc = await vscode.workspace.openTextDocument(file);
+					await doc.save();
+					let edited = doc.getText();
 
-					let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
-					if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
+					const filePassages = passages.filter(el => el.origin === file);
+					for (const passage of filePassages) {
+						const regexp = new RegExp(
+							"^::\\s*" +
+							passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+							".*?$"
+						, "m");
 
-					const edited = doc.getText().replace(regexp, "$1 " + JSON.stringify(pMeta));
+						let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
+						if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
+
+						edited = edited.replace(regexp, `:: ${passage.name} ` + (passage.tags?.length ? `[${passage.tags.join(" ")}] ` : "") + JSON.stringify(pMeta));
+					}
+
 					await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
 				}
 			});
