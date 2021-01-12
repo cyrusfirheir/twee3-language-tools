@@ -150,6 +150,61 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	}
 
+	async function getPassageContent(passage: Passage): Promise<string> {
+		const doc = await vscode.workspace.openTextDocument(passage.origin);
+		const fileContent = doc.getText();
+		const searchPassageRegexp = new RegExp("^::\\s*" + passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") + ".*?$", "m");
+		const anyPassageRegexp = new RegExp("^::\s*(.*)?(\[.*?\]\s*?)?(\{.*\}\s*)?$", "m");
+		const passageStartMatch = fileContent.match(searchPassageRegexp);
+		if (!passageStartMatch || !('index' in passageStartMatch)) throw new Error('Cannot find passage title in origin-file');
+		const contentStart = (passageStartMatch.index as number) + passageStartMatch[0].length;
+		const restOfFile = fileContent.substr(contentStart);
+		const nextPassageMatch = restOfFile.match(anyPassageRegexp);
+		return restOfFile.substr(0, nextPassageMatch?.index);
+	}
+
+	async function getLinkedPassageNames(passage: Passage): Promise<string[]> {
+		const passageContent = await getPassageContent(passage);
+        const parts = passageContent.split('[[').slice(1);
+        return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => ((part.split(']').shift() as string).split('|').pop() as string).trim());
+	};
+
+	async function sendPassagesToClient(client: socketio.Socket) {
+		const rawPassages = await (ctx.workspaceState.get("passages", []) as Passage[]);
+		const passagePromises = rawPassages.map(async (passage) => {
+			const linksTo = await getLinkedPassageNames(passage);
+			return {
+				origin: passage.origin,
+				name: passage.name,
+				tags: passage.tags,
+				meta: passage.meta,
+				linksTo,
+			};
+		});
+		const passages = await Promise.all(passagePromises);
+		console.log(`Sending ${passages.length} passages to client`);
+		client.emit('passages', passages);
+	}
+
+	type Vector = { x: number; y: number; };
+	type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; };
+	async function updatePassages(passages: UpdatePassage[]) {
+		for await (let passage of passages) {
+			const doc = await vscode.workspace.openTextDocument(passage.origin);
+			const regexp = new RegExp(
+				"(^::\\s*" +
+				passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+				"\\s*?(?:\\[.*?\\])?\\s*?)(?:\\{.*?\\}\\s*?)?$"
+			, "m");
+
+			let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
+			if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
+
+			const edited = doc.getText().replace(regexp, "$1 " + JSON.stringify(pMeta));
+			await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
+		}
+	}
+
 	function startUI() {
 		// Config
 		const port = 42069;
@@ -170,36 +225,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			// Good to know
 			console.log('client connected');
 			// Lets give them info
-			const passages = (ctx.workspaceState.get("passages", []) as Passage[]).map((passage) => ({
-				origin: passage.origin,
-				name: passage.name,
-				tags: passage.tags,
-				meta: passage.meta,
-			}));
-			console.log(`Sending ${passages.length} passages to client`);
-			client.emit('passages', passages);
-			// Listen for stuff
-			client.on('open-passage', (data: { name: string, origin: string }) => {
-				jumpToPassage(data);
-			});
-			type Vector = { x: number; y: number; };
-			type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; };
-			client.on('update-passages', async (passages: UpdatePassage[]) => {
-				for (let passage of passages) {
-					const doc = await vscode.workspace.openTextDocument(passage.origin);
-					const regexp = new RegExp(
-						"(^::\\s*" +
-						passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-						"\\s*?(?:\\[.*?\\])?\\s*?)(?:\\{.*?\\}\\s*?)?$"
-					, "m");
+			sendPassagesToClient(client);
 
-					let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
-					if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
-
-					const edited = doc.getText().replace(regexp, "$1 " + JSON.stringify(pMeta));
-					await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
-				}
-			});
+			// Listen for client commands
+			client.on('open-passage', jumpToPassage);
+			client.on('update-passages', updatePassages);
 			// When they disconnect, we're done
 			client.on('disconnect', () => {
 				console.log('client disconnected');
