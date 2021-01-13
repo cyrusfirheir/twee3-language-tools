@@ -246,6 +246,11 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Provide errors about invalid argument syntax being passed into macros?"
+				},
+				"twee3LanguageTools.sugarcube-2.error.parameterValidation": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Depends upon `argumentParsing`."
 				}
 			}
 		},

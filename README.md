@@ -140,6 +140,8 @@ Manual settings:
 - `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax? (`true` by default.)  
 ⠀
 - `twee3LanguageTools.sugarcube-2.error.argumentParsing`: Provide errors about invalid argument syntax being passed into macros? (`true` by default.)  
+
+- `twee3LanguageTools.sugarcube-2.error.parameterValidation`: Provide errors about invalid argument types being passed into macros? (`true` by default.)  
 ⠀
 - `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)  
 ⠀
