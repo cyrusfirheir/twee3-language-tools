@@ -406,6 +406,8 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 				// characters.
 				// TODO: technically we could handle escaped characters (if that is all it does,
 				// but I am uncertain about that) manually.
+				// Remove quotation marks from string.
+				arg = arg.slice(1, -1);
 				args.arguments.push({
 					type: ArgType.String,
 					text: arg,
