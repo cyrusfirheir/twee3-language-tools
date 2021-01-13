@@ -4,10 +4,11 @@ import { Arg, parseArguments, ParsedArguments } from './arguments';
 import { ArgumentError, ArgumentWarning, Parameters, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 
+export type MacroName = string;
 export interface macro {
 	id: number;
 	pair: number;
-	name: string;
+	name: MacroName;
 	open: boolean;
 	selfClosed: boolean;
 	endVariant: boolean;
@@ -15,7 +16,7 @@ export interface macro {
 }
 
 export interface macroDef {
-	name?: string;
+	name?: MacroName;
 	description?: string,
 	parameters?: Parameters,
 	container?: boolean;
