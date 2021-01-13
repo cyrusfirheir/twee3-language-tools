@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { parseArguments } from './arguments';
+import { Arg, parseArguments, ParsedArguments } from './arguments';
+import { ArgumentError, ArgumentWarning, Parameters, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 
 export interface macro {
@@ -16,6 +17,7 @@ export interface macro {
 export interface macroDef {
 	name?: string;
 	description?: string,
+	parameters?: Parameters,
 	container?: boolean;
 	selfClose?: boolean;
 	children?: string[];
@@ -71,7 +73,17 @@ export const macroList = async function (): Promise<Record<string, macroDef>> {
  * Update the cache with by parsing the files.
  */
 const updateMacroCache = async function () {
-	macroCache = await parseMacroList();
+	let list = await parseMacroList();
+	// Before we cache it, we parse the parameters into a more useful format.
+	let errors = parseMacroParameters(list);
+	// We can continue despite errors from parsing the parameters, but we report them.
+	if (errors.length > 0) {
+		// Note: Since this is called early on, these messages might not be displayed.
+		let errorMessages: string = errors.map(err => err.message).join(", \n");
+		vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
+	}
+
+	macroCache = list;
 }
 
 /**
@@ -272,7 +284,7 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 			}
 
 			if (el.open && !cur.skipArgs && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("argumentParsing")) {
-				let parsedArguments = parseArguments(document, el, cur);
+				let parsedArguments: ParsedArguments = parseArguments(document, el, cur);
 				// Add any errors that we've found just from parsing to the diagnostics.
 				for (let i = 0; i < parsedArguments.errors.length; i++) {
 					let error = parsedArguments.errors[i];
@@ -283,6 +295,109 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 						source: 'sc2-ex',
 						code: 107,
 					});
+				}
+
+				// Perform parameter validation.
+				// Requires a setting to be enabled and it to be a parsed instance of parameters.
+				// As well, we currently don't try checking if there was errors in parsing the 
+				// arguments.
+				if (parsedArguments.errors.length === 0 && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && cur.parameters instanceof Parameters) {
+					const parameters: Parameters = cur.parameters;
+					const highestVariant = parameters.validate(parsedArguments);
+
+					if (highestVariant.variantKey === null) {
+						if (parameters.isEmpty()) {
+							// There are no parameters!
+							if (parsedArguments.arguments.length > 0) {
+								// Construct a range covering all of the arguments
+								let range = new vscode.Range(
+									parsedArguments.arguments[0].range.start,
+									parsedArguments.arguments[parsedArguments.arguments.length - 1].range.end
+								);
+								d.push({
+									severity: vscode.DiagnosticSeverity.Error,
+									range,
+									message: `Expected no arguments, got ${parsedArguments.arguments.length} argument(s).`,
+									source: `sc2-ex`,
+									code: 108,
+								});
+							}
+						} else {
+							// TODO: What should we do in this situation where we failed to find a
+							// variant but the parameters weren't empty? This might be an error due
+							// to not matching any parameters and managing to not gain any rank, but
+							// it starts at 0, so if there is a variant that shouldn't be possible.
+							// but it might occur if we ever allow negative rank, so this could be a
+							// 'failed to find variant that fit' error.
+						}
+					} else {
+						// The end of the macro.
+						const endRange = new vscode.Range(el.range.end.translate(0, -('<<'.length)), el.range.end);
+
+						// Display any errors.
+						for (let i = 0; i < highestVariant.info.errors.length; i++) {
+							const error: ArgumentError = highestVariant.info.errors[i];
+							const arg: Arg | undefined = parsedArguments.arguments[error.index];
+							let range: vscode.Range;
+							if (arg === undefined) {
+								// Since if the arg is undefined it is probably about missing
+								// argument errors
+								range = endRange
+							} else {
+								range = arg.range;
+							}
+
+							d.push({
+								severity: vscode.DiagnosticSeverity.Error,
+								range,
+								message: error.error.message,
+								source: `sc2-ex`,
+								code: 109,
+							});
+						}
+
+						// Display any warnings.
+						for (let i = 0; i < highestVariant.info.warnings.length; i++) {
+							const warning: ArgumentWarning = highestVariant.info.warnings[i];
+							const arg: Arg | undefined = parsedArguments.arguments[warning.index];
+							let range: vscode.Range;
+							if (arg === undefined) {
+								range = endRange;
+							} else {
+								range = arg.range;
+							}
+
+							d.push({
+								severity: vscode.DiagnosticSeverity.Warning,
+								range,
+								message: warning.warning.message,
+								source: `sc2-ex`,
+								code: 110,
+							});
+						}
+
+						// Check if there is too many parameters
+						// argIndex is the *current* index it got to.
+						// So, it would be equivalent to length if it got to exactly the arguments
+						// given.
+						// We only do this if there were no errors though, as we may have
+						// gotten an incorrect variant and we don't want to confuse the user more
+						if (highestVariant.info.errors.length === 0 && parsedArguments.arguments.length > highestVariant.info.argIndex) {
+							// Compute the range of extra arguments
+							const exceedingArgs = parsedArguments.arguments
+								.slice(highestVariant.info.argIndex);
+							const start = exceedingArgs[0].range.start;
+							const end = exceedingArgs[exceedingArgs.length - 1].range.end;
+							const range = new vscode.Range(start, end);
+							d.push({
+								severity: vscode.DiagnosticSeverity.Error,
+								range,
+								message: `Too many arguments for variant '${highestVariant.variantKey}'`,
+								source: `sc2-ex`,
+								code: 111,
+							})
+						}
+					}
 				}
 			}
 		} else if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("undefinedMacro")) {
