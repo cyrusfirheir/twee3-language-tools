@@ -6,7 +6,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 	constructor(private context: vscode.ExtensionContext) { }
 
-	refresh(): void {
+	refresh() {
 		this._onDidChangeTreeData.fire();
 	}
 
