@@ -172,13 +172,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	async function sendPassagesToClient(client: socketio.Socket) {
 		const rawPassages = await (ctx.workspaceState.get("passages", []) as Passage[]);
 		const passagePromises = rawPassages.map(async (passage) => {
-			const linksTo = await getLinkedPassageNames(passage);
+			const linksToNames = await getLinkedPassageNames(passage);
 			return {
 				origin: passage.origin,
 				name: passage.name,
 				tags: passage.tags,
 				meta: passage.meta,
-				linksTo,
+				linksToNames,
 			};
 		});
 		const passages = await Promise.all(passagePromises);
