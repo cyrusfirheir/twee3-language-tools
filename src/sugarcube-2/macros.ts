@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { Arg, parseArguments, ParsedArguments } from './arguments';
+import { Arg, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
 import { ArgumentError, ArgumentWarning, Parameters, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 
@@ -285,7 +285,9 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 			}
 
 			if (el.open && !cur.skipArgs && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("argumentParsing")) {
-				let parsedArguments: ParsedArguments = parseArguments(document, el, cur);
+				const lexRange: vscode.Range = makeMacroArgumentsRange(el);
+				const args: UnparsedMacroArguments = document.getText(lexRange);
+				let parsedArguments: ParsedArguments = parseArguments(args, lexRange, el, cur);
 				// Add any errors that we've found just from parsing to the diagnostics.
 				for (let i = 0; i < parsedArguments.errors.length; i++) {
 					let error = parsedArguments.errors[i];

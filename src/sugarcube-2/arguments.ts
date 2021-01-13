@@ -296,10 +296,7 @@ export type UnparsedMacroArguments = string;
  * @param text The text of the file
  * @throws {Error}
  */
-export function parseArguments(document: vscode.TextDocument, macro: macro, macroDefinition: macroDef): ParsedArguments {
-	const lexRange = makeMacroArgumentsRange(macro);
-	let source: UnparsedMacroArguments = document.getText(lexRange);
-
+export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.Range, macro: macro, macroDefinition: macroDef): ParsedArguments {
 	function makeRange(item: LexerItem<MacroParse.Item>): vscode.Range {
 		// Note: Since we only ran the parser on a portion of the macro, we have to offset it
 		// in order to get the valid range.
