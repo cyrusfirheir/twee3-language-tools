@@ -314,6 +314,7 @@ line {
 
 .save-changes {
   position: absolute;
+  z-index: 200;
   top: 10px;
   right: 10px;
 
