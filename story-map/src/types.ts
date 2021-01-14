@@ -45,3 +45,10 @@ export interface Line {
     y2: number;
     key: string;
 }
+
+export interface PassageLink {
+    from: Passage;
+    to: Passage;
+    twoWay: boolean;
+    key: string;
+}

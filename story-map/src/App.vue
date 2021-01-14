@@ -9,17 +9,20 @@
     <ToolBar class="toolbar"></ToolBar>
     <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }">
       <svg :style="svgStyle">
-        <line
-          v-for="line of lines"
-          :key="line.key"
-          :x1="line.x1"
-          :y1="line.y1"
-          :x2="line.x2"
-          :y2="line.y2"
-          @mouseenter="onHoverableMouseEnter(line)"
-          @mouseleave="onHoverableMouseLeave(line)"
-          :class="{ highlight: highlightElements.includes(line) }"
-        />
+        <template v-if="!draggedPassage">
+          <!-- I would prefer if I could keep drawing lines while dragging -->
+          <!-- But that just slows things down to a crawl, probably need canvas to fix -->
+          <PassageLinkLink
+            v-for="linkedPassage in linkedPassages"
+            :key="linkedPassage.key"
+            :from="linkedPassage.from"
+            :to="linkedPassage.to"
+            :twoWay="linkedPassage.twoWay"
+            :highlight="highlightElements.includes(linkedPassage)"
+            @mouseenter="onHoverableMouseEnter(linkedPassage)"
+            @mouseleave="onHoverableMouseLeave(linkedPassage)"
+          />
+        </template>
       </svg>
       <div
         v-for="item in items"
@@ -45,11 +48,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { socket } from './socket';
-import { PassageAndStyle, Vector, Passage, RawPassage, Line, LinkedPassage } from './types';
+import { PassageAndStyle, Vector, Passage, RawPassage, LinkedPassage, PassageLink } from './types';
 import { linkPassage, parseRaw } from './util/passage-tools';
 import { cropLine } from './util/line-tools';
 
 import ToolBar from './components/ToolBar.vue';
+import PassageLinkLink from './components/PassageLinkLine.vue';
 
 interface ComponentData {
     connected: boolean;
@@ -59,12 +63,14 @@ interface ComponentData {
     highestZIndex: number;
     translate: Vector;
     zoom: number;
-    hoveredElement: Line | LinkedPassage | null;
+    hoveredElement: PassageLink | LinkedPassage | null;
+    linkedPassages: PassageLink[];
+    highlightElements: Array<PassageLink | LinkedPassage>;
 }
 
 export default defineComponent({
   name: 'App',
-  components: { ToolBar },
+  components: { ToolBar, PassageLinkLink },
   data: (): ComponentData => ({
     connected: false,
     passages: [],
@@ -74,6 +80,8 @@ export default defineComponent({
     translate: { x: 0, y: 0 },
     zoom: 1,
     hoveredElement: null,
+    linkedPassages: [],
+    highlightElements: [],
   }),
   computed: {
     items(): PassageAndStyle[] {
@@ -100,60 +108,6 @@ export default defineComponent({
     unsavedChanges(): boolean {
       return this.changedPassages.length > 0;
     },
-    lines(): Line[] {
-      const isDraggingPassage = this.draggedPassage !== null;
-      const passages: LinkedPassage[] = this.passages;
-      if (isDraggingPassage) return [];
-      
-      const lines: Line[] = [];
-      for (const passage of passages) {
-        for (const linkedPassage of passage.linksTo) {
-          // Check if this exact line already exists, it shouldn't but... Check anyway
-          if (lines.some((line) => line.fromPassage === passage && line.toPassage === linkedPassage)) continue;
-          // Check if this line already exists in  the opposite direction
-          let existingLine = lines.find((line) => line.fromPassage === linkedPassage && line.toPassage === passage);
-          if (existingLine) {
-            // A line between these passages already exists in the opposite direction
-            // make that line bi-directional
-            existingLine.twoWay = true;
-            continue;
-          }
-          // No line between these passages exists, create it
-          const line: Line = {
-            x1: passage.position.x + (passage.size.x / 2),
-            y1: passage.position.y + (passage.size.y / 2),
-            x2: linkedPassage.position.x + (linkedPassage.size.x / 2),
-            y2: linkedPassage.position.y + (linkedPassage.size.y / 2),
-            key: `line-${passage.name}-${linkedPassage.name}`,
-            fromPassage: passage,
-            toPassage: linkedPassage,
-          };
-          // Okay so right now the line goes from center to center, lets move the endpoints of the arrows to the edges
-          cropLine(line, passage, linkedPassage);
-          lines.push(line);
-        }
-      }
-      return lines;
-    },
-    highlightElements(): Array<Line | LinkedPassage> {
-      const highlightElements: Array<Line | LinkedPassage> = [];
-      if (this.hoveredElement) {
-        highlightElements.push(this.hoveredElement);
-        if ('name' in this.hoveredElement) {
-          // Its a passage
-          // add lines
-          const highlightLines = this.lines.filter((line) => line.fromPassage === this.hoveredElement || line.toPassage === this.hoveredElement);
-          highlightElements.push(...highlightLines);
-          // add linked passages
-          highlightElements.push(...this.hoveredElement.linksTo);
-          highlightElements.push(...this.hoveredElement.linkedFrom);
-        } else {
-          // Its a line
-          highlightElements.push(this.hoveredElement.fromPassage, this.hoveredElement.toPassage);
-        }
-      }
-      return highlightElements;
-    },
     svgStyle() {
       let maxX = 0;
       let maxY = 0;
@@ -169,13 +123,65 @@ export default defineComponent({
       return `translate(${Math.round(this.translate.x * 1000) / 1000}px, ${Math.round(this.translate.y * 1000) / 1000}px)`;
     },
   },
+  watch: {
+    hoveredElement: {
+      deep: false,
+      handler: function(hoveredElement: PassageLink | LinkedPassage | null) {
+        const highlightElements: Array<Passage | PassageLink> = [];
+        if (hoveredElement) {
+          highlightElements.push(this.hoveredElement);
+          if ('name' in hoveredElement) {
+            // Its a passage
+            // add passage links
+            const linkedPassages: PassageLink[] = this.linkedPassages;
+            const highlightLinks = linkedPassages.filter((linkedPassage) => linkedPassage.from === hoveredElement || linkedPassage.to === hoveredElement);
+            highlightElements.push(...highlightLinks);
+            // add linked passages
+            highlightElements.push(...this.hoveredElement.linksTo);
+            highlightElements.push(...this.hoveredElement.linkedFrom);
+          } else if ('from' in hoveredElement) {
+            // Its a passage link
+            highlightElements.push(hoveredElement.from, hoveredElement.to);
+          }
+        }
+        this.highlightElements = highlightElements;
+      },
+    },
+    passages: {
+      deep: false,
+      handler: function(passages: LinkedPassage[]) {
+        const linkedPassages: PassageLink[] = [];
+        for (const passage of passages) {
+          for (const linkedPassage of passage.linksTo) {
+            // Check if this exact line already exists, it shouldn't but... Check anyway
+            if (linkedPassages.some((line) => line.from === passage && line.to === linkedPassage)) continue;
+            // Check if this line already exists in  the opposite direction
+            let existingLink = linkedPassages.find((line) => line.from === linkedPassage && line.to === passage);
+            if (existingLink) {
+              // A line between these passages already exists in the opposite direction
+              // make that line bi-directional
+              existingLink.twoWay = true;
+              continue;
+            }
+            // No link between these passages exists, create it
+            linkedPassages.push({
+              from: passage,
+              to: linkedPassage,
+              twoWay: false,
+              key: `link-${passage.name}-${linkedPassage.name}`,
+            });
+          }
+        }
+        this.linkedPassages = linkedPassages;
+      },
+    },
+  },
   methods: {
     onPassageMouseDown(passage: LinkedPassage, event: MouseEvent) {
       this.highestZIndex++;
       passage.zIndex = this.highestZIndex;
       this.draggedPassage = passage;
       this.lastDragPosition = { x: event.clientX, y: event.clientY };
-      console.log(this.highestZIndex);
     },
     onMapMouseDown(event: MouseEvent) {
       this.lastDragPosition = { x: event.clientX, y: event.clientY };
@@ -214,10 +220,10 @@ export default defineComponent({
       this.translate.y += (topOfClientY - topOfClientYTarget);
       this.zoom *= zoomMod;
     },
-    onHoverableMouseEnter(element: Line | LinkedPassage) {
+    onHoverableMouseEnter(element: PassageLink | LinkedPassage) {
       this.hoveredElement = element;
     },
-    onHoverableMouseLeave(element: Line | LinkedPassage) {
+    onHoverableMouseLeave(element: PassageLink | LinkedPassage) {
       if (this.hoveredElement === element || this.hoveredElement.key === element['key']) {
         this.hoveredElement = null;
       }
@@ -300,16 +306,6 @@ svg {
   min-width: 100%;
   min-height: 100%;
   background-color: rgba(255, 255, 255, .1);
-}
-
-line {
-  stroke:rgb(200,200,200);
-  stroke-width:2;
-
-  &.highlight {
-    stroke:rgb(100,255,100);
-    z-index: 1;
-  }
 }
 
 .save-changes {
