@@ -95,19 +95,19 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 
 				passage.meta = passageMeta || "";
 
-				let icon = "";
+				let icon = "", color = "";
 
 				if (specialName) switch (passageName) {
-					case "Start": icon = "rocket"; break;
-					case "StoryTitle": icon = "mention"; break;
-					case "StoryData": icon = "json"; break;
+					case "Start": icon = "rocket"; color="charts.yellow"; break;
+					case "StoryTitle": icon = "mention"; color="charts.orange"; break;
+					case "StoryData": icon = "json"; color="charts.purple"; break;
 				}
 				else if (specialTag) switch (passage.tags?.[0]) {
-					case "script": icon = "code"; break;
-					case "stylesheet": icon = "paintcan"; break;
+					case "script": icon = "code"; color="charts.blue"; break;
+					case "stylesheet": icon = "paintcan"; color="charts.green"; break;
 				}
 
-				passage.iconPath = icon ? new vscode.ThemeIcon(icon) : "";
+				passage.iconPath = icon ? new vscode.ThemeIcon(icon, color ? new vscode.ThemeColor(color) : undefined) : "";
 
 				passages.push(passage);
 			}
