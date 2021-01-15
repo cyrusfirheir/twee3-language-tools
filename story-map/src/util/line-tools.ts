@@ -2,7 +2,7 @@ import { Line, Passage } from "@/types";
 
 export const cropLine = (ln: Line, p1: Passage, p2: Passage) => {
     // These should be the numbers I need
-    const xDelta = ln.x2 - ln.x1 || 0.0000001;
+    const xDelta = ln.x2 - ln.x1 || 0.0000001; // the .00000001 is to avoid division by 0
     const yDelta = ln.y2 - ln.y1 || 0.0000001;
     const lnFactor = Math.abs(xDelta / yDelta);
     const p1Factor = p1.size.x / p1.size.y;

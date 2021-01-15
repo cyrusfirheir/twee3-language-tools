@@ -74,9 +74,9 @@ export default defineComponent({
       cropLine(line, this.from, this.to);
       lines.push(line);
 
-      lines.push(...this.getArrow({ x: line.x1, y: line.y1 }, { x: line.x2, y: line.y2 }));
+      lines.push(...this.getArrow({ x: line.x2, y: line.y2 }, { x: line.x1, y: line.y1 }));
       if (this.twoWay) {
-        lines.push(...this.getArrow({ x: line.x2, y: line.y2 }, { x: line.x1, y: line.y1 }));
+        lines.push(...this.getArrow({ x: line.x1, y: line.y1 }, { x: line.x2, y: line.y2 }));
       }
       this.lines = lines;
       this.lastUpdate = Date.now();
@@ -86,7 +86,6 @@ export default defineComponent({
       const deltaX = at.x - from.x;
       const deltaY = at.y - from.y;
       const deg = (Math.atan(deltaY / deltaX) * 180 / Math.PI) - (deltaX < 0 ? 180 : 0);
-      console.log({ deltaX, deltaY, deg, tan: Math.atan(deltaY / deltaX) });
       const ln1Deg = (deg + 330) % 360;
       const ln2Deg = (deg + 30) % 360;
 
