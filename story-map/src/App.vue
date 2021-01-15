@@ -337,6 +337,7 @@ svg {
   color: #FFF;
   padding: 5px;
   font-size: 12px;
+  overflow-wrap: anywhere;
 
   &.highlight {
     background-color: #5A5;
