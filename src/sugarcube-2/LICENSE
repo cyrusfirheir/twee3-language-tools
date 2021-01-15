@@ -2,6 +2,7 @@ Major chunks of the following files in this project:
 - arguments.ts
 - macros.json
 - macros.ts
+- validation.ts
 are adapted from Thomas Michael Edwards's SugarCube-2 (https://github.com/tmedwards/sugarcube-2/)
 which is licensed under the BSD 2-Clause "Simplified" License, which is essentially compatible
 with  the MIT License that this project uses.

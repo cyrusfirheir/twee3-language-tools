@@ -450,13 +450,14 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 				// TODO: Potential future feature would making the cache simply hold the
 				// diagnostics themselves rather than reconstructing them each time.
 				const cacheEntry = argumentCache.getInsert(el.name, args, () => {
-					const parsedArguments: ParsedArguments = parseArguments(args, lexRange, el, cur);
+					const stateInfo = {
+						passages,
+					};
+					const parsedArguments: ParsedArguments = parseArguments(args, lexRange, el, cur, stateInfo);
 					let chosenVariant: ChosenVariantInformation | null = null;
 					if (parsedArguments.errors.length === 0 && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && cur.parameters instanceof Parameters) {
 						const parameters: Parameters = cur.parameters;
-						chosenVariant = parameters.validate(parsedArguments, {
-							passages,
-						});
+						chosenVariant = parameters.validate(parsedArguments, stateInfo);
 					}
 
 					return {
@@ -478,6 +479,18 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 						message: error.message || "Unknown argument parsing failure",
 						source: 'sc2-ex',
 						code: 107,
+					});
+				}
+
+				// Add any warnings
+				for (let i = 0; i < parsedArguments.warnings.length; i++) {
+					const warning = parsedArguments.warnings[i];
+					d.push({
+						severity: vscode.DiagnosticSeverity.Warning,
+						range: warning.range,
+						message: warning.message || "Unknown argument parsing error",
+						source: `sc2-ex`,
+						code: 112,
 					});
 				}
 
