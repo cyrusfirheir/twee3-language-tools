@@ -307,6 +307,11 @@
 				"command": "twee3LanguageTools.ifid.generate",
 				"title": "Generate IFID",
 				"category": "Twee3 Language Tools"
+			},
+			{
+				"command": "twee3LanguageTools.sc2.clearArgumentCache",
+				"title": "Clear Argument Cache",
+				"category": "Twee3 Language Tools"
 			}
 		],
 		"menus": {
