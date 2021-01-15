@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { Arg, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
-import { ArgumentError, ArgumentWarning, ChosenVariantInformation, isArrayEqual, Parameters, parseMacroParameters } from './parameters';
+import { ArgumentError, ArgumentWarning, ChosenVariantInformation, Parameters, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 import { Passage } from '../tree-view';
+import { isArrayEqual } from './validation';
 
 export type MacroName = string;
 export interface macro {

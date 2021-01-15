@@ -1,21 +1,11 @@
 import * as vscode from 'vscode';
 import { Passage } from '../tree-view';
 import { Arg, ArgType, ExpressionArgument, ParsedArguments, SettingsSetupAccessArgument, VariableArgument } from './arguments';
+import { StateInfo, Warning } from './validation';
 
 export type UnparsedFormat = string;
 // Note: This may eventually also be allowed to become an object, for more configuration options.
 export type UnparsedVariant = UnparsedFormat;
-
-// The warning class is for things that are technically 'errors' (in that they are invalid)
-// but are likely just slightly incorrect and so should be counted as at least a partial validity
-// for a given variant. (Ex: Passing a link with a setter to something that takes `linkNoSetter`)
-export class Warning {
-    readonly message: string;
-
-    constructor(message: string) {
-        this.message = message;
-    }
-}
 
 /**
  * Helper function for constructing simple paramter types without the boilerplate
@@ -188,13 +178,6 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>):
         }
     }
     return errors;
-}
-
-/**
- * Information about the state, used for verifying some parts of the parameters.
- */
-export interface StateInfo {
-    passages: Passage[],
 }
 
 export interface ChosenVariantInformation {
@@ -1155,31 +1138,6 @@ export function compareFormat(left: Format, right: Format): boolean {
         // Unequal kind
         return false;
     }
-}
-
-
-/**
- * Simple function for if checking each of two array's elements are equal.
- * Uses triple-equals and does not do any recursive calls on sub-arrays.
- * Has the option to take undefined arrays, because that is just better for the place it is used in.
- */
-export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
-    if (left === right) {
-        // They're the same array, or both undefined
-        return true;
-    } else if (left === undefined || right === undefined) {
-        // We already checked for equality, so if either are undefined then we know it isn't equal
-        return false;
-    } else if (left.length !== right.length) {
-        return false;
-    }
-
-    for (let i = 0; i < left.length; i++) {
-        if (left[i] !== right[i]) {
-            return false;
-        }
-    }
-    return true;
 }
 
 /**
