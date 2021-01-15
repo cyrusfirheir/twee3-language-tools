@@ -43,7 +43,7 @@ function makeSimpleParameterType(name: string | string[], errorMessage: string, 
  * Naming should be camelCase.
  * Type names are currently case-sensitive.
  */
-const parameterTypes: ParameterType[] = [
+export const parameterTypes: ParameterType[] = [
     makeSimpleParameterType("true", "Argument is not 'true'", ArgType.True),
     makeSimpleParameterType("false", "Argument is not 'false'", ArgType.False),
     makeSimpleParameterType(["bool", "boolean"], "Argument is not a boolean", type => type === ArgType.True || type === ArgType.False),
@@ -114,7 +114,7 @@ const parameterTypes: ParameterType[] = [
         }
     }
 ];
-function findParameterType(name: string): null | ParameterType {
+export function findParameterType(name: string): null | ParameterType {
     for (let i = 0; i < parameterTypes.length; i++) {
         if (parameterTypes[i].name.includes(name)) {
             return parameterTypes[i];
@@ -122,7 +122,7 @@ function findParameterType(name: string): null | ParameterType {
     }
     return null;
 }
-interface ParameterType {
+export interface ParameterType {
     /**
      * Names that this parameter goes by.
      */
@@ -213,6 +213,33 @@ export class Parameters {
             }
         }
         this.variants = result;
+    }
+
+    /**
+     * Check if any of the paths contain this format.
+     * Does not do complex validation of if it is ever reachable.
+     * @param testFormat 
+     */
+    has (testFormat: Format): boolean {
+        for (const key in this.variants) {
+            if (this.variants[key].has(testFormat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test whether the format contains a specific type in it.
+     * Uses `has`. Minor helper utility.
+     */
+    hasType(type: ParameterType): boolean {
+        return this.has({
+            kind: FormatKind.Type,
+            // Having to construct this is unfortunate, but it doesn't matter much.
+            range: new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0)),
+            type,
+        });
     }
 
     /**
@@ -334,6 +361,18 @@ export class Variant {
      */
     isEmpty(): boolean {
         return this.format === null;
+    }
+    
+    /**
+     * Test whether the format contains the given format in any of its paths.
+     * @param testFormat
+     */
+    has(testFormat: Format): boolean {
+        if (this.format === null) {
+            return false;
+        }
+
+        return formatHas(this.format, testFormat);
     }
 
     /**
@@ -1024,7 +1063,7 @@ export class Variant {
     }
 }
 
-enum FormatKind {
+export enum FormatKind {
     // See: parameterTypes.
     Type,
     // 'text'
@@ -1065,7 +1104,7 @@ interface FormatLexRepeat {
 
 // FormatKind (lexer) without the Group, since that does not appear.
 // Sadly this isn't an enum, so we still have to ues formatkind.
-type FormatParseKind = Exclude<FormatKind, FormatKind.Group>;
+export type FormatParseKind = Exclude<FormatKind, FormatKind.Group>;
 type Format = FormatType | FormatLiteral | FormatAndNext | FormatMaybeNext | FormatOr | FormatRepeat;
 interface FormatType {
     kind: FormatKind.Type,
@@ -1102,6 +1141,24 @@ interface FormatRepeat {
     kind: FormatKind.Repeat,
     range: vscode.Range,
     right: Format,
+}
+
+export function formatHas(format: Format, needle: Format): boolean {
+    if (compareFormat(format, needle)) {
+        return true;
+    }
+
+    if (format.kind === FormatKind.AndNext || format.kind === FormatKind.Or) {
+        return formatHas(format.left, needle) || formatHas(format.right, needle);
+    } else if (format.kind === FormatKind.MaybeNext) {
+        return (format.left !== undefined && formatHas(format.left, needle)) || formatHas(format.right, needle);
+    } else if (format.kind === FormatKind.Repeat) {
+        return formatHas(format.right, needle);
+    } else {
+        // If this was a Type or Literal then we already compared them at the start of the function
+        // and they weren't equal, thus this branch does not have the needle.
+        return false;
+    }
 }
 
 /**
