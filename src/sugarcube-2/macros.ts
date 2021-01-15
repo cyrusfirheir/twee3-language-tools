@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { Arg, parseArguments, ParsedArguments } from './arguments';
-import { ArgumentError, ArgumentWarning, Parameters, parseMacroParameters } from './parameters';
+import { Arg, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
+import { ArgumentError, ArgumentWarning, ChosenVariantInformation, isArrayEqual, Parameters, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 
+export type MacroName = string;
 export interface macro {
 	id: number;
 	pair: number;
-	name: string;
+	name: MacroName;
 	open: boolean;
 	selfClosed: boolean;
 	endVariant: boolean;
@@ -15,7 +16,7 @@ export interface macro {
 }
 
 export interface macroDef {
-	name?: string;
+	name?: MacroName;
 	description?: string,
 	parameters?: Parameters,
 	container?: boolean;
@@ -83,6 +84,21 @@ const updateMacroCache = async function () {
 		vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
 	}
 
+	// Check for changed macros and clear those from the arguments cache.
+	if (macroCache !== null) {
+		for (const key in macroCache) {
+			if (key in list) {
+				if (!isMacroFunctionallyEquivalent(macroCache[key], list[key])) {
+					// They weren't equivalent, thus we remove it from cache.
+					argumentCache.clearMacro(key);
+				}
+			} else {
+				// The macro no longer exists. Remove it from cache.
+				argumentCache.clearMacro(key);
+			}
+		}
+	}
+
 	macroCache = list;
 }
 
@@ -106,6 +122,37 @@ const parseMacroList = async function () {
 
 	return list;
 };
+
+
+/**
+ * Check if two macro definition are functionally equivalent.
+ * Essentially a _loose_ check for if they would produce the same behavior. It errs on the side of
+ * caution (and performance).
+ */
+function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean {
+	if (left.parameters === undefined || right.parameters === undefined) {
+		if (left.parameters !== right.parameters) {
+			// One of them is undefined whilst the other is not.
+			return false;
+		}
+	} else {
+		// They are both non-undefined
+		if (!left.parameters.compare(right.parameters)) {
+			return false;
+		}
+	}
+	// Both of the above checks fall through in the valid case and we don't have to have ugly 
+	// checks in the boolean expression below
+
+	return left.name === right.name &&
+		left.container === right.container &&
+		left.selfClose === right.selfClose &&
+		isArrayEqual(left.children, right.children) &&
+		isArrayEqual(left.parents, right.parents) &&
+		left.deprecated === right.deprecated &&
+		isArrayEqual(left.deprecatedSuggestions, right.deprecatedSuggestions) &&
+		left.skipArgs === right.skipArgs;
+}
 
 export const collect = async function (raw: string) {
 	const list = await macroList();
@@ -198,6 +245,116 @@ export const collect = async function (raw: string) {
 	return { list, macros };
 };
 
+interface ArgumentCacheEntry {
+	parsed: ParsedArguments,
+	// This is null in several cases: errors in argument parsing, the setting being off, and there
+	// being no parameters field on the macro definition.
+	variant: ChosenVariantInformation | null,
+	// The time it was last accessed at, used for dumping it from the cache.
+	lastAccess: number,
+}
+/**
+ * A class to cache results from parsing and validating arguments.
+ * This will minor hurt performance in the initial parsing, but most argument parsing/validation is
+ * the same as it was previously and so will help avoid abusing the user's cpu.
+ */
+class ArgumentCache {
+	// So, the first level is the MacroName. This lets us identify the macro it is for easier.
+	// Which is useful for two reasons
+	// 	1. It lets us quickly clear all the entries under that macro name, such as when it is
+	// 		updated in the settings file.
+	//  2. (Primary reason). We can just use the arguments as the cache key, and so even if two
+	//  	macro invocations have the same arguments they won't collide. Pretty simple, very little
+	// 		special handling.
+	// We use the arguments as the second ''level''-key so that it can be identified.
+	// We do this rather than computing a hash for it ourselves, because the v8 engine already does
+	// this in almost certainly a far better manner than we do.
+	// Though there is a downside in memory due to storing these strings instead of a far smaller
+	// hash computed by ourselves, it was deemed 'probably fine' after.. much thought.
+	private cache: Record<MacroName, Record<UnparsedMacroArguments, ArgumentCacheEntry>>
+
+	private cacheCleanerInterval: NodeJS.Timeout | undefined;
+
+	constructor() {
+		this.cache = Object.create(null);
+		this.initializeCacheCleaner();
+	}
+
+	// TODO: let this be user customizable
+	// 5 minutes
+	private static cacheCleanerDelay: number = (1000 * 60) * 5;
+	private initializeCacheCleaner() {
+		if (this.cacheCleanerInterval !== undefined) {
+			clearInterval(this.cacheCleanerInterval);
+		}
+
+		this.cacheCleanerInterval = setInterval(() => {
+			this.cleanCache();
+		}, ArgumentCache.cacheCleanerDelay);
+	}
+
+	// TODO: let this be user customizable
+	// 5 minutes
+	// The amount of time between the last access and now before it is allowed to be removed.
+	private static cacheMinLastAccess: number = (1000 * 60) * 2;
+	cleanCache() {
+		let current = Date.now();
+		for (const name in this.cache) {
+			for (const args in this.cache[name]) {
+				if (current - this.cache[name][args].lastAccess >= ArgumentCache.cacheMinLastAccess) {
+					delete this.cache[name][args];
+				}
+			}
+		}
+	}
+
+	/**
+	 * Clear the entire cache.
+	 */
+	clear() {
+		this.cache = Object.create(null);
+	}
+
+	/**
+	 * Clear a specific macro from the cache. This is used for when macro definitions are updated
+	 * which can change parsing despite having the same arguments
+	 * @param name The name of the macor
+	 */
+	clearMacro(name: MacroName) {
+		if (name in this.cache) {
+			delete this.cache[name];
+		}
+	}
+
+	/**
+	 * Gets a cache entry, otherwise creates it with the given `construct` function.
+	 * @param name The name of the macro.
+	 * @param args The string of arguments that the macro received
+	 * @param construct A function to construct the entry if it did not exist.
+	 */
+	getInsert(name: MacroName, args: UnparsedMacroArguments, construct: () => ArgumentCacheEntry): ArgumentCacheEntry {
+		// If caching is not enabled, we just make the cache immediately construct and return
+		// without storing it.
+		if (!vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.cache").get("argumentInformation")) {
+			return construct();
+		}
+
+
+		if (!(name in this.cache)) {
+			this.cache[name] = Object.create(null);
+		}
+
+		if (!(args in this.cache[name])) {
+			// Even if this errors, the cache should still be in a valid state.
+			this.cache[name][args] = construct();
+		}
+
+		this.cache[name][args].lastAccess = Date.now();
+		return this.cache[name][args];
+	}
+}
+export const argumentCache: ArgumentCache = new ArgumentCache();
+
 export const diagnostics = async function (document: vscode.TextDocument) {
 	let d: vscode.Diagnostic[] = [];
 
@@ -284,7 +441,29 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 			}
 
 			if (el.open && !cur.skipArgs && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("argumentParsing")) {
-				let parsedArguments: ParsedArguments = parseArguments(document, el, cur);
+				const lexRange: vscode.Range = makeMacroArgumentsRange(el);
+				const args: UnparsedMacroArguments = document.getText(lexRange);
+
+				// TODO: Potential future feature would making the cache simply hold the
+				// diagnostics themselves rather than reconstructing them each time.
+				const cacheEntry = argumentCache.getInsert(el.name, args, () => {
+					const parsedArguments: ParsedArguments = parseArguments(args, lexRange, el, cur);
+					let chosenVariant: ChosenVariantInformation | null = null;
+					if (parsedArguments.errors.length === 0 && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && cur.parameters instanceof Parameters) {
+						const parameters: Parameters = cur.parameters;
+						chosenVariant = parameters.validate(parsedArguments);
+					}
+
+					return {
+						parsed: parsedArguments,
+						variant: chosenVariant,
+						lastAccess: Date.now(),
+					};
+				});
+
+				const parsedArguments = cacheEntry.parsed;
+				const highestVariant = cacheEntry.variant;
+
 				// Add any errors that we've found just from parsing to the diagnostics.
 				for (let i = 0; i < parsedArguments.errors.length; i++) {
 					let error = parsedArguments.errors[i];
@@ -297,14 +476,8 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 					});
 				}
 
-				// Perform parameter validation.
-				// Requires a setting to be enabled and it to be a parsed instance of parameters.
-				// As well, we currently don't try checking if there was errors in parsing the 
-				// arguments.
-				if (parsedArguments.errors.length === 0 && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && cur.parameters instanceof Parameters) {
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && highestVariant !== null && cur.parameters instanceof Parameters) {
 					const parameters: Parameters = cur.parameters;
-					const highestVariant = parameters.validate(parsedArguments);
-
 					if (highestVariant.variantKey === null) {
 						if (parameters.isEmpty()) {
 							// There are no parameters!

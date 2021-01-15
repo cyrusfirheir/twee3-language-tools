@@ -195,6 +195,16 @@ export async function activate(context: vscode.ExtensionContext) {
 					fileGlob().forEach(file => prepare(file));
 				});
 			}
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.cache.argumentInformation") && !vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.cache").get(".argumentInformation")) {
+				// The configuration for this setting has been changed and it is now false, so we
+				// clear the cache.
+				sc2m.argumentCache.clear();
+			}
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.error.parameterValidation")) {
+				// Note: We simply clear the arguments cache to force it to revalidate.
+				// This could be done in a more efficient manner, but this is good enough.
+				sc2m.argumentCache.clear();
+			}
 		})
 		,
 		vscode.workspace.onDidCreateFiles(e => {
@@ -275,6 +285,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.defineMacro", sc2ca.unrecognizedMacroFixCommand)
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.clearArgumentCache", () => {
+			// Provide a command to clear the argument cache for if there is ever any bugs with the
+			// implementation, it can tide users over until a fix.
+			sc2m.argumentCache.clear();
+		})
 		,
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
 			providedCodeActionKinds: sc2ca.EndMacro.providedCodeActionKinds

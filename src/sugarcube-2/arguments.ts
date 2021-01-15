@@ -264,16 +264,14 @@ export interface StringArgument {
 	text: string,
 	range: vscode.Range,
 }
+
 /**
- * Parses the arguments passed into an ParsedArguments structure.
- * Returns a partial ParsedArguments structure if it failed, with the `valid` bool set to false.
- * @param macro The macro in the file, giving us a position to parse at. Should be the opening the
- * macro, otherwise an error is thrown.
- * @param macroDefinition The definition of the macro so that we can check it
- * @param text The text of the file
- * @throws {Error}
+ * Acquire a range over the macro's arguments.
+ * Returns null if it was a closing macro.
+ * @param macro
+ * @throws {Error} if macro is open
  */
-export function parseArguments(document: vscode.TextDocument, macro: macro, macroDefinition: macroDef): ParsedArguments {
+export function makeMacroArgumentsRange(macro: macro): vscode.Range {
 	if (!macro.open) {
 		throw new Error("Expected opening macro to parse arguments of.");
 	}
@@ -284,9 +282,21 @@ export function parseArguments(document: vscode.TextDocument, macro: macro, macr
 	// mistake
 	// Note: this means later places where we use positions within the text need to be offset to get
 	// accurate results.
-	let lexRange = new vscode.Range(afterMacroName, beforeMacroClose);
-	let source = document.getText(lexRange);
+	return new vscode.Range(afterMacroName, beforeMacroClose);
+}
 
+export type UnparsedMacroArguments = string;
+
+/**
+ * Parses the arguments passed into an ParsedArguments structure.
+ * Returns a partial ParsedArguments structure if it failed, with the `valid` bool set to false.
+ * @param macro The macro in the file, giving us a position to parse at. Should be the opening the
+ * macro, otherwise an error is thrown.
+ * @param macroDefinition The definition of the macro so that we can check it
+ * @param text The text of the file
+ * @throws {Error}
+ */
+export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.Range, macro: macro, macroDefinition: macroDef): ParsedArguments {
 	function makeRange(item: LexerItem<MacroParse.Item>): vscode.Range {
 		// Note: Since we only ran the parser on a portion of the macro, we have to offset it
 		// in order to get the valid range.
