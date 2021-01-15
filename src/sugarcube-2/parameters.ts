@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Passage } from '../tree-view';
 import { Arg, ArgType, ExpressionArgument, ParsedArguments, SettingsSetupAccessArgument, VariableArgument } from './arguments';
 
 export type UnparsedFormat = string;
@@ -98,12 +99,26 @@ const parameterTypes: ParameterType[] = [
     },
     {
         name: ["passage"],
-        validate(info: ArgumentInfo): Error | null {
-            // TODO; Validate the passage name (if possible)
-            let t = info.arg.type;
-            if (t === ArgType.Bareword || t === ArgType.String || t === ArgType.True || t === ArgType.False || t === ArgType.Null || t === ArgType.NaN || t === ArgType.Number) {
+        validate(info: ArgumentInfo): Error | Warning | null {
+            // The passage, if it is undefined then we can't check it at runtime.
+            let passageName: string | undefined = undefined;
+            if (info.arg.type === ArgType.Bareword) {
+                passageName = info.arg.value;
+            } else if (info.arg.type === ArgType.String) {
+                passageName = info.arg.text;
+            } else if (info.arg.type === ArgType.NaN) {
+                passageName = String(NaN);
+            } else if (info.arg.type === ArgType.Number) {
+                passageName = String(info.arg.value);
+            }
+
+            if (passageName !== undefined) {
+                if (!info.state.passages.find(passage => passage.name === passageName)) {
+                    return new Warning("Nonexistent passage");
+                }
                 return null;
             } else {
+                // Based on SugarCube's Story.has, we don't allow booleans, null, objects, etc.
                 return new Error("Argument is not an acceptable passage");
             }
         }
@@ -139,6 +154,8 @@ interface ArgumentInfo {
     index: number,
     // Easy access. Equivalent to `arguments[index]`.
     arg: Arg,
+    // Information about the state, used for some types which depend on other parts of the code
+    state: StateInfo,
 }
 
 /**
@@ -171,6 +188,13 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>):
         }
     }
     return errors;
+}
+
+/**
+ * Information about the state, used for verifying some parts of the parameters.
+ */
+export interface StateInfo {
+    passages: Passage[],
 }
 
 export interface ChosenVariantInformation {
@@ -237,7 +261,7 @@ export class Parameters {
      * Checks the given arguments for their matching to a chosen
      * @param args The parsed arguments for type validation
      */
-    validate(args: ParsedArguments): ChosenVariantInformation {
+    validate(args: ParsedArguments, stateInfo: StateInfo): ChosenVariantInformation {
         // We track the current most likely variant based on type and somewhat on
         // argument count. This certainly isn't the most accurate implementation but it
         // should work well enough for now.
@@ -255,7 +279,7 @@ export class Parameters {
 
         for (const variantKey in this.variants) {
             const variant = this.variants[variantKey];
-            let info = variant.validate(args);
+            let info = variant.validate(args, stateInfo);
 
             if (info.rank > highestVariant.info.rank) {
                 highestVariant.info = info;
@@ -350,7 +374,7 @@ export class Variant {
     /**
      * Checks if the arguments are valid based on this variant.
      */
-    validate(parsedArguments: ParsedArguments): ValidateInformation {
+    validate(parsedArguments: ParsedArguments, stateInfo: StateInfo): ValidateInformation {
         // Shorthand
         const args = parsedArguments.arguments;
         let iterations: number = 0;
@@ -462,8 +486,7 @@ export class Variant {
 
                 argIndex = infoRight.argIndex;
                 rank += infoRight.rank;
-                warnings.concat(infoRight.warnings);
-
+                warnings = warnings.concat(infoRight.warnings);
                 return makeSuccess(argIndex, rank, warnings);
             } else if (format.kind === FormatKind.AndNext) {
                 let rank: number = 0;
@@ -582,6 +605,7 @@ export class Variant {
                     arg,
                     index: argIndex,
                     arguments: args,
+                    state: stateInfo,
                 });
 
                 if (result instanceof Error) {

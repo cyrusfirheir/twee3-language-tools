@@ -3,6 +3,7 @@ import * as yaml from 'yaml';
 import { Arg, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
 import { ArgumentError, ArgumentWarning, ChosenVariantInformation, isArrayEqual, Parameters, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
+import { Passage } from '../tree-view';
 
 export type MacroName = string;
 export interface macro {
@@ -355,10 +356,11 @@ class ArgumentCache {
 }
 export const argumentCache: ArgumentCache = new ArgumentCache();
 
-export const diagnostics = async function (document: vscode.TextDocument) {
+export const diagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument) {
 	let d: vscode.Diagnostic[] = [];
 
 	let collected = await collect(document.getText());
+	const passages: Passage[] = ctx.workspaceState.get("passages", []);
 
 	collected.macros.forEach(el => {
 		let cur: macroDef;
@@ -451,7 +453,9 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 					let chosenVariant: ChosenVariantInformation | null = null;
 					if (parsedArguments.errors.length === 0 && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && cur.parameters instanceof Parameters) {
 						const parameters: Parameters = cur.parameters;
-						chosenVariant = parameters.validate(parsedArguments);
+						chosenVariant = parameters.validate(parsedArguments, {
+							passages,
+						});
 					}
 
 					return {
