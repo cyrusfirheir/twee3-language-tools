@@ -209,6 +209,31 @@ export class Parameters {
     }
 
     /**
+     * Checks if two Parameters are loosely equivalent
+     */
+    compare(other: Parameters): boolean {
+        if (Object.keys(this.variants).length !== Object.keys(other.variants).length) {
+            // Different amount of keys so they cannot be equivalent.
+            return false;
+        }
+
+        for (let key in this.variants) {
+            let left: Variant = this.variants[key];
+            let right: Variant | undefined = other.variants[key];
+            if (right === undefined) {
+                // Certainly not equal. One of the keys is gone.
+                return false;
+            } else if (!left.compare(right)) {
+                // The variants weren't equivalent
+                return false;
+            }
+        }
+
+        // We've checked the number of keys, and they both have all the same variants.
+        return true;
+    }
+
+    /**
      * Checks the given arguments for their matching to a chosen
      * @param args The parsed arguments for type validation
      */
@@ -302,6 +327,19 @@ export class Variant {
      */
     isEmpty(): boolean {
         return this.format === null;
+    }
+
+    /**
+     * Whether two variants are loosely equivalent.
+     */
+    compare(other: Variant): boolean {
+        // We don't bother comparing their format string, what matters is the parsed version
+        if (this.format === other.format) {
+            return true;
+        } else if (this.format === null || other.format === null) {
+            return false;
+        }
+        return compareFormat(this.format, other.format);
     }
 
     /**
@@ -1057,6 +1095,67 @@ interface FormatRepeat {
     kind: FormatKind.Repeat,
     range: vscode.Range,
     right: Format,
+}
+
+/**
+ * Recursively compare formats for equivalence.
+ * Ignores the range, only cares about the structure.
+ * Note that it doesn't try to be very complex to see if they have the same meanings, just
+ * equivalent parsed structure. (Ex: `a &+ b |+ c` is the same as `a &+ (b |+ c)`) but they'd
+ * parse differently and so are not equal by this function.
+ */
+export function compareFormat(left: Format, right: Format): boolean {
+    if (left === right) {
+        // Early exit for easy equivalence.
+        return true;
+    }
+
+    if (left.kind === FormatKind.Type && right.kind === FormatKind.Type) {
+        // Since these are objects from the global, they should be equivalent if they are the same.
+        return left.type === right.type;
+    } else if (left.kind === FormatKind.Literal && right.kind === FormatKind.Literal) {
+        return left.value === right.value;
+    } else if (left.kind === FormatKind.AndNext && right.kind === FormatKind.AndNext) {
+        return compareFormat(left.left, right.left) && compareFormat(left.right, right.right);
+    } else if (left.kind === FormatKind.MaybeNext && right.kind === FormatKind.MaybeNext) {
+        if (left.left === undefined || right.left === undefined) {
+            return left.left === right.left && compareFormat(left.right, right.right);
+        } else {
+            return compareFormat(left.left, right.left) && compareFormat(left.right, right.right);
+        }
+    } else if (left.kind === FormatKind.Or && right.kind === FormatKind.Or) {
+        return compareFormat(left.left, right.left) && compareFormat(left.right, right.right);
+    } else if (left.kind === FormatKind.Repeat && right.kind === FormatKind.Repeat) {
+        return compareFormat(left.right, right.right);
+    } else {
+        // Unequal kind
+        return false;
+    }
+}
+
+
+/**
+ * Simple function for if checking each of two array's elements are equal.
+ * Uses triple-equals and does not do any recursive calls on sub-arrays.
+ * Has the option to take undefined arrays, because that is just better for the place it is used in.
+ */
+export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
+    if (left === right) {
+        // They're the same array, or both undefined
+        return true;
+    } else if (left === undefined || right === undefined) {
+        // We already checked for equality, so if either are undefined then we know it isn't equal
+        return false;
+    } else if (left.length !== right.length) {
+        return false;
+    }
+
+    for (let i = 0; i < left.length; i++) {
+        if (left[i] !== right[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 /**
