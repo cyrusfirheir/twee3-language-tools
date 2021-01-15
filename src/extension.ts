@@ -165,8 +165,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	async function getLinkedPassageNames(passage: Passage): Promise<string[]> {
 		const passageContent = await getPassageContent(passage);
-        const parts = passageContent.split('[[').slice(1);
-        return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => ((part.split(']').shift() as string).split('|').pop() as string).trim());
+        const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
+        return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => {
+			const link = part.split(']').shift() as string;
+			if (link.includes("->")) return (link.split("->").pop() as string).trim();
+			else if (link.includes("<-")) return (link.split("<-").shift() as string).trim();
+			else return (link.split('|').pop() as string).trim();
+		});
 	};
 
 	async function sendPassagesToClient(client: socketio.Socket) {
