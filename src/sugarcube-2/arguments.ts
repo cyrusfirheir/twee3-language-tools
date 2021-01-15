@@ -460,7 +460,7 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 							arg.setter = markup.setter;
 						}
 						if (markup.link) {
-							arg.passage = checkPassageId(state.passages, markup.source as string, range, args.warnings);
+							arg.passage = checkPassageId(state.passages, markup.link as string, range, args.warnings);
 						}
 						args.arguments.push(arg);
 					} else if (markup.isImage) {
@@ -503,6 +503,7 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 function checkPassageId(passages: Passage[], passage: string, range: vscode.Range, warningsOutput: ArgumentParseWarning[]): Evaluatable<string, string> {
 	const argPassage = evalPassageId(passages, passage);
 	if (argPassage.isEvaluated) {
+		console.log("Checking", argPassage.value);
 		if (!passages.find(passage => passage.name === argPassage.value)) {
 			warningsOutput.push({
 				kind: ArgumentParseWarningKind.InvalidPassageName,
