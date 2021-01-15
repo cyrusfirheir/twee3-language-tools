@@ -1,23 +1,25 @@
+// Imports
+//#region 
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import * as glob from 'glob';
 
-import headsplit from './headsplit';
+import express from 'express';
+import path from 'path';
+import open from 'open';
+import { Server } from 'http';
+import * as socketio from 'socket.io';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
+import { tweeProjectConfig, changeStoryFormat } from "./tweeProject";
+import { updatePassages, sendPassagesToClient } from "./socket";
 
 import { PassageListProvider, Passage } from './tree-view';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
-
-import express from 'express';
-import * as socketio from 'socket.io';
-import path from 'path';
-import open from 'open';
-
-import { Server } from 'http';
+//#endregion
 
 let ctx: vscode.ExtensionContext;
 
@@ -49,41 +51,6 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		return 0;
 	}
 }
-
-const tweeProjectConfig = function (document: vscode.TextDocument) {
-	const raw = document.getText();
-	if (!raw.match(/^::\s*StoryData\b/gm)) return;
-	const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
-	if (!storydata?.content) return;
-	let formatInfo: any = undefined;
-	try {
-		formatInfo = JSON.parse(storydata.content);
-	} catch {
-		vscode.window.showErrorMessage("Malformed StoryData JSON!");
-		return;
-	}
-	const format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
-	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
-	if (config.get("current") !== format) {
-		config.update("current", format)
-			.then(() => vscode.window.showInformationMessage("Storyformat set to " + format));
-	}
-};
-
-const changeStoryFormat = async function (document: vscode.TextDocument) {
-	let format: string = "";
-	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
-	const override = config.get("override") || "";
-	if (!override) format = "twee3-" + config.get("current");
-	else format = "twee3-" + override;
-	const langs = await vscode.languages.getLanguages();
-	if (!langs.includes(format)) format = "twee3";
-	if (
-		/^twee3.*/.test(document.languageId) &&
-		document.languageId !== format
-	) return vscode.languages.setTextDocumentLanguage(document, format);
-	else return new Promise(res => res(document));
-};
 
 const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
@@ -150,73 +117,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	}
 
-	async function getPassageContent(passage: Passage): Promise<string> {
-		const doc = await vscode.workspace.openTextDocument(passage.origin);
-		const fileContent = doc.getText();
-		const searchPassageRegexp = new RegExp("^::\\s*" + passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") + ".*?$", "m");
-		const anyPassageRegexp = new RegExp("^::\s*(.*)?(\[.*?\]\s*?)?(\{.*\}\s*)?$", "m");
-		const passageStartMatch = fileContent.match(searchPassageRegexp);
-		if (!passageStartMatch || !('index' in passageStartMatch)) throw new Error('Cannot find passage title in origin-file');
-		const contentStart = (passageStartMatch.index as number) + passageStartMatch[0].length;
-		const restOfFile = fileContent.substr(contentStart);
-		const nextPassageMatch = restOfFile.match(anyPassageRegexp);
-		return restOfFile.substr(0, nextPassageMatch?.index);
-	}
-
-	async function getLinkedPassageNames(passage: Passage): Promise<string[]> {
-		const passageContent = await getPassageContent(passage);
-        const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
-        return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => {
-			const link = part.split(']').shift() as string;
-			if (link.includes("->")) return (link.split("->").pop() as string).trim();
-			else if (link.includes("<-")) return (link.split("<-").shift() as string).trim();
-			else return (link.split('|').pop() as string).trim();
-		});
-	};
-
-	async function sendPassagesToClient(client: socketio.Socket) {
-		const rawPassages = await (ctx.workspaceState.get("passages", []) as Passage[]);
-		const passagePromises = rawPassages.map(async (passage) => {
-			const linksToNames = await getLinkedPassageNames(passage);
-			return {
-				origin: passage.origin,
-				name: passage.name,
-				tags: passage.tags,
-				meta: passage.meta,
-				linksToNames,
-			};
-		});
-		const passages = await Promise.all(passagePromises);
-		console.log(`Sending ${passages.length} passages to client`);
-		client.emit('passages', passages);
-	}
-
-	type Vector = { x: number; y: number; };
-	type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; tags?: string[] };
-	async function updatePassages(passages: UpdatePassage[]) {
-		const files = [... new Set(passages.map(passage => passage.origin))];
-		for (const file of files) {
-			const doc = await vscode.workspace.openTextDocument(file);
-			await doc.save();
-			let edited = doc.getText();
-
-			const filePassages = passages.filter(el => el.origin === file);
-			for (const passage of filePassages) {
-				const regexp = new RegExp(
-					"^::\\s*" +
-					passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-					".*?$"
-				, "m");
-
-				let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
-				if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
-
-				edited = edited.replace(regexp, `:: ${passage.name} ` + (passage.tags?.length ? `[${passage.tags.join(" ")}] ` : "") + JSON.stringify(pMeta));
-			}
-
-			await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
-		}
-	}
+	
+	let storyMapClient: socketio.Socket | undefined = undefined;
 
 	function startUI() {
 		// Config
@@ -227,7 +129,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		// Http server
 		const app = express();
 		app.use(express.static(storyMapPath));
-
+	
 		const httpServer = new Server(app);
 		httpServer.listen(port, () => console.log(`Server bla ${hostUrl}`));
 		// open browser
@@ -235,16 +137,18 @@ export async function activate(context: vscode.ExtensionContext) {
 			cors: { origin: '*' }, // This Cors stuff should probably only be on in dev mode
 		});
 		io.on('connection', (client: socketio.Socket) => {
+			storyMapClient = client;
 			// Good to know
 			console.log('client connected');
 			// Lets give them info
-			sendPassagesToClient(client);
-
+			sendPassagesToClient(ctx, client);
+	
 			// Listen for client commands
 			client.on('open-passage', jumpToPassage);
 			client.on('update-passages', updatePassages);
 			// When they disconnect, we're done
 			client.on('disconnect', () => {
+				storyMapClient = undefined;
 				console.log('client disconnected');
 				// io.close(); // I kinda think this is a good idea, but its annoying for dev mode
 			})
@@ -335,21 +239,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidDeleteFiles(e => {
-			for (let file of e.files) {
-				const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
-				const passages = oldPassages.filter(el => el.origin !== file.path);
-				ctx.workspaceState.update("passages", passages).then(() => passageListProvider.refresh());
-			}
-
 			const removedFilePaths = e.files.map((file) => file.path);
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
-			ctx.workspaceState.update("passages", newPassages).then(() => passageListProvider.refresh());
-
-			for (let file of e.files) {
-				const passages = oldPassages.filter(el => el.origin !== file.path);
-			}
-
+			ctx.workspaceState.update("passages", newPassages).then(() => {
+				if (storyMapClient) sendPassagesToClient(ctx, storyMapClient);
+				passageListProvider.refresh()
+			});
 		})
 		,
 		vscode.workspace.onDidRenameFiles(async e => {
@@ -360,21 +256,17 @@ export async function activate(context: vscode.ExtensionContext) {
 				passages.forEach(el => {
 					if (el.origin === file.oldUri.path) el.origin = file.newUri.path;
 				});
-				// Do passages get serialized when reading/updating? If not, you shouldn't need to update this right?
 				await ctx.workspaceState.update("passages", passages);
-				passageListProvider.refresh();
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+				if (storyMapClient) sendPassagesToClient(ctx, storyMapClient);
 			}
 		})
 		,
-		vscode.workspace.onDidSaveTextDocument(document => {
-			// What does this actually do?
+		vscode.workspace.onDidSaveTextDocument(async document => {
 			tweeProjectConfig(document);
-			// okay so this is something to do with parsing the current file for
-			// like some UI element that deals with the on-screen passage?
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
-				// I think your functions should often use return value more often
-				parseText(ctx, document, passageListProvider);
-			}
+			await parseText(ctx, document);
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+			if (storyMapClient) sendPassagesToClient(ctx, storyMapClient);
 		})
 		,
 		vscode.window.registerTreeDataProvider(
@@ -387,12 +279,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (doc) updateDiagnostics(doc, collection);
 		})
 		,
-		// Neat
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {
 			jumpToPassage(item);
 		})
 		,
-		// is this just inverting the value?
 		vscode.commands.registerCommand("twee3LanguageTools.passage.list", () => {
 			const config = vscode.workspace.getConfiguration("twee3LanguageTools.passage");
 			config.update("list", !config.get("list"));
@@ -417,12 +307,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("twee3LanguageTools.ifid.generate", () => {
 			vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(uuidv4().toUpperCase()));
 		})
-		// Do you want the code I have for parsing macros? It actually works quite well
 		,
-		// should I look at what this does?
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.defineMacro", sc2ca.unrecognizedMacroFixCommand)
 		,
-		// what are these code action things? are they like "right click -> add to definiton file"?
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
 			providedCodeActionKinds: sc2ca.EndMacro.providedCodeActionKinds
 		})

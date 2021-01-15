@@ -1,12 +1,12 @@
-:: One {"position":"458,135"}
+:: One {"position":"287,172"}
 
 Leads to [[Two<-2]]
 
 Leads to [[tree->Three]]
 
-:: Two {"position":"574,335"}
+:: Two {"position":"409,381"}
 
 
-:: Three {"position":"712,154"}
+:: Three {"position":"561,147"}
 
 Leads bacc to [[o|One]].
