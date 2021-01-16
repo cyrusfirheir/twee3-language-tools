@@ -2,7 +2,7 @@ import { info } from 'console';
 import * as vscode from 'vscode';
 import { Passage } from '../tree-view';
 import { macro, macroDef } from "./macros";
-import { evalPassageId, Evaluatable, evaluateTwineScriptString, StateInfo, Warning } from './validation';
+import { evalPassageId, Evaluatable, evaluateTwineScriptString, notSpaceRegex, settingsSetupAccessRegexp, spaceRegex, StateInfo, varTestRegexp, Warning } from './validation';
 
 // Note: Much of this file has come from SugarCube2, though it is modified for simplicities sake.
 
@@ -501,9 +501,8 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
  * @param warningsOutput an array to output a warning if we get one
  */
 function checkPassageId(passages: Passage[], passage: string, range: vscode.Range, warningsOutput: ArgumentParseWarning[]): Evaluatable<string, string> {
-	const argPassage = evalPassageId(passages, passage);
+	const argPassage = evalPassageId(passages, passage, vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("barewordLinkPassageChecking"));
 	if (argPassage.isEvaluated) {
-		console.log("Checking", argPassage.value);
 		if (!passages.find(passage => passage.name === argPassage.value)) {
 			warningsOutput.push({
 				kind: ArgumentParseWarningKind.InvalidPassageName,
@@ -616,13 +615,6 @@ function isExternalLink(link: string) {
 
 // Much of the code following this is essentially modified SugarCube code, though
 // for the most part just adding types and changing small parts.
-
-// SugarCube has more complex checks for these, but we're only supporting VSCode and assume its
-// whitespace handling is sane.
-const notSpaceRegex: RegExp = /\S/;
-const spaceRegex: RegExp = /\s/;
-const varTestRegexp: RegExp = /^[$_][$A-Z_a-z][$0-9A-Z_a-z]*/;
-const settingsSetupAccessRegexp: RegExp = /^(?:settings|setup)[.[]/;
 
 namespace MacroParse {
 	export enum Item {

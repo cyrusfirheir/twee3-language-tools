@@ -5,6 +5,14 @@
 
 import { Passage } from "../tree-view";
 
+// SugarCube has more complex checks for these, but we're only supporting VSCode and assume its
+// whitespace handling is sane.
+export const notSpaceRegex: RegExp = /\S/;
+export const spaceRegex: RegExp = /\s/;
+export const settingsSetupAccessRegexp: RegExp = /^(?:settings|setup)[.[]/;
+export const varTestRegexp: RegExp = /^[$_][$A-Z_a-z][$0-9A-Z_a-z]*/;
+
+
 
 // The warning class is for things that are technically 'errors' (in that they are invalid)
 // but are likely just slightly incorrect and so should be counted as at least a partial validity
@@ -69,7 +77,7 @@ export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
  * @param validPassages 
  * @param passageName A TwineScript passage name.
  */
-export function evalPassageId(validPassages: Passage[], passageName: string): Evaluatable<string, string> {
+export function evalPassageId(validPassages: Passage[], passageName: string, allowBasicBareword: boolean = false): Evaluatable<string, string> {
 	// SugarCube simply checks if it is null or if the passage name is valid before returning.
 	// See: SugarCube2 wikifier.js evalPassageId for what we are imitating.
 	if (passageName === "null" || validPassages.find(passage => passage.name === passageName)) {
@@ -80,7 +88,7 @@ export function evalPassageId(validPassages: Passage[], passageName: string): Ev
 		}
 	}
 
-	return evaluateTwineScriptString(passageName);
+	return evaluateTwineScriptString(passageName, allowBasicBareword);
 }
 
 
@@ -91,7 +99,7 @@ export function evalPassageId(validPassages: Passage[], passageName: string): Ev
  * of an excuse)
  * @param code The input TwineScript
  */
-export function evaluateTwineScriptString(code: string): Evaluatable<string, string> {
+export function evaluateTwineScriptString(code: string, allowBasicBareword: boolean = false): Evaluatable<string, string> {
     // Note: If this is moved out of this function for re-use then that exec uses the state held
     // inside the regexp will have to be taken into account and reset/copy the regex before running.
     const parseRe = new RegExp([
@@ -118,6 +126,22 @@ export function evaluateTwineScriptString(code: string): Evaluatable<string, str
                 // Remove quotes
                 value: code.slice(1, -1),
             }
+        } else if (allowBasicBareword && match[5] === code) {
+            // We allow simple barewords. This has the potential for false positives.
+            // This is essentially meant just for links, where
+            // [[blah]] could be the value in the global scope named `blah`, or a passage
+            // named `blah`, and we want to consider that as a string
+            if (match[5] === '$' || match[5] === '_') {
+                break;
+            } else if (varTestRegexp.test(match[5])) {
+                break;
+            }
+
+            return {
+                original: code,
+                isEvaluated: true,
+                value: code,
+            };
         }
     }
 

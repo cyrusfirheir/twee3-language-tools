@@ -205,6 +205,9 @@ export async function activate(context: vscode.ExtensionContext) {
 				// This could be done in a more efficient manner, but this is good enough.
 				sc2m.argumentCache.clear();
 			}
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.warningbarewordLinkPassageChecking")) {
+				sc2m.argumentCache.clearMacrosUsingPassage();
+			}
 		})
 		,
 		vscode.workspace.onDidCreateFiles(e => {
