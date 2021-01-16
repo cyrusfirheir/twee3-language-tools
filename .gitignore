@@ -5,3 +5,4 @@ npm-debug.log
 *.vsix
 .res.ignore
 publish.bat
+res/story-map
