@@ -251,6 +251,11 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Depends upon `argumentParsing`."
+				},
+				"twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Provides warnings for links like `[[passage]]` when `passage` is not a valid passage name. This could cause false positives in cases where you are using a global variable."
 				}
 			}
 		},
@@ -306,6 +311,11 @@
 			{
 				"command": "twee3LanguageTools.ifid.generate",
 				"title": "Generate IFID",
+				"category": "Twee3 Language Tools"
+			},
+			{
+				"command": "twee3LanguageTools.sc2.clearArgumentCache",
+				"title": "Clear Argument Cache",
 				"category": "Twee3 Language Tools"
 			}
 		],

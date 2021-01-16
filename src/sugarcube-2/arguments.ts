@@ -1,5 +1,8 @@
+import { info } from 'console';
 import * as vscode from 'vscode';
+import { Passage } from '../tree-view';
 import { macro, macroDef } from "./macros";
+import { evalPassageId, Evaluatable, evaluateTwineScriptString, notSpaceRegex, settingsSetupAccessRegexp, spaceRegex, StateInfo, varTestRegexp, Warning } from './validation';
 
 // Note: Much of this file has come from SugarCube2, though it is modified for simplicities sake.
 
@@ -151,6 +154,9 @@ export interface ParsedArguments {
 	/// Errors encountered whilst parsing
 	/// If this has entries then it may mean that the rest of the arguments were not parsed
 	errors: ArgumentParseError[],
+	/// Warnings about parts that have been parsed. These are ones we can manage to skip past and
+	// continue, usually due to guessing what you meant.
+	warnings: ArgumentParseWarning[],
 	arguments: Arg[],
 }
 export enum ArgumentParseErrorKind {
@@ -163,17 +169,15 @@ export interface ArgumentParseError {
 	message?: string,
 	range: vscode.Range,
 }
-
-/**
- * An interfact for data which could have evaluatable data within it, but might not!
- * `T`: The type that would result from evaluating it. (Not that we can do that)
- * `B`: The original type (usually string).
- */
-export interface Evaluatable<T, B> {
-	original: B,
-	isEvaluated: boolean,
-	value?: T
+export enum ArgumentParseWarningKind {
+	InvalidPassageName,
 }
+export interface ArgumentParseWarning {
+	kind: ArgumentParseWarningKind,
+	message?: string,
+	range: vscode.Range,
+}
+
 
 export enum ArgType {
 	// These are from link
@@ -296,7 +300,7 @@ export type UnparsedMacroArguments = string;
  * @param text The text of the file
  * @throws {Error}
  */
-export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.Range, macro: macro, macroDefinition: macroDef): ParsedArguments {
+export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.Range, macro: macro, macroDefinition: macroDef, state: StateInfo): ParsedArguments {
 	function makeRange(item: LexerItem<MacroParse.Item>): vscode.Range {
 		// Note: Since we only ran the parser on a portion of the macro, we have to offset it
 		// in order to get the valid range.
@@ -315,6 +319,7 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 
 	let args: ParsedArguments = {
 		errors: [],
+		warnings: [],
 		arguments: [],
 	};
 
@@ -455,14 +460,14 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 							arg.setter = markup.setter;
 						}
 						if (markup.link) {
-							arg.passage = evalPassageId(markup.link);
+							arg.passage = checkPassageId(state.passages, markup.link as string, range, args.warnings);
 						}
 						args.arguments.push(arg);
 					} else if (markup.isImage) {
 						let arg: ImageArgument = {
 							type: ArgType.Image,
 							// TODO: should we assume that source is a string?
-							image: evalPassageId(markup.source as string),
+							image: checkPassageId(state.passages, markup.source as string, range, args.warnings),
 							range,
 						};
 
@@ -475,7 +480,7 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 						}
 
 						if (markup.hasOwnProperty('link')) {
-							arg.passage = evalPassageId(markup.link as string);
+							arg.passage = checkPassageId(state.passages, markup.link as string, range, args.warnings);
 						}
 
 						if (markup.hasOwnProperty('setter')) {
@@ -489,6 +494,27 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 	}
 	return args;
 }
+
+/**
+ *
+ * @param passage The unevaluated twinescript for a passage
+ * @param warningsOutput an array to output a warning if we get one
+ */
+function checkPassageId(passages: Passage[], passage: string, range: vscode.Range, warningsOutput: ArgumentParseWarning[]): Evaluatable<string, string> {
+	const argPassage = evalPassageId(passages, passage, vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.warning").get("barewordLinkPassageChecking"));
+	if (argPassage.isEvaluated) {
+		if (!passages.find(passage => passage.name === argPassage.value)) {
+			warningsOutput.push({
+				kind: ArgumentParseWarningKind.InvalidPassageName,
+				message: "Nonexistent passage",
+				range,
+			});
+		}
+	}
+	return argPassage;
+}
+
+
 
 
 interface MarkupInput {
@@ -586,23 +612,9 @@ function isExternalLink(link: string) {
 	return urlRegExp.test(link) || /[/.?#]/.test(link);
 }
 
-function evalPassageId(passage: string): Evaluatable<string, string> {
-	// TODO: check if the passage exists.
-	return {
-		original: passage,
-		isEvaluated: false,
-	};
-}
 
 // Much of the code following this is essentially modified SugarCube code, though
 // for the most part just adding types and changing small parts.
-
-// SugarCube has more complex checks for these, but we're only supporting VSCode and assume its
-// whitespace handling is sane.
-const notSpaceRegex: RegExp = /\S/;
-const spaceRegex: RegExp = /\s/;
-const varTestRegexp: RegExp = /^[$_][$A-Z_a-z][$0-9A-Z_a-z]*/;
-const settingsSetupAccessRegexp: RegExp = /^(?:settings|setup)[.[]/;
 
 namespace MacroParse {
 	export enum Item {

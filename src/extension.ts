@@ -114,7 +114,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
-			updateDiagnostics(doc, collection);
+			updateDiagnostics(ctx, doc, collection);
 			await parseText(ctx, doc);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list"))  passageListProvider.refresh();
 		})
@@ -127,6 +127,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			"enabled": true
 		}, true);
 	}
+
+	passageListProvider.onDidChangeTreeData(x => {
+    	// Update any argument/parameters that may depend on passages.
+    	sc2m.argumentCache.clearMacrosUsingPassage();
+	});
 
 	ctx.subscriptions.push(
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
@@ -160,17 +165,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
-				updateDiagnostics(editor.document, collection);
+				updateDiagnostics(ctx, editor.document, collection);
 			}
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
 			changeStoryFormat(document);
-			updateDiagnostics(document, collection);
+			updateDiagnostics(ctx, document, collection);
 		})
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
-			updateDiagnostics(e.document, collection);
+			updateDiagnostics(ctx, e.document, collection);
 		})
 		,
 		vscode.workspace.onDidChangeConfiguration(e => {
@@ -178,7 +183,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				fileGlob().forEach(file => {
 					vscode.workspace.openTextDocument(file).then(doc => {
 						changeStoryFormat(doc);
-						updateDiagnostics(doc, collection);
+						updateDiagnostics(ctx, doc, collection);
 					})
 				});
 			}
@@ -204,6 +209,9 @@ export async function activate(context: vscode.ExtensionContext) {
 				// Note: We simply clear the arguments cache to force it to revalidate.
 				// This could be done in a more efficient manner, but this is good enough.
 				sc2m.argumentCache.clear();
+			}
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.warningbarewordLinkPassageChecking")) {
+				sc2m.argumentCache.clearMacrosUsingPassage();
 			}
 		})
 		,
@@ -243,7 +251,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.refreshDiagnostics", () => {
 			let doc = vscode.window.activeTextEditor?.document;
-			if (doc) updateDiagnostics(doc, collection);
+			if (doc) updateDiagnostics(ctx, doc, collection);
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {

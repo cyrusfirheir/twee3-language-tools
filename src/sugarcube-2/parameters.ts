@@ -1,20 +1,11 @@
 import * as vscode from 'vscode';
+import { Passage } from '../tree-view';
 import { Arg, ArgType, ExpressionArgument, ParsedArguments, SettingsSetupAccessArgument, VariableArgument } from './arguments';
+import { StateInfo, Warning } from './validation';
 
 export type UnparsedFormat = string;
 // Note: This may eventually also be allowed to become an object, for more configuration options.
 export type UnparsedVariant = UnparsedFormat;
-
-// The warning class is for things that are technically 'errors' (in that they are invalid)
-// but are likely just slightly incorrect and so should be counted as at least a partial validity
-// for a given variant. (Ex: Passing a link with a setter to something that takes `linkNoSetter`)
-export class Warning {
-    readonly message: string;
-
-    constructor(message: string) {
-        this.message = message;
-    }
-}
 
 /**
  * Helper function for constructing simple paramter types without the boilerplate
@@ -52,7 +43,7 @@ function makeSimpleParameterType(name: string | string[], errorMessage: string, 
  * Naming should be camelCase.
  * Type names are currently case-sensitive.
  */
-const parameterTypes: ParameterType[] = [
+export const parameterTypes: ParameterType[] = [
     makeSimpleParameterType("true", "Argument is not 'true'", ArgType.True),
     makeSimpleParameterType("false", "Argument is not 'false'", ArgType.False),
     makeSimpleParameterType(["bool", "boolean"], "Argument is not a boolean", type => type === ArgType.True || type === ArgType.False),
@@ -98,18 +89,32 @@ const parameterTypes: ParameterType[] = [
     },
     {
         name: ["passage"],
-        validate(info: ArgumentInfo): Error | null {
-            // TODO; Validate the passage name (if possible)
-            let t = info.arg.type;
-            if (t === ArgType.Bareword || t === ArgType.String || t === ArgType.True || t === ArgType.False || t === ArgType.Null || t === ArgType.NaN || t === ArgType.Number) {
+        validate(info: ArgumentInfo): Error | Warning | null {
+            // The passage, if it is undefined then we can't check it at runtime.
+            let passageName: string | undefined = undefined;
+            if (info.arg.type === ArgType.Bareword) {
+                passageName = info.arg.value;
+            } else if (info.arg.type === ArgType.String) {
+                passageName = info.arg.text;
+            } else if (info.arg.type === ArgType.NaN) {
+                passageName = String(NaN);
+            } else if (info.arg.type === ArgType.Number) {
+                passageName = String(info.arg.value);
+            }
+
+            if (passageName !== undefined) {
+                if (!info.state.passages.find(passage => passage.name === passageName)) {
+                    return new Warning("Nonexistent passage");
+                }
                 return null;
             } else {
+                // Based on SugarCube's Story.has, we don't allow booleans, null, objects, etc.
                 return new Error("Argument is not an acceptable passage");
             }
         }
     }
 ];
-function findParameterType(name: string): null | ParameterType {
+export function findParameterType(name: string): null | ParameterType {
     for (let i = 0; i < parameterTypes.length; i++) {
         if (parameterTypes[i].name.includes(name)) {
             return parameterTypes[i];
@@ -117,7 +122,7 @@ function findParameterType(name: string): null | ParameterType {
     }
     return null;
 }
-interface ParameterType {
+export interface ParameterType {
     /**
      * Names that this parameter goes by.
      */
@@ -139,6 +144,8 @@ interface ArgumentInfo {
     index: number,
     // Easy access. Equivalent to `arguments[index]`.
     arg: Arg,
+    // Information about the state, used for some types which depend on other parts of the code
+    state: StateInfo,
 }
 
 /**
@@ -209,6 +216,33 @@ export class Parameters {
     }
 
     /**
+     * Check if any of the paths contain this format.
+     * Does not do complex validation of if it is ever reachable.
+     * @param testFormat 
+     */
+    has (testFormat: Format): boolean {
+        for (const key in this.variants) {
+            if (this.variants[key].has(testFormat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test whether the format contains a specific type in it.
+     * Uses `has`. Minor helper utility.
+     */
+    hasType(type: ParameterType): boolean {
+        return this.has({
+            kind: FormatKind.Type,
+            // Having to construct this is unfortunate, but it doesn't matter much.
+            range: new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0)),
+            type,
+        });
+    }
+
+    /**
      * Checks if two Parameters are loosely equivalent
      */
     compare(other: Parameters): boolean {
@@ -237,7 +271,7 @@ export class Parameters {
      * Checks the given arguments for their matching to a chosen
      * @param args The parsed arguments for type validation
      */
-    validate(args: ParsedArguments): ChosenVariantInformation {
+    validate(args: ParsedArguments, stateInfo: StateInfo): ChosenVariantInformation {
         // We track the current most likely variant based on type and somewhat on
         // argument count. This certainly isn't the most accurate implementation but it
         // should work well enough for now.
@@ -255,7 +289,7 @@ export class Parameters {
 
         for (const variantKey in this.variants) {
             const variant = this.variants[variantKey];
-            let info = variant.validate(args);
+            let info = variant.validate(args, stateInfo);
 
             if (info.rank > highestVariant.info.rank) {
                 highestVariant.info = info;
@@ -328,6 +362,18 @@ export class Variant {
     isEmpty(): boolean {
         return this.format === null;
     }
+    
+    /**
+     * Test whether the format contains the given format in any of its paths.
+     * @param testFormat
+     */
+    has(testFormat: Format): boolean {
+        if (this.format === null) {
+            return false;
+        }
+
+        return formatHas(this.format, testFormat);
+    }
 
     /**
      * Whether two variants are loosely equivalent.
@@ -350,7 +396,7 @@ export class Variant {
     /**
      * Checks if the arguments are valid based on this variant.
      */
-    validate(parsedArguments: ParsedArguments): ValidateInformation {
+    validate(parsedArguments: ParsedArguments, stateInfo: StateInfo): ValidateInformation {
         // Shorthand
         const args = parsedArguments.arguments;
         let iterations: number = 0;
@@ -462,8 +508,7 @@ export class Variant {
 
                 argIndex = infoRight.argIndex;
                 rank += infoRight.rank;
-                warnings.concat(infoRight.warnings);
-
+                warnings = warnings.concat(infoRight.warnings);
                 return makeSuccess(argIndex, rank, warnings);
             } else if (format.kind === FormatKind.AndNext) {
                 let rank: number = 0;
@@ -582,6 +627,7 @@ export class Variant {
                     arg,
                     index: argIndex,
                     arguments: args,
+                    state: stateInfo,
                 });
 
                 if (result instanceof Error) {
@@ -1017,7 +1063,7 @@ export class Variant {
     }
 }
 
-enum FormatKind {
+export enum FormatKind {
     // See: parameterTypes.
     Type,
     // 'text'
@@ -1058,7 +1104,7 @@ interface FormatLexRepeat {
 
 // FormatKind (lexer) without the Group, since that does not appear.
 // Sadly this isn't an enum, so we still have to ues formatkind.
-type FormatParseKind = Exclude<FormatKind, FormatKind.Group>;
+export type FormatParseKind = Exclude<FormatKind, FormatKind.Group>;
 type Format = FormatType | FormatLiteral | FormatAndNext | FormatMaybeNext | FormatOr | FormatRepeat;
 interface FormatType {
     kind: FormatKind.Type,
@@ -1097,6 +1143,24 @@ interface FormatRepeat {
     right: Format,
 }
 
+export function formatHas(format: Format, needle: Format): boolean {
+    if (compareFormat(format, needle)) {
+        return true;
+    }
+
+    if (format.kind === FormatKind.AndNext || format.kind === FormatKind.Or) {
+        return formatHas(format.left, needle) || formatHas(format.right, needle);
+    } else if (format.kind === FormatKind.MaybeNext) {
+        return (format.left !== undefined && formatHas(format.left, needle)) || formatHas(format.right, needle);
+    } else if (format.kind === FormatKind.Repeat) {
+        return formatHas(format.right, needle);
+    } else {
+        // If this was a Type or Literal then we already compared them at the start of the function
+        // and they weren't equal, thus this branch does not have the needle.
+        return false;
+    }
+}
+
 /**
  * Recursively compare formats for equivalence.
  * Ignores the range, only cares about the structure.
@@ -1131,31 +1195,6 @@ export function compareFormat(left: Format, right: Format): boolean {
         // Unequal kind
         return false;
     }
-}
-
-
-/**
- * Simple function for if checking each of two array's elements are equal.
- * Uses triple-equals and does not do any recursive calls on sub-arrays.
- * Has the option to take undefined arrays, because that is just better for the place it is used in.
- */
-export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
-    if (left === right) {
-        // They're the same array, or both undefined
-        return true;
-    } else if (left === undefined || right === undefined) {
-        // We already checked for equality, so if either are undefined then we know it isn't equal
-        return false;
-    } else if (left.length !== right.length) {
-        return false;
-    }
-
-    for (let i = 0; i < left.length; i++) {
-        if (left[i] !== right[i]) {
-            return false;
-        }
-    }
-    return true;
 }
 
 /**

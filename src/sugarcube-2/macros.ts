@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { Arg, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
-import { ArgumentError, ArgumentWarning, ChosenVariantInformation, isArrayEqual, Parameters, parseMacroParameters } from './parameters';
+import { Arg, ArgType, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
+import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
+import { Passage } from '../tree-view';
+import { isArrayEqual } from './validation';
 
 export type MacroName = string;
 export interface macro {
@@ -327,6 +329,44 @@ class ArgumentCache {
 	}
 
 	/**
+	 * Clears macros that use passages.
+	 * This could be improved in several ways thought it works well enough:
+	 * - Only recheck passages rather than entire reparsing and revalidation.
+	 * - Cache whether some parameters uses passages.
+	 */
+	async clearMacrosUsingPassage() {
+		const macros = await macroList();
+		// We assume that all of these exist.
+		const parameterTypes = [
+			findParameterType("passage"),
+			findParameterType("link"),
+			findParameterType("linkNoSetter"),
+			findParameterType("image"),
+			findParameterType("imageNoSetter"),
+		] as ParameterType[];
+
+		mainLoop: for (const macroName in this.cache) {
+			const macroDefinition: macroDef | undefined = macros[macroName];
+			if (macroDefinition !== undefined && macroDefinition.parameters !== undefined) {
+				for (let i = 0; i < parameterTypes.length; i++) {
+					if (macroDefinition.parameters.hasType(parameterTypes[i])) {
+						continue mainLoop;
+					}
+				}
+			}
+			// Check individual cached macros for the use of links
+			for (const arg in this.cache[macroName]) {
+				const passageUsingArg = this.cache[macroName][arg].parsed.arguments
+					.find(arg => (arg.type === ArgType.Link || arg.type === ArgType.Image) && arg.passage);
+				if (passageUsingArg !== undefined) {
+					delete this.cache[macroName][arg];
+				}
+			}
+			// If parameters are undefined we don't bother checking it.
+		}
+	}
+
+	/**
 	 * Gets a cache entry, otherwise creates it with the given `construct` function.
 	 * @param name The name of the macro.
 	 * @param args The string of arguments that the macro received
@@ -355,10 +395,11 @@ class ArgumentCache {
 }
 export const argumentCache: ArgumentCache = new ArgumentCache();
 
-export const diagnostics = async function (document: vscode.TextDocument) {
+export const diagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument) {
 	let d: vscode.Diagnostic[] = [];
 
 	let collected = await collect(document.getText());
+	const passages: Passage[] = ctx.workspaceState.get("passages", []);
 
 	collected.macros.forEach(el => {
 		let cur: macroDef;
@@ -447,11 +488,14 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 				// TODO: Potential future feature would making the cache simply hold the
 				// diagnostics themselves rather than reconstructing them each time.
 				const cacheEntry = argumentCache.getInsert(el.name, args, () => {
-					const parsedArguments: ParsedArguments = parseArguments(args, lexRange, el, cur);
+					const stateInfo = {
+						passages,
+					};
+					const parsedArguments: ParsedArguments = parseArguments(args, lexRange, el, cur, stateInfo);
 					let chosenVariant: ChosenVariantInformation | null = null;
 					if (parsedArguments.errors.length === 0 && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && cur.parameters instanceof Parameters) {
 						const parameters: Parameters = cur.parameters;
-						chosenVariant = parameters.validate(parsedArguments);
+						chosenVariant = parameters.validate(parsedArguments, stateInfo);
 					}
 
 					return {
@@ -473,6 +517,18 @@ export const diagnostics = async function (document: vscode.TextDocument) {
 						message: error.message || "Unknown argument parsing failure",
 						source: 'sc2-ex',
 						code: 107,
+					});
+				}
+
+				// Add any warnings
+				for (let i = 0; i < parsedArguments.warnings.length; i++) {
+					const warning = parsedArguments.warnings[i];
+					d.push({
+						severity: vscode.DiagnosticSeverity.Warning,
+						range: warning.range,
+						message: warning.message || "Unknown argument parsing error",
+						source: `sc2-ex`,
+						code: 112,
 					});
 				}
 
