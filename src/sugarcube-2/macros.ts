@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { Arg, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
-import { ArgumentError, ArgumentWarning, ChosenVariantInformation, Parameters, parseMacroParameters } from './parameters';
+import { Arg, ArgType, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
+import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 import { Passage } from '../tree-view';
 import { isArrayEqual } from './validation';
@@ -325,6 +325,44 @@ class ArgumentCache {
 	clearMacro(name: MacroName) {
 		if (name in this.cache) {
 			delete this.cache[name];
+		}
+	}
+
+	/**
+	 * Clears macros that use passages.
+	 * This could be improved in several ways thought it works well enough:
+	 * - Only recheck passages rather than entire reparsing and revalidation.
+	 * - Cache whether some parameters uses passages.
+	 */
+	async clearMacrosUsingPassage() {
+		const macros = await macroList();
+		// We assume that all of these exist.
+		const parameterTypes = [
+			findParameterType("passage"),
+			findParameterType("link"),
+			findParameterType("linkNoSetter"),
+			findParameterType("image"),
+			findParameterType("imageNoSetter"),
+		] as ParameterType[];
+
+		mainLoop: for (const macroName in this.cache) {
+			const macroDefinition: macroDef | undefined = macros[macroName];
+			if (macroDefinition !== undefined && macroDefinition.parameters !== undefined) {
+				for (let i = 0; i < parameterTypes.length; i++) {
+					if (macroDefinition.parameters.hasType(parameterTypes[i])) {
+						continue mainLoop;
+					}
+				}
+			}
+			// Check individual cached macros for the use of links
+			for (const arg in this.cache[macroName]) {
+				const passageUsingArg = this.cache[macroName][arg].parsed.arguments
+					.find(arg => (arg.type === ArgType.Link || arg.type === ArgType.Image) && arg.passage);
+				if (passageUsingArg !== undefined) {
+					delete this.cache[macroName][arg];
+				}
+			}
+			// If parameters are undefined we don't bother checking it.
 		}
 	}
 

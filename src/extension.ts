@@ -128,6 +128,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
+	passageListProvider.onDidChangeTreeData(x => {
+    	// Update any argument/parameters that may depend on passages.
+    	sc2m.argumentCache.clearMacrosUsingPassage();
+	});
+
 	ctx.subscriptions.push(
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
 		,
