@@ -1,5 +1,16 @@
 <template>
   <g>
+    <template v-if="highlight">
+      <line
+        v-for="line of lines"
+        :key="line.key"
+        :x1="line.x1"
+        :y1="line.y1"
+        :x2="line.x2"
+        :y2="line.y2"
+        class="outline"
+      />
+    </template>
     <line
       v-for="line of lines"
       :key="line.key"
@@ -113,12 +124,19 @@ export default defineComponent({
 
 <style scoped lang="scss">
 line {
-  stroke: rgb(200, 200, 200);
+  stroke: hsl(53deg 30% 50%);
   stroke-width: 2;
 
   &.highlight {
-    stroke: rgb(100, 255, 100);
+    stroke: hsl(53deg 50% 70%);
     z-index: 1;
+  }
+
+  &.outline {
+    stroke: hsl(53deg 50% 30%);
+    stroke-width: 4px;
+    stroke-linecap: round;
+    opacity: .5;
   }
 }
 </style>

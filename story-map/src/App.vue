@@ -6,7 +6,12 @@
     @mousedown="onMapMouseDown($event)"
     @wheel.prevent="onWheel($event)"
   >
-    <ToolBar class="toolbar" @toggle="toggleSetting($event)"></ToolBar>
+    <ToolBar
+      class="toolbar"
+      :unsavedChanges="unsavedChanges"
+      @saveChanges="saveChanges()"
+      @toggle="toggleSetting($event)"
+    />
     <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }">
       <svg :style="svgStyle">
         <template v-if="!draggedPassage">
@@ -38,10 +43,6 @@
         {{ item.passage.name }}
       </div>
       <div v-if="shadowPassage" :style="shadowPassage.style" class="passage shadow-passage"></div>
-    </div>
-    <!-- Move this to toolbar -->
-    <div class="save-changes" v-if="unsavedChanges">
-      <button type="button" @click="saveChanges()">Save changes</button>
     </div>
   </div>
 </template>
@@ -93,9 +94,9 @@ export default defineComponent({
     highlightElements: [],
     shadowPassage: null,
     settings: {
-      showGrid: false,
+      showGrid: true,
       snapToGrid: false,
-      gridSize: 20,
+      gridSize: 25,
     },
   }),
   computed: {
@@ -130,14 +131,13 @@ export default defineComponent({
       const style: { [key: string]: any } = {
         width: `${maxX * 1.1}px`,
         height: `${maxY * 1.1}px`,
-        backgroundColor: `rgba(255, 255, 255, .1)`,
       };
       if (this.settings.showGrid) {
         const gridSize = this.settings.gridSize;
         const svgGrid = /* html */`
           <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
-            <line x1="${gridSize}" y1="0" x2="${gridSize}" y2="${gridSize}" stroke="rgba(255,255,255,.25)"></line>
-            <line x1="0" y1="${gridSize}" x2="${gridSize}" y2="${gridSize}" stroke="rgba(255,255,255,.25)"></line>
+            <line x1="${gridSize}" y1="0" x2="${gridSize}" y2="${gridSize}" stroke="rgba(0,0,0,.25)"></line>
+            <line x1="0" y1="${gridSize}" x2="${gridSize}" y2="${gridSize}" stroke="rgba(0,0,0,.25)"></line>
           </svg>
         `.split('\n').join('').split('\r').join('').split('  ').join('');
         style.backgroundImage = `url('data:image/svg+xml;utf8,${svgGrid}')`;
@@ -215,7 +215,6 @@ export default defineComponent({
     toggleSetting({ id, value }: { id: string; value: any }) {
       if (id === 'snap-to-grid') {
         this.settings.snapToGrid = value;
-        this.settings.showGrid = value;
       }
     },
     getSnappedPassagePosition(position: Vector): Vector {
@@ -361,6 +360,7 @@ html, body {
   flex-direction: column;
   width: 100vw;
   height: 100vh;
+  background-color: hsl(53deg 20% 75%);
 }
 
 .toolbar {
@@ -376,45 +376,36 @@ html, body {
 svg {
   min-width: 100%;
   min-height: 100%;
-  background-color: rgba(255, 255, 255, .1);
-}
-
-.save-changes {
-  position: absolute;
-  z-index: 200;
-  top: 10px;
-  right: 10px;
-
-  button {
-    padding: 5px 10px;
-    font-size: 24px;
-    background-color: #234;
-    color: #FFF;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 0;
-
-    &:hover {
-      background-color: #468;
-    }
-  }
+  border-radius: 8px;
+  background-color: hsl(54deg 60% 96%);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 
 .passage {
   position: absolute;
   overflow: hidden;
-  background-color: #000;
-  color: #FFF;
+  background-color: #F2F2F2;
+  border: solid #CCC 1px;
+  border-radius: 3px;
+  color: #000;
   padding: 5px;
   font-size: 12px;
   overflow-wrap: anywhere;
+  cursor: grab;
+  transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
 
   &.highlight {
-    background-color: #5A5;
+    background-color: hsl(54deg 15% 90%);
+    border-color: #999;
+    border-width: 2px;
+    padding: 4px;
   }
 
   &:hover {
-    background-color: #363;
+    background-color: #FFF;
+    border-color: #999;
+    border-width: 2px;
+    padding: 4px;
   }
 
   &.shadow-passage {

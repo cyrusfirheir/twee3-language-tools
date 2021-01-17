@@ -4,6 +4,7 @@
       <button
         v-if="element.tag === 'button' && element.type === 'toggle'"
         type="button"
+        class="tb-button"
         :data-action="element.id"
         :key="element.id"
         :class="{ active: element.active }"
@@ -14,6 +15,13 @@
         <span class="text">{{ element.text }}</span>
       </button>
     </template>
+    <div class="spacer"></div>
+    <div class="save-changes" v-if="unsavedChanges">
+      <button type="button" @click="$emit('saveChanges')">
+        <span class="button-text">Save changes</span>
+        <img class="button-icon" src="save.svg" alt="">
+      </button>
+    </div>
   </div>
 </template>
 
@@ -22,6 +30,9 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "ToolBar",
+  props: {
+    unsavedChanges: Boolean,
+  },
   data: () => ({
     elements: [
       {
@@ -47,10 +58,10 @@ export default defineComponent({
 .toolbar {
   display: flex;
   flex-direction: row;
-  padding: 4px;
-  background-color: #222;
+  padding: 10px;
+  background-color: #356;
 
-  button {
+  .tb-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -58,7 +69,7 @@ export default defineComponent({
     height: 36px;
     border: 0;
     overflow: hidden;
-    background-color: #444;
+    background-color: #082030;
     cursor: pointer;
     outline: 0;
     padding: 0;
@@ -110,5 +121,51 @@ export default defineComponent({
       display: none;
     }
   }
+
+  .save-changes button {
+    padding: 5px 8px 5px 8px;
+    font-size: 24px;
+    background-color: #082030;
+    color: #FFF;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 0;
+    display: flex;
+    align-items: center;
+
+    .button-icon {
+      width: 24px;
+      height: 24px;
+      opacity: .85;
+      transition: opacity .4s ease-in-out;
+    }
+
+    .button-text {
+      width: 0px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-align: left;
+      transition: width .4s ease-in-out, opacity .4s ease-in-out;
+      opacity: 0;
+      font-size: 16px;
+    }
+
+    &:hover {
+      background-color: #245;
+
+      .button-text {
+        width: 110px;
+        opacity: .5;
+      }
+
+      .button-icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.spacer {
+  flex: 1;
 }
 </style>
