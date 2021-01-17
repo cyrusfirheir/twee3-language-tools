@@ -15,6 +15,7 @@ export interface Passage {
     originalPosition: Vector;
     originalSize: Vector;
     zIndex?: number;
+    dropShadow?: string;
 }
 
 export interface LinkedPassage extends Passage {
@@ -22,9 +23,13 @@ export interface LinkedPassage extends Passage {
     linkedFrom: Passage[];
 }
 
+export interface PassageStyle {
+    [key: string]: any;
+}
+
 export interface PassageAndStyle {
     passage: Passage;
-    style: { [key: string]: any; };
+    style: PassageStyle;
 }
 
 export interface RawPassage {

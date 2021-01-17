@@ -6,7 +6,7 @@
     @mousedown="onMapMouseDown($event)"
     @wheel.prevent="onWheel($event)"
   >
-    <ToolBar class="toolbar"></ToolBar>
+    <ToolBar class="toolbar" @toggle="toggleSetting($event)"></ToolBar>
     <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }">
       <svg :style="svgStyle">
         <template v-if="!draggedPassage">
@@ -37,6 +37,7 @@
       >
         {{ item.passage.name }}
       </div>
+      <div v-if="shadowPassage" :style="shadowPassage.style" class="passage shadow-passage"></div>
     </div>
     <!-- Move this to toolbar -->
     <div class="save-changes" v-if="unsavedChanges">
@@ -48,7 +49,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { socket } from './socket';
-import { PassageAndStyle, Vector, Passage, RawPassage, LinkedPassage, PassageLink } from './types';
+import { PassageAndStyle, Vector, Passage, RawPassage, LinkedPassage, PassageLink, PassageStyle } from './types';
 import { linkPassage, parseRaw } from './util/passage-tools';
 import { cropLine } from './util/line-tools';
 
@@ -59,13 +60,20 @@ interface ComponentData {
     connected: boolean;
     passages: LinkedPassage[];
     draggedPassage: LinkedPassage | null;
-    lastDragPosition: Vector | null;
+    initialDragItemPosition: Vector | null;
+    initialDragPosition: Vector | null;
     highestZIndex: number;
     translate: Vector;
     zoom: number;
     hoveredElement: PassageLink | LinkedPassage | null;
     linkedPassages: PassageLink[];
     highlightElements: Array<PassageLink | LinkedPassage>;
+    shadowPassage: PassageAndStyle | null;
+    settings: {
+      showGrid: boolean;
+      snapToGrid: boolean;
+      gridSize: number;
+    };
 }
 
 export default defineComponent({
@@ -75,25 +83,26 @@ export default defineComponent({
     connected: false,
     passages: [],
     draggedPassage: null,
-    lastDragPosition: null,
+    initialDragItemPosition: null,
+    initialDragPosition: null,
     highestZIndex: 0,
     translate: { x: 0, y: 0 },
     zoom: 1,
     hoveredElement: null,
     linkedPassages: [],
     highlightElements: [],
+    shadowPassage: null,
+    settings: {
+      showGrid: false,
+      snapToGrid: false,
+      gridSize: 20,
+    },
   }),
   computed: {
     items(): PassageAndStyle[] {
       return this.passages.map((passage) => ({
         passage,
-        style: {
-          width: `${passage.size.x}px`,
-          height: `${passage.size.y}px`,
-          left: `${passage.position.x}px`,
-          top: `${passage.position.y}px`,
-          ['z-index']: passage.zIndex || 0,
-        },
+        style: this.getPassageStyle(passage),
       }));
     },
     changedPassages(): LinkedPassage[] {
@@ -117,7 +126,24 @@ export default defineComponent({
         maxX = Math.max(maxX, passageMaxX);
         maxY = Math.max(maxY, passageMaxY);
       }
-      return `width: ${maxX * 1.1}px; height: ${maxY * 1.1}px;`;
+
+      const style: { [key: string]: any } = {
+        width: `${maxX * 1.1}px`,
+        height: `${maxY * 1.1}px`,
+        backgroundColor: `rgba(255, 255, 255, .1)`,
+      };
+      if (this.settings.showGrid) {
+        const gridSize = this.settings.gridSize;
+        const svgGrid = /* html */`
+          <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
+            <line x1="${gridSize}" y1="0" x2="${gridSize}" y2="${gridSize}" stroke="rgba(255,255,255,.25)"></line>
+            <line x1="0" y1="${gridSize}" x2="${gridSize}" y2="${gridSize}" stroke="rgba(255,255,255,.25)"></line>
+          </svg>
+        `.split('\n').join('').split('\r').join('').split('  ').join('');
+        style.backgroundImage = `url('data:image/svg+xml;utf8,${svgGrid}')`;
+      }
+
+      return style;
     },
     translateStr() {
       return `translate(${Math.round(this.translate.x * 1000) / 1000}px, ${Math.round(this.translate.y * 1000) / 1000}px)`;
@@ -177,32 +203,77 @@ export default defineComponent({
     },
   },
   methods: {
+    getPassageStyle(passage: LinkedPassage): PassageStyle {
+      return {
+        width: `${passage.size.x}px`,
+        height: `${passage.size.y}px`,
+        left: `${passage.position.x}px`,
+        top: `${passage.position.y}px`,
+        ['z-index']: passage.zIndex || 0,
+      };
+    },
+    toggleSetting({ id, value }: { id: string; value: any }) {
+      if (id === 'snap-to-grid') {
+        this.settings.snapToGrid = value;
+        this.settings.showGrid = value;
+      }
+    },
+    getSnappedPassagePosition(position: Vector): Vector {
+      const gridSize: number = this.settings.gridSize;
+      const halfGrid = gridSize / 2;
+      const offset: Vector = { x: position.x % gridSize, y: position.y % gridSize };
+      const target: Vector = {
+        x: position.x - offset.x + (offset.x < halfGrid ? 0 : gridSize),
+        y: position.y - offset.y + (offset.y < halfGrid ? 0 : gridSize),
+      }
+      return target;
+    },
     onPassageMouseDown(passage: LinkedPassage, event: MouseEvent) {
       this.highestZIndex++;
       passage.zIndex = this.highestZIndex;
       this.draggedPassage = passage;
-      this.lastDragPosition = { x: event.clientX, y: event.clientY };
+
+      this.initialDragItemPosition = { ... passage.position };
+      this.initialDragPosition = { x: event.clientX, y: event.clientY };
     },
     onMapMouseDown(event: MouseEvent) {
-      this.lastDragPosition = { x: event.clientX, y: event.clientY };
+      this.initialDragItemPosition = { ...this.translate };
+      this.initialDragPosition = { x: event.clientX, y: event.clientY };
     },
     onMouseMove(event: MouseEvent) {
-      if (!this.lastDragPosition) return;
+      if (!this.initialDragPosition || !this.initialDragItemPosition) return;
 
       if (this.draggedPassage) {
-        const delta: Vector = { x: this.lastDragPosition.x - event.clientX, y: this.lastDragPosition.y - event.clientY };
-        this.draggedPassage.position.x = Math.max(0, this.draggedPassage.position.x - (delta.x / this.zoom));
-        this.draggedPassage.position.y = Math.max(0, this.draggedPassage.position.y - (delta.y / this.zoom));
+        const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
+        this.draggedPassage.position.x = Math.max(0, this.initialDragItemPosition.x - (delta.x / this.zoom));
+        this.draggedPassage.position.y = Math.max(0, this.initialDragItemPosition.y - (delta.y / this.zoom));
+        if (this.settings.snapToGrid) {
+          const gridSnappedPassageClone = {
+            ...this.draggedPassage,
+            position: this.getSnappedPassagePosition(this.draggedPassage.position),
+          };
+          this.shadowPassage = {
+            passage: gridSnappedPassageClone,
+            style: this.getPassageStyle(gridSnappedPassageClone),
+          };
+        }
       } else {
         // Drag map
-        const delta: Vector = { x: this.lastDragPosition.x - event.clientX, y: this.lastDragPosition.y - event.clientY };
-        this.translate.x -= delta.x;
-        this.translate.y -= delta.y;
+        const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
+        this.translate.x = this.initialDragItemPosition.x - delta.x;
+        this.translate.y = this.initialDragItemPosition.y - delta.y;
       }
-      this.lastDragPosition = { x: event.clientX, y: event.clientY };
     },
     onMouseUp(event: MouseEvent) {
-      this.lastDragPosition = null;
+      if (this.draggedPassage) {
+        this.draggedPassage.dropShadow = undefined;
+        if (this.settings.snapToGrid) {
+          this.draggedPassage.position = this.getSnappedPassagePosition(this.draggedPassage.position);
+          this.shadowPassage = null;
+        }
+      }
+      this.initialDragPosition = null;
+      this.initialDragItemPosition = null;
       this.draggedPassage = null;
     },
     onWheel(event: WheelEvent) {
@@ -332,7 +403,6 @@ svg {
 .passage {
   position: absolute;
   overflow: hidden;
-  border: solid #333 1px;
   background-color: #000;
   color: #FFF;
   padding: 5px;
@@ -345,6 +415,12 @@ svg {
 
   &:hover {
     background-color: #363;
+  }
+
+  &.shadow-passage {
+    background: 0;
+    outline: solid #F00 1px;
+    pointer-events: none;
   }
 }
 </style>

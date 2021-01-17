@@ -63,6 +63,10 @@ export default defineComponent({
     outline: 0;
     padding: 0;
 
+    &.active {
+      outline: solid #FFF 1px;
+    }
+
     .icon {
       position: relative;
       width: 24px;
