@@ -83,7 +83,7 @@ export default defineComponent({
   components: { ToolBar, PassageLinkLink },
   data: (): ComponentData => ({
     connected: false,
-    theme: 'dark',
+    theme: '',
     passages: [],
     draggedPassage: null,
     initialDragItemPosition: null,
