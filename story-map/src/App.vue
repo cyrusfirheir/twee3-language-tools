@@ -136,7 +136,7 @@ export default defineComponent({
         height: `${maxY * 1.1}px`,
       };
       if (this.settings.showGrid) {
-        const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines');
+        const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines').replace(/#/g, '%23').trim();
         const gridSize = this.settings.gridSize;
         const svgGrid = /* html */`
           <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
@@ -390,7 +390,29 @@ html, body {
 }
 
 [data-theme="dark"] {
-  --primary-200: hotpink; // passage
+  --text-color-light: #FFF;
+  --text-color-dark: #DDD;
+  --primary-100: #000; /* passage hover */
+  --primary-200: #151515; /* passage */
+  --primary-300: #202029; /* passage highlight  */
+  --primary-400: #070919; /* map background */
+  --primary-500: #CCC9B3; /* layout background (around map) */
+  --primary-600: #8C93D9; /* arrow-highlight inner */
+  --primary-700: #5960A6; /* arrow inner */
+  --primary-800: #262D73; /* arrow-highlight outer */
+
+  --gray-100: #FFF; /* outline for toolbar button when .active */
+  --gray-500: #444; /* passage outline  */
+  --gray-600: #777; /* passage-border (hover & highlight) */
+
+  --accent-800: #082030;  /* toolbar button background */
+  --accent-500: #245; /* toolbar button hover */
+  --accent-400: #356; /* toolbar background */
+
+  --highlight: #F00; /* the drop location for a passage when dragging with snap to grid enabled */
+
+  --shadow-rgb: 0, 0, 0;
+  --grid-lines: #31333f;
 }
 </style>
 
