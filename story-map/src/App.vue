@@ -396,7 +396,7 @@ html, body {
   --primary-200: #151515; /* passage */
   --primary-300: #202029; /* passage highlight  */
   --primary-400: #070919; /* map background */
-  --primary-500: #CCC9B3; /* layout background (around map) */
+  --primary-500: #2b2b2b; /* layout background (around map) */
   --primary-600: #8C93D9; /* arrow-highlight inner */
   --primary-700: #5960A6; /* arrow inner */
   --primary-800: #262D73; /* arrow-highlight outer */
@@ -412,7 +412,7 @@ html, body {
   --highlight: #F00; /* the drop location for a passage when dragging with snap to grid enabled */
 
   --shadow-rgb: 0, 0, 0;
-  --grid-lines: #31333f;
+  --grid-lines: #444466;
 }
 </style>
 
