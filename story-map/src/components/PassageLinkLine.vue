@@ -124,16 +124,16 @@ export default defineComponent({
 
 <style scoped lang="scss">
 line {
-  stroke: hsl(53deg 30% 50%);
+  stroke: var(--primary-700);
   stroke-width: 2;
 
   &.highlight {
-    stroke: hsl(53deg 50% 70%);
+    stroke: var(--primary-600);
     z-index: 1;
   }
 
   &.outline {
-    stroke: hsl(53deg 50% 30%);
+    stroke: var(--primary-800);;
     stroke-width: 4px;
     stroke-linecap: round;
     opacity: .5;

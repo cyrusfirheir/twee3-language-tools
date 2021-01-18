@@ -59,6 +59,7 @@ import PassageLinkLink from './components/PassageLinkLine.vue';
 
 interface ComponentData {
     connected: boolean;
+    theme: string;
     passages: LinkedPassage[];
     draggedPassage: LinkedPassage | null;
     initialDragItemPosition: Vector | null;
@@ -82,6 +83,7 @@ export default defineComponent({
   components: { ToolBar, PassageLinkLink },
   data: (): ComponentData => ({
     connected: false,
+    theme: 'dark',
     passages: [],
     draggedPassage: null,
     initialDragItemPosition: null,
@@ -121,6 +123,7 @@ export default defineComponent({
     svgStyle() {
       let maxX = 0;
       let maxY = 0;
+      let theme = this.theme; // I need to read it so that this will be re-evaluated
       for (const passage of (this.passages as LinkedPassage[])) {
         const passageMaxX = passage.position.x + passage.size.x;
         const passageMaxY = passage.position.y + passage.size.y;
@@ -133,11 +136,12 @@ export default defineComponent({
         height: `${maxY * 1.1}px`,
       };
       if (this.settings.showGrid) {
+        const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines');
         const gridSize = this.settings.gridSize;
         const svgGrid = /* html */`
           <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
-            <line x1="${gridSize}" y1="0" x2="${gridSize}" y2="${gridSize}" stroke="rgba(0,0,0,.25)"></line>
-            <line x1="0" y1="${gridSize}" x2="${gridSize}" y2="${gridSize}" stroke="rgba(0,0,0,.25)"></line>
+            <line x1="${gridSize}" y1="0" x2="${gridSize}" y2="${gridSize}" stroke="${gridLine}"></line>
+            <line x1="0" y1="${gridSize}" x2="${gridSize}" y2="${gridSize}" stroke="${gridLine}"></line>
           </svg>
         `.split('\n').join('').split('\r').join('').split('  ').join('');
         style.backgroundImage = `url('data:image/svg+xml;utf8,${svgGrid}')`;
@@ -201,6 +205,12 @@ export default defineComponent({
         this.linkedPassages = linkedPassages;
       },
     },
+    theme: {
+      immediate: true,
+      handler: (theme) => {
+        document.body.setAttribute('data-theme', theme);
+      },
+    }
   },
   methods: {
     getPassageStyle(passage: LinkedPassage): PassageStyle {
@@ -345,12 +355,42 @@ html, body {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background-color: #111;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
   user-select: none;
+}
+
+:root {
+  // Normal light theme
+  --text-color-light: #FFF;
+  --text-color-dark: #000;
+  --primary-100: hsl(55deg 60% 100%); // passage hover
+  --primary-200: hsl(55deg 15% 95%); // passage
+  --primary-300: hsl(55deg 15% 90%); // passage highlight
+  --primary-400: hsl(55deg 60% 96%); // map background
+  --primary-500: hsl(53deg 20% 75%); // layout background (around map)
+  --primary-600: hsl(55deg 50% 70%); // arrow-highlight inner
+  --primary-700: hsl(55deg 30% 50%); // arrow inner
+  --primary-800: hsl(55deg 50% 30%); // arrow-highlight outer
+
+  --gray-100: #FFF; // outline for toolbar button when .active
+  --gray-500: #CCC; // passage outline 
+  --gray-600: #999; // passage-border (hover & highlight)
+
+  --accent-800: #082030; // toolbar button background
+  --accent-500: #245; // toolbar button hover
+  --accent-400: #356; // toolbar background
+
+  --highlight: #F00; // the drop location for a passage when dragging with snap to grid enabled
+
+  --shadow-rgb: 0, 0, 0;
+  --grid-lines: rgba(0, 0, 0, .25);
+}
+
+[data-theme="dark"] {
+  --primary-200: hotpink; // passage
 }
 </style>
 
@@ -360,7 +400,7 @@ html, body {
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-  background-color: hsl(53deg 20% 75%);
+  background-color: var(--primary-500);
 }
 
 .toolbar {
@@ -377,40 +417,41 @@ svg {
   min-width: 100%;
   min-height: 100%;
   border-radius: 8px;
-  background-color: hsl(54deg 60% 96%);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  background-color: var(--primary-400);
+  box-shadow: 0 10px 20px rgba(var(--shadow-rgb),0.19), 0 6px 6px rgba(var(--shadow-rgb),0.23);
 }
 
 .passage {
   position: absolute;
   overflow: hidden;
-  background-color: #F2F2F2;
-  border: solid #CCC 1px;
+  background-color: var(--primary-200);
+  border: solid var(--gray-500) 1px;
   border-radius: 3px;
-  color: #000;
+  color: var(--text-color-dark);
   padding: 5px;
   font-size: 12px;
   overflow-wrap: anywhere;
   cursor: grab;
   transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb),0.12), 0 1px 2px rgba(var(--shadow-rgb),0.24);
 
   &.highlight {
-    background-color: hsl(54deg 15% 90%);
-    border-color: #999;
+    background-color: var(--primary-300);
+    border-color: var(--gray-600);
     border-width: 2px;
     padding: 4px;
   }
 
   &:hover {
-    background-color: #FFF;
-    border-color: #999;
+    background-color: var(--primary-100);
+    border-color: var(--gray-600);
     border-width: 2px;
     padding: 4px;
   }
 
   &.shadow-passage {
     background: 0;
-    outline: solid #F00 1px;
+    outline: solid var(--highlight) 1px;
     pointer-events: none;
   }
 }

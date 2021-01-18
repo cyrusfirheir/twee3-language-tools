@@ -19,7 +19,7 @@
     <div class="save-changes" v-if="unsavedChanges">
       <button type="button" @click="$emit('saveChanges')">
         <span class="button-text">Save changes</span>
-        <img class="button-icon" src="save.svg" alt="">
+        <Save class="button-icon" />
       </button>
     </div>
   </div>
@@ -27,9 +27,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Save from './svg/Save.vue';
 
 export default defineComponent({
   name: "ToolBar",
+  components: {
+    Save,
+  },
   props: {
     unsavedChanges: Boolean,
   },
@@ -59,7 +63,7 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   padding: 10px;
-  background-color: #356;
+  background-color: var(--accent-400);
 
   .tb-button {
     display: flex;
@@ -69,13 +73,13 @@ export default defineComponent({
     height: 36px;
     border: 0;
     overflow: hidden;
-    background-color: #082030;
+    background-color: var(--accent-800);
     cursor: pointer;
     outline: 0;
     padding: 0;
 
     &.active {
-      outline: solid #FFF 1px;
+      outline: solid var(--gray-100) 1px;
     }
 
     .icon {
@@ -98,8 +102,8 @@ export default defineComponent({
           right: 6px;
           top: 0;
           bottom: 0;
-          border-left: solid #FFF 2px;
-          border-right: solid #FFF 2px;
+          border-left: solid var(--text-color-light) 2px;
+          border-right: solid var(--text-color-light) 2px;
         }
 
         &::after {
@@ -107,8 +111,8 @@ export default defineComponent({
           bottom: 6px;
           left: 0;
           right: 0;
-          border-top: solid #FFF 2px;
-          border-bottom: solid #FFF 2px;
+          border-top: solid var(--text-color-light) 2px;
+          border-bottom: solid var(--text-color-light) 2px;
         }
 
         &:hover {
@@ -125,8 +129,8 @@ export default defineComponent({
   .save-changes button {
     padding: 5px 8px 5px 8px;
     font-size: 24px;
-    background-color: #082030;
-    color: #FFF;
+    background-color: var(--accent-800);
+    color: var(--text-color-light);
     cursor: pointer;
     border-radius: 4px;
     border: 0;
@@ -151,7 +155,7 @@ export default defineComponent({
     }
 
     &:hover {
-      background-color: #245;
+      background-color: var(--accent-500);
 
       .button-text {
         width: 110px;
