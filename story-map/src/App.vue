@@ -254,8 +254,8 @@ export default defineComponent({
 
       if (this.draggedPassage) {
         const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
-        this.draggedPassage.position.x = Math.max(0, this.initialDragItemPosition.x - (delta.x / this.zoom));
-        this.draggedPassage.position.y = Math.max(0, this.initialDragItemPosition.y - (delta.y / this.zoom));
+        this.draggedPassage.position.x = Math.max(0, Math.round(this.initialDragItemPosition.x - (delta.x / this.zoom)));
+        this.draggedPassage.position.y = Math.max(0, Math.round(this.initialDragItemPosition.y - (delta.y / this.zoom)));
         if (this.settings.snapToGrid) {
           const gridSnappedPassageClone = {
             ...this.draggedPassage,
@@ -269,8 +269,8 @@ export default defineComponent({
       } else {
         // Drag map
         const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
-        this.translate.x = this.initialDragItemPosition.x - delta.x;
-        this.translate.y = this.initialDragItemPosition.y - delta.y;
+        this.translate.x = Math.round(this.initialDragItemPosition.x - delta.x);
+        this.translate.y = Math.round(this.initialDragItemPosition.y - delta.y);
       }
     },
     onMouseUp(event: MouseEvent) {
