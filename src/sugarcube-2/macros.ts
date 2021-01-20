@@ -159,38 +159,52 @@ function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean
 interface CollectedMacros {
 	macros: macro[],
 }
+
+const collectCleanList = [
+	["/\\*", "\\*/"],
+	["/%", "%/"],
+	["<!--", "-->"],
+	["{{3}", "}{3}"],
+	["\"{3}", "\"{3}"],
+	["<nowiki>", "</nowiki>"],
+	["<script>", "</script>"],
+	["<style>", "</style>"],
+	["^::.*?\\[\\s*script\\s*\\]", "^(?=::)"],
+	["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"]
+].map(el => {
+	const searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;
+	return new RegExp(searchString, "gmi");
+});
 const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 	const list = await macroList();
-	const cleanList = [
-		["/\\*", "\\*/"],
-		["/%", "%/"],
-		["<!--", "-->"],
-		["{{3}", "}{3}"],
-		["\"{3}", "\"{3}"],
-		["<nowiki>", "</nowiki>"],
-		["<script>", "</script>"],
-		["<style>", "</style>"],
-		["^::.*?\\[\\s*script\\s*\\]", "^(?=::)"],
-		["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"]
-	];
 
 	let macros: macro[] = [];
 	let id = 0;
 	let opened: any = {};
 
-	let lines = raw.split(/\n/); // used only for keeping count
-
 	let cleaned = raw + "\n::";
 
-	cleanList.forEach(el => {
-		let searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;
-		cleaned = cleaned.replace(new RegExp(searchString, "gmi"), function (match, p1, p2, p3) {
+	collectCleanList.forEach(searchRegExp => {
+		cleaned = cleaned.replace(searchRegExp, function (match, p1, p2, p3) {
 			return p1 + p2.replace(/<</g, "MO") + p3;
 		});
 	});
 
-	let re = macroRegex;
-	let ex;
+	const selfClosingMacrosEnabled = vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros").get("enable");
+
+	// The array of line endings, their respective indices being their line number.
+	const lineIndices: number[] = [];
+	let lastIndex = cleaned.indexOf('\n');
+	while (lastIndex !== -1) {
+		lineIndices.push(lastIndex);
+		// Add a 1 to skip past the newline character
+		lastIndex = cleaned.indexOf('\n', lastIndex + 1);
+	}
+
+	const re = macroRegex;
+	let ex: RegExpExecArray | null;
+	// Keep track of the last line end to make so we only search from that index
+	let lineEnd = 0;
 	while ((ex = re.exec(cleaned)) !== null) {
 		let open = true,
 			endVariant = false,
@@ -211,14 +225,19 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 
 		if (ex[1] === "/" || endVariant) open = false;
 
-		let lineStart = cleaned.substring(0, ex.index).split(/\n/).length - 1;
-		let lineEnd = lineStart + ex[0].split(/\n/).length - 1;
-		let charStart = ex.index - lines.slice(0, lineStart).join("\n").length - 1;
-		let charEnd = charStart + ex[0].length;
+		const exIndex = ex.index;
+		const lineStart = lineIndices
+			.slice(lineEnd)
+			.findIndex((index) => index > exIndex) + lineEnd;
+		const ex0Length = ex[0].length;
+		lineEnd = lineIndices.slice(lineStart)
+			.findIndex((index) => index > exIndex + ex0Length) + lineStart;
+		const charStart = exIndex - (lineStart ? lineIndices[lineStart - 1] : 0);
+        let charEnd = charStart + ex[0].length;
 
 		let range = new vscode.Range(lineStart, charStart, lineEnd, charEnd);
 
-		if (ex[4] === "/" && vscode.workspace.getConfiguration("twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros").get("enable")) {
+		if (selfClosingMacrosEnabled && ex[4] === "/") {
 			selfClosed = true;
 			selfCloseMacro = {
 				id: id + 1, pair: pair++,
@@ -246,7 +265,6 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 
 		id++;
 	}
-
 	return { macros };
 };
 
