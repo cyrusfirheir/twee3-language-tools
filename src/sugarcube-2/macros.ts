@@ -156,7 +156,10 @@ function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean
 		left.skipArgs === right.skipArgs;
 }
 
-export const collect = async function (raw: string) {
+interface CollectedMacros {
+	macros: macro[],
+}
+const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 	const list = await macroList();
 	const cleanList = [
 		["/\\*", "\\*/"],
@@ -244,8 +247,53 @@ export const collect = async function (raw: string) {
 		id++;
 	}
 
-	return { list, macros };
+	return { macros };
 };
+
+
+interface CollectedMacroCacheEntry {
+	collectedMacros: CollectedMacros,
+	// Last text-document version
+	version: number,
+}
+class CollectedMacroCache {
+	// the string is the filename
+	private cache: Record<string, CollectedMacroCacheEntry>
+	constructor () {
+		this.cache = Object.create(null);
+	}
+
+	async create (document: vscode.TextDocument) {
+		const filename = document.fileName;
+		this.cache[filename] = {
+			collectedMacros: await collectUncached(document.getText()),
+			version: document.version,
+		};
+	}
+
+	async clearFilename (filename: string) {
+		if (filename in this.cache) {
+			delete this.cache[filename];
+		}
+	}
+
+	async get (document: vscode.TextDocument): Promise<CollectedMacros> {
+		const filename = document.fileName;
+		if (filename in this.cache) {
+			if (document.version > this.cache[filename].version) {
+				// Changed file so we need to update
+				await this.create(document);
+			}
+		} else {
+			// Not in cache so we need to create it
+			await this.create(document);
+		}
+
+		return this.cache[filename].collectedMacros;
+	}
+}
+export const collectCache = new CollectedMacroCache();
+
 
 interface ArgumentCacheEntry {
 	parsed: ParsedArguments,
@@ -398,16 +446,17 @@ export const argumentCache: ArgumentCache = new ArgumentCache();
 export const diagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument) {
 	let d: vscode.Diagnostic[] = [];
 
-	let collected = await collect(document.getText());
+	let collected = await collectCache.get(document);
+	let macroDefinitions = await macroList();
 	const passages: Passage[] = ctx.workspaceState.get("passages", []);
 
 	collected.macros.forEach(el => {
 		let cur: macroDef;
-		if (el.name.startsWith("end") && collected.list[el.name.substring(3)]) {
-			cur = collected.list[el.name.substring(3)];
+		if (el.name.startsWith("end") && macroDefinitions[el.name.substring(3)]) {
+			cur = macroDefinitions[el.name.substring(3)];
 			el.open = false;
 		} else {
-			cur = collected.list[el.name];
+			cur = macroDefinitions[el.name];
 		}
 
 		if (cur) {
@@ -648,7 +697,8 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
  */
 export const hover = async function (document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | null> {
 	// Acquire list of macros in the file.
-	const collected = await collect(document.getText());
+	const collected = await collectCache.get(document);
+	const macroDefinitions = await macroList();
 
 	const angle_start_length = '<<'.length;
 	const angle_end_length = '>>'.length;
@@ -656,7 +706,7 @@ export const hover = async function (document: vscode.TextDocument, position: vs
 	// Find the macro with which our position intersects with
 	for (let i = 0; i < collected.macros.length; i++) {
 		const macro = collected.macros[i];
-		const macroDefinition = collected.list[macro.name];
+		const macroDefinition = macroDefinitions[macro.name];
 		// Check if the macro exists in the definitions.
 		// If it doesn't then we know it can't have a description.
 		if (!macroDefinition) continue;
@@ -683,8 +733,8 @@ export const hover = async function (document: vscode.TextDocument, position: vs
 		// And if the macro exists
 		// We have to use the ugly prototype.hasOwnProperty because the macroList is constructed
 		// with a null prototype.
-		if (contained_in && Object.prototype.hasOwnProperty.call(collected.list, macro.name)) {
-			let macroDefinition = collected.list[macro.name];
+		if (contained_in && Object.prototype.hasOwnProperty.call(macroDefinitions, macro.name)) {
+			let macroDefinition = macroDefinitions[macro.name];
 			if (typeof (macroDefinition.description) === "string") {
 				return new vscode.Hover(macroDefinition.description);
 			} else {

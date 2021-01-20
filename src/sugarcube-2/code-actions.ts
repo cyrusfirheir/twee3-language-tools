@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { macroRegex, macroDef, macro, collect } from './macros';
+import { macroRegex, macroDef, macro, collectCache } from './macros';
 
 export class EndMacro implements vscode.CodeActionProvider {
 	public static readonly providedCodeActionKinds = [
@@ -28,7 +28,7 @@ export class Unrecognized implements vscode.CodeActionProvider {
 	];
 
 	public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext): Promise<vscode.CodeAction[]> {
-		const collected = await collect(document.getText());
+		const collected = await collectCache.get(document);
 		let newMacros = new Map<string, macroDef>();
 
 		context.diagnostics

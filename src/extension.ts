@@ -183,7 +183,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		,
 		vscode.window.onDidChangeTextEditorSelection(async e => {
 			if (e.textEditor.document.languageId === "twee3-sugarcube-2" && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.features").get("macroTagMatching")) {
-				let collected = await sc2m.collect(e.textEditor.document.getText());
+				let collected = await sc2m.collectCache.get(e.textEditor.document);
 				let r: vscode.Range[] = [];
 				e.selections.forEach(sel => {
 					let pos = sel.active;
@@ -250,6 +250,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidDeleteFiles(e => {
+			e.files.forEach(file => sc2m.collectCache.clearFilename(file.fsPath));
+
 			const removedFilePaths = e.files.map((file) => file.path);
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
@@ -263,6 +265,9 @@ export async function activate(context: vscode.ExtensionContext) {
 			for (let file of e.files) {
 				let doc = await vscode.workspace.openTextDocument(file.newUri);
 				changeStoryFormat(doc);
+
+				sc2m.collectCache.clearFilename(file.oldUri.fsPath);
+
 				let passages: Passage[] = ctx.workspaceState.get("passages", []);
 				passages.forEach(el => {
 					if (el.origin === file.oldUri.path) el.origin = file.newUri.path;
