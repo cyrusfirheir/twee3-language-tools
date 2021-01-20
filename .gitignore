@@ -1,8 +1,23 @@
 out
+res/story-map
+.DS_Store
 node_modules
 npm-debug.log
+pnpm-debug.log*
 .vscode-test
 *.vsix
 .res.ignore
 publish.bat
-res/story-map
+
+
+# local env files
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -1,4 +1,4 @@
-:: Chapbook
+:: Chapbook {"position":"1225,600"}
 This_is_the_Variable_Section: true
 MyStringVariable: "Text"
 MyIntVariable: 123

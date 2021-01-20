@@ -1,4 +1,3 @@
-import { info } from 'console';
 import * as vscode from 'vscode';
 import { Passage } from '../tree-view';
 import { macro, macroDef } from "./macros";

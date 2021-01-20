@@ -8,7 +8,7 @@ export type UnparsedFormat = string;
 export type UnparsedVariant = UnparsedFormat;
 
 /**
- * Helper function for constructing simple paramter types without the boilerplate
+ * Helper function for constructing simple parameter types without the boilerplate
  */
 function makeSimpleParameterType(name: string | string[], errorMessage: string, validateType: ((type: ArgType) => boolean) | ArgType) {
     if (typeof(name) === 'string') {

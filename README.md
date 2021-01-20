@@ -2,13 +2,25 @@
 
 Syntax highlighting for HTML and select storyformats (see [Features](#features)) on top of Twee 3 code.
 
+Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+
 ## **Features**
 
 ### Twee
 - Syntax highlighting.  
+
 - Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default) and search for "IFID".  
-- A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).)  
-    ![Passage List](https://imgur.com/3WObntl.png)
+
+- A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  
+
+    ![Passage List](https://imgur.com/3WObntl.png)  
+
+- A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar. Currently implemented features:  
+	- Snap to grid (button on top-left)  
+	- Arrows to linked passages  
+	- Saving position changes to file  
+
+	![Story Map](https://imgur.com/pjtlOrC.png)
 
 ### Chapbook
 *(id: `chapbook-1`)*
@@ -24,7 +36,7 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 *(id: `sugarcube-2`)*
 - Syntax highlighting.  
     ![SugarCube syntax](https://imgur.com/9Z94sM4.png)
-- Macro documentation on hover. (Contributed by [@MinusGix](https://github.com/MinusGix)) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube))
+- Macro documentation on hover. (Contributed by @MinusGix) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube))
 	![Screenshot](https://imgur.com/6Q2AR83.png)
 - Container macro pair highlights.
 	![SC macro pairs](https://imgur.com/qjcr3ZK.png)
@@ -39,9 +51,9 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
 		- [Screenshot - diagnostic](https://imgur.com/gv3OJ4i.png)
 		- [Screenshot - quick fix](https://imgur.com/RX5ztR8.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
-	- Invalid argument syntax in macros (Contributed by [@MinusGix](https://github.com/MinusGix)):
+	- Invalid argument syntax in macros (Contributed by @MinusGix):
 		- [Screenshot - diagnostics](https://imgur.com/xw1OFUt.png)
-
+	- Argument validation (Contributed by @MinusGix): [Read here](docs/parameters.md) for more information.
 
 ---
 
@@ -107,7 +119,8 @@ The following properties are currently programmed, even though not all of them a
 - **children** `(string array)` *optional*: If the macro has children, specify their names as an array (currently unused in code.)
 - **parents** `(string array)` *optional*: If the macro is a child macro, specify the names of its parents as an array (currently unused in code.)
 - **deprecated** `(boolean)` *optional*: If the macro is deprecated or not. `false` by default.
-- **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array. 
+- **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array.
+- **parameters** `(object)` *optional*: Allows for macro argument validation. [Read here](docs/parameters.md) for more information.
 
 **NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following file can also be used as an example):
 - `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml))
@@ -130,7 +143,9 @@ Manual settings:
 - `twee3LanguageTools.directories.include`: Directories in which to look for twee files. Use glob patterns *relative* to the root of the workspace folders (e.g. `src/unprocessed/twee`, `src/static`, `external`). (Searches the entire workspace by default.)  
 - `twee3LanguageTools.directories.exclude`: Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened.  
 ⠀
-- `twee3LanguageTools.passage.list`: Collect passage names to display a list of quick 'jump' links? (`false` by default.)  
+- `twee3LanguageTools.storyMap.unusedPortClosingDelay`: Duration in milliseconds before the story-map server port is closed after the UI in the browser window has been closed. (`5000` by default.)
+⠀
+- `twee3LanguageTools.passage.list`: Display list of passages with quick 'jump' links? (`false` by default.)  
 - `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin, folder of origin, or passage tags.)  
 ⠀
 - `twee3LanguageTools.twee-3.warning.spaceAfterStartToken`: Warn about missing space after the start token (`::`) in passage headers? (`true` by default.)  
@@ -138,9 +153,9 @@ Manual settings:
 - `twee3LanguageTools.sugarcube-2.warning.undefinedMacro`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax? (`true` by default.)  
+- `twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking`: Provides warnings for links like `[[passage]]` when `passage` is not a valid passage name. This could cause false positives in cases where you are using a global variable. (`true` by default.)  
 ⠀
 - `twee3LanguageTools.sugarcube-2.error.argumentParsing`: Provide errors about invalid argument syntax being passed into macros? (`true` by default.)  
-
 - `twee3LanguageTools.sugarcube-2.error.parameterValidation`: Provide errors about invalid argument types being passed into macros? (`true` by default.)  
 ⠀
 - `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)  
@@ -164,6 +179,12 @@ Config.passages.onProcess = function(p) {
 ```
 
 The `twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable` setting enables detection of self-closed macros.
+
+---
+
+## **Known issues**
+
+Argument validation is still a work in progress. Passage name validation, especially. Shouldn't hinder workflow, however.
 
 ---
 

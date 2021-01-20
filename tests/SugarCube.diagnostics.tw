@@ -1,5 +1,4 @@
-:: SugarCube diagnostics
-
+:: SugarCube diagnostics {"position":"800,675"}
 /* diagnostic tests */
 
 /* custom definitions - should not throw because defined as a container macro in t3lt.twee-config.yml */

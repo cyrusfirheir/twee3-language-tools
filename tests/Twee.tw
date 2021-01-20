@@ -1,24 +1,24 @@
 <!-- special passage name tests -->
 
-:: StoryTitle
+:: StoryTitle {"position":"1000,100"}
 Twee 3 Language Tools tests
 
-:: StoryData
+:: StoryData {"position":"1000,225"}
 {
   "ifid": "1A9D1134-9D13-4677-BCA1-36E3B42AB8FF",
   "format": "SugarCube",
   "format-version": "2.33.4"
 }
 
-:: Start
+:: Start {"position":"1000,350"}
 
 
 <!-- twee passage name validation tests - all of the following should be valid and highlighted -->
 
-:: Passage Name [tags] { "meta" : "data" }
-:: Passage -\ this i$ a va(l)iD_ name\{ [tags multiple] { "meta" : "data" }
-::    Pass\[age Name [tags tag lol]
-:: Pass\}age N\{ame { "meta" : "data" }
+:: Passage Name [tags] {"position":"1350,275"}
+:: Passage -\ this i$ a va(l)iD_ name\{ [tags multiple] {"position":"1350,25"}
+:: Pass\[age Name [tags tag lol] {"position":"1350,150"}
+:: Pass\}age N\{ame {"position":"1350,400"}
 
 
 <!--
@@ -34,10 +34,10 @@ Twee 3 Language Tools tests
 
 <!-- special tag name test -->
 
-:: Script passage [script]
+:: Script passage [script] {"position":"200,650"}
 console.log("This is a script passage.");
 
-:: Style passage [stylesheet]
+:: Style passage [stylesheet] {"position":"75,650"}
 .this-is a .stylesheet {
 	position: absolute;
 }

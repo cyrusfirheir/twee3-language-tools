@@ -1,16 +1,25 @@
+// Imports
+//#region 
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import * as glob from 'glob';
 
-import headsplit from './headsplit';
+import express from 'express';
+import path from 'path';
+import open from 'open';
+import { Server } from 'http';
+import * as socketio from 'socket.io';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
+import { tweeProjectConfig, changeStoryFormat } from "./tweeProject";
+import { updatePassages, sendPassagesToClient } from "./socket";
 
 import { PassageListProvider, Passage } from './tree-view';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
+//#endregion
 
 let ctx: vscode.ExtensionContext;
 
@@ -42,41 +51,6 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		return 0;
 	}
 }
-
-const tweeProjectConfig = function (document: vscode.TextDocument) {
-	const raw = document.getText();
-	if (!raw.match(/^::\s*StoryData\b/gm)) return;
-	const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
-	if (!storydata?.content) return;
-	let formatInfo: any = undefined;
-	try {
-		formatInfo = JSON.parse(storydata.content);
-	} catch {
-		vscode.window.showErrorMessage("Malformed StoryData JSON!");
-		return;
-	}
-	const format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
-	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
-	if (config.get("current") !== format) {
-		config.update("current", format)
-			.then(() => vscode.window.showInformationMessage("Storyformat set to " + format));
-	}
-};
-
-const changeStoryFormat = async function (document: vscode.TextDocument) {
-	let format: string = "";
-	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
-	const override = config.get("override") || "";
-	if (!override) format = "twee3-" + config.get("current");
-	else format = "twee3-" + override;
-	const langs = await vscode.languages.getLanguages();
-	if (!langs.includes(format)) format = "twee3";
-	if (
-		/^twee3.*/.test(document.languageId) &&
-		document.languageId !== format
-	) return vscode.languages.setTextDocumentLanguage(document, format);
-	else return new Promise(res => res(document));
-};
 
 const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
@@ -116,7 +90,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			tweeProjectConfig(doc);
 			updateDiagnostics(ctx, doc, collection);
 			await parseText(ctx, doc);
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list"))  passageListProvider.refresh();
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		})
 	}
 
@@ -128,12 +102,73 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	passageListProvider.onDidChangeTreeData(x => {
-    	// Update any argument/parameters that may depend on passages.
-    	sc2m.argumentCache.clearMacrosUsingPassage();
-	});
+	function jumpToPassage(passage: { name: string; origin: string }) {
+		vscode.window.showTextDocument(vscode.Uri.file(passage.origin)).then(editor => {
+			const regexp = new RegExp(
+				"^::\\s*" +
+				passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
+				"\\s*(\\[|\\{|$)"
+			);
+			const lines = editor.document.getText().split(/\r?\n/);
+			const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
+			editor.revealRange(new vscode.Range(start, 0, start, 0), vscode.TextEditorRevealType.AtTop);
+		});
+	}
+
+	interface storyMapIO {
+		client: socketio.Socket | undefined;
+		server: Server | undefined;
+		disconnectTimeout: NodeJS.Timeout | undefined;
+	}
+	const storyMap: storyMapIO = { client: undefined, server: undefined, disconnectTimeout: undefined };
+
+	vscode.commands.executeCommand('setContext', 't3lt.storyMap', false);
+
+	function startUI() {
+		const port = 42069;
+
+		const hostUrl = `http://localhost:${port}/`
+		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
+
+		const app = express();
+		app.use(express.static(storyMapPath));
+
+		storyMap.server = new Server(app);
+		storyMap.server.listen(port, () => console.log(`Server connected on ${hostUrl}`));
+
+		const io = new socketio.Server(storyMap.server);
+		io.on('connection', (client: socketio.Socket) => {
+			if (storyMap.client) storyMap.client.disconnect(true);
+			if (storyMap.disconnectTimeout) clearTimeout(storyMap.disconnectTimeout);
+
+			storyMap.client = client;
+			console.log('client connected');
+			sendPassagesToClient(ctx, client);
+
+			client.on('open-passage', jumpToPassage);
+			client.on('update-passages', updatePassages);
+			client.on('disconnect', () => {
+				console.log('client disconnected');
+				storyMap.client = undefined;
+				storyMap.disconnectTimeout = setTimeout(() => {
+					if (!storyMap.client) stopUI();
+				}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
+			});
+		});
+		open(hostUrl);
+		vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
+	}
+
+	function stopUI() {
+		storyMap.client?.disconnect(true);
+		storyMap.server?.close(() => vscode.commands.executeCommand('setContext', 't3lt.storyMap', false));
+	}
+
+	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUI);
+	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUI);
 
 	ctx.subscriptions.push(
+		mapShowCommand, mapStopCommand,
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
@@ -188,12 +223,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
-				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
-					fileGlob().forEach(file => {
-						vscode.workspace.openTextDocument(file).then(doc => parseText(ctx, doc, passageListProvider));
-					});
-				}
-				else ctx.workspaceState.update("passages", undefined).then(() => passageListProvider.refresh());
+				passageListProvider.refresh();
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.directories")) {
 				start().then(() => {
@@ -210,7 +240,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				// This could be done in a more efficient manner, but this is good enough.
 				sc2m.argumentCache.clear();
 			}
-			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.warningbarewordLinkPassageChecking")) {
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking")) {
 				sc2m.argumentCache.clearMacrosUsingPassage();
 			}
 		})
@@ -223,7 +253,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			const removedFilePaths = e.files.map((file) => file.path);
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
-			ctx.workspaceState.update("passages", newPassages).then(() => passageListProvider.refresh());
+			ctx.workspaceState.update("passages", newPassages).then(() => {
+				if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
+				passageListProvider.refresh()
+			});
 		})
 		,
 		vscode.workspace.onDidRenameFiles(async e => {
@@ -235,13 +268,16 @@ export async function activate(context: vscode.ExtensionContext) {
 					if (el.origin === file.oldUri.path) el.origin = file.newUri.path;
 				});
 				await ctx.workspaceState.update("passages", passages);
-				passageListProvider.refresh();
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+				if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
 			}
 		})
 		,
-		vscode.workspace.onDidSaveTextDocument(document => {
+		vscode.workspace.onDidSaveTextDocument(async document => {
 			tweeProjectConfig(document);
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) parseText(ctx, document, passageListProvider);
+			await parseText(ctx, document);
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+			if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
 		})
 		,
 		vscode.window.registerTreeDataProvider(
@@ -255,16 +291,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {
-			vscode.window.showTextDocument(vscode.Uri.file(item.origin)).then(editor => {
-				const regexp = new RegExp(
-					"^::\\s*" +
-					item.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-					"\\s*(\\[|\\{|$)"
-				);
-				const lines = editor.document.getText().split(/\r?\n/);
-				const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
-				editor.revealRange(new vscode.Range(start, 0, start, 0), vscode.TextEditorRevealType.AtTop);
-			});
+			jumpToPassage(item);
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.list", () => {

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Passage, PassageListProvider } from './tree-view';
+import * as sc2m from './sugarcube-2/macros';
 
 interface IParsedToken {
 	line: number;
@@ -98,13 +99,13 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 				let icon = "", color = "";
 
 				if (specialName) switch (passageName) {
-					case "Start": icon = "rocket"; color="charts.yellow"; break;
-					case "StoryTitle": icon = "mention"; color="charts.orange"; break;
-					case "StoryData": icon = "json"; color="charts.purple"; break;
+					case "Start": icon="rocket"; color="charts.yellow"; break;
+					case "StoryTitle": icon="mention"; color="charts.orange"; break;
+					case "StoryData": icon="json"; color="charts.purple"; break;
 				}
 				else if (specialTag) switch (passage.tags?.[0]) {
-					case "script": icon = "code"; color="charts.blue"; break;
-					case "stylesheet": icon = "paintcan"; color="charts.green"; break;
+					case "script": icon="code"; color="charts.blue"; break;
+					case "stylesheet": icon="paintcan"; color="charts.green"; break;
 				}
 
 				passage.iconPath = icon ? new vscode.ThemeIcon(icon, color ? new vscode.ThemeColor(color) : undefined) : "";
@@ -116,6 +117,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 
 	await context.workspaceState.update("passages", passages);
 	provider?.refresh();
+	if (document.languageId === "twee3-sugarcube-2") sc2m.argumentCache.clearMacrosUsingPassage();
 
 	return Promise.resolve(r);
 }

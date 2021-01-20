@@ -1,10 +1,21 @@
 # Changelog
 
+## v0.8.0
+
+Adds:
+
+- A story map UI which opens in the browser (thanks to [@Goctionni](https://github.com/Goctionni)). Still in early stages, so feedback is welcome.
+
+- SugarCube:
+	- Macro argument validation (thanks to [@MinusGix](https://github.com/MinusGix)).
+
+---
+
 ## v0.7.0
 
 Adds:
 
-- SugarCube: (both thanks to [@MinusGix](https://github.com/MinusGix)!)
+- SugarCube: (both thanks to @MinusGix)
 	- Macro documentation on hover.  
 	- Diagnostics for invalid argument syntax in macros.
 
