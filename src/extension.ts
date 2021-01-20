@@ -85,7 +85,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		return files;
 	}
 
-	// This seems kind of like an init file
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
@@ -97,7 +96,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	fileGlob().forEach(file => prepare(file));
 
-	// Isnt this just going to turn a setting on if its off? why?
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
 			"enabled": true
@@ -117,51 +115,57 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	}
 
-	
-	let storyMapClient: socketio.Socket | undefined = undefined;
+	interface storyMapIO {
+		client: socketio.Socket | undefined;
+		server: Server | undefined;
+	}
+	const storyMap: storyMapIO = { client: undefined, server: undefined };
+
+	vscode.commands.executeCommand('setContext', 't3lt.storyMap', false);
 
 	function startUI() {
-		// Config
 		const port = 42069;
-		// Prep
+		
 		const hostUrl = `http://localhost:${port}/`
 		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
-		// Http server
+		
 		const app = express();
 		app.use(express.static(storyMapPath));
 	
-		const httpServer = new Server(app);
-		httpServer.listen(port, () => console.log(`Server bla ${hostUrl}`));
-		// open browser
-		const io = new socketio.Server(httpServer, {
-			cors: { origin: '*' }, // This Cors stuff should probably only be on in dev mode
-		});
+		storyMap.server = new Server(app);
+		storyMap.server.listen(port, () => console.log(`Server connected on ${hostUrl}`));
+		
+		const io = new socketio.Server(storyMap.server);
 		io.on('connection', (client: socketio.Socket) => {
-			storyMapClient = client;
-			// Good to know
+			if (storyMap.client) storyMap.client.disconnect(true);
+			storyMap.client = client;
 			console.log('client connected');
-			// Lets give them info
 			sendPassagesToClient(ctx, client);
 	
-			// Listen for client commands
 			client.on('open-passage', jumpToPassage);
 			client.on('update-passages', updatePassages);
-			// When they disconnect, we're done
 			client.on('disconnect', () => {
-				storyMapClient = undefined;
+				storyMap.client = undefined;
 				console.log('client disconnected');
-				// io.close(); // I kinda think this is a good idea, but its annoying for dev mode
-			})
+				setTimeout(() => {
+					if (!storyMap.client) stopUI();
+				}, 5000);
+			});
 		});
-		io.listen(port);
 		open(hostUrl);
+		vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
 	}
 
-	// Add a command that can be used to start the twee-gui
-	const guiCommandSubscription = vscode.commands.registerCommand("twee3LanguageTools.UI.show", startUI);
+	function stopUI() {
+		storyMap.client?.disconnect(true);
+		storyMap.server?.close(() => vscode.commands.executeCommand('setContext', 't3lt.storyMap', false));
+	}
+
+	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUI);
+	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUI);
 
 	ctx.subscriptions.push(
-		guiCommandSubscription, // does the order of subscriptions added matter?
+		mapShowCommand, mapStopCommand,
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
@@ -191,7 +195,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 		,
-		// Note to self, what is this? Just see when a different file is opened/switched to? or when the window receives focus?
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
 				updateDiagnostics(editor.document, collection);
@@ -207,7 +210,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			updateDiagnostics(e.document, collection);
 		})
 		,
-		// What is this gonna do?
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
 				fileGlob().forEach(file => {
@@ -218,13 +220,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
-				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) {
-					fileGlob().forEach(file => {
-						// are we opening all the files? whats up?
-						vscode.workspace.openTextDocument(file).then(doc => parseText(ctx, doc, passageListProvider));
-					});
-				}
-				else ctx.workspaceState.update("passages", undefined).then(() => passageListProvider.refresh());
+				passageListProvider.refresh();
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.directories")) {
 				start().then(() => {
@@ -233,7 +229,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 		,
-		// So when we create a file, we open  it; but then changeStoryFormat? Wut?
 		vscode.workspace.onDidCreateFiles(e => {
 			e.files.forEach(file => vscode.workspace.openTextDocument(file).then((doc) => changeStoryFormat(doc)));
 		})
@@ -243,7 +238,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
-				if (storyMapClient) sendPassagesToClient(ctx, storyMapClient);
+				if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
 				passageListProvider.refresh()
 			});
 		})
@@ -258,7 +253,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 				await ctx.workspaceState.update("passages", passages);
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-				if (storyMapClient) sendPassagesToClient(ctx, storyMapClient);
+				if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
 			}
 		})
 		,
@@ -266,7 +261,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			tweeProjectConfig(document);
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-			if (storyMapClient) sendPassagesToClient(ctx, storyMapClient);
+			if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
 		})
 		,
 		vscode.window.registerTreeDataProvider(

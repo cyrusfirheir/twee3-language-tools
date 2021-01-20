@@ -72,7 +72,8 @@ interface ComponentData {
     highlightElements: Array<PassageLink | LinkedPassage>;
     shadowPassage: PassageAndStyle | null;
     settings: {
-      showGrid: boolean;
+	  showGrid: boolean;
+	  showDots: boolean;
       snapToGrid: boolean;
       gridSize: number;
     };
@@ -83,7 +84,7 @@ export default defineComponent({
   components: { ToolBar, PassageLinkLink },
   data: (): ComponentData => ({
     connected: false,
-    theme: '',
+    theme: 'cydark',
     passages: [],
     draggedPassage: null,
     initialDragItemPosition: null,
@@ -96,7 +97,8 @@ export default defineComponent({
     highlightElements: [],
     shadowPassage: null,
     settings: {
-      showGrid: true,
+	  showGrid: true,
+	  showDots: true,
       snapToGrid: false,
       gridSize: 25,
     },
@@ -135,17 +137,47 @@ export default defineComponent({
         width: `${maxX * 1.1}px`,
         height: `${maxY * 1.1}px`,
       };
+	  const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines').replace(/#/g, '%23').trim();
+	  const gridSize = this.settings.gridSize;
+	  const gridDotRadius = 1.5;
+
+	  const bgArr: string[] = [];
+
       if (this.settings.showGrid) {
-        const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines').replace(/#/g, '%23').trim();
-        const gridSize = this.settings.gridSize;
-        const svgGrid = /* html */`
-          <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
-            <line x1="${gridSize}" y1="0" x2="${gridSize}" y2="${gridSize}" stroke="${gridLine}"></line>
-            <line x1="0" y1="${gridSize}" x2="${gridSize}" y2="${gridSize}" stroke="${gridLine}"></line>
-          </svg>
-        `.split('\n').join('').split('\r').join('').split('  ').join('');
-        style.backgroundImage = `url('data:image/svg+xml;utf8,${svgGrid}')`;
-      }
+		const svgLines = `
+			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
+				<line x1="${gridSize/2}" y1="0" x2="${gridSize/2}" y2="${gridSize}" stroke-width="${gridDotRadius/3}" stroke="${gridLine}"></line>
+				<line x1="0" y1="${gridSize/2}" x2="${gridSize}" y2="${gridSize/2}" stroke-width="${gridDotRadius/3}" stroke="${gridLine}"></line>
+			</svg>
+			`.replace(/\r?\n/g, " ");
+		const svgLinesBig = `
+			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize*4}" height="${gridSize*4}">
+				<line x1="${gridSize/2}" y1="0" x2="${gridSize/2}" y2="${gridSize*4}" stroke-width="${gridDotRadius/2}" stroke="${gridLine}"></line>
+				<line x1="0" y1="${gridSize/2}" x2="${gridSize*4}" y2="${gridSize/2}" stroke-width="${gridDotRadius/2}" stroke="${gridLine}"></line>
+			</svg>
+			`.replace(/\r?\n/g, " ");
+		
+		bgArr.push(svgLines, svgLinesBig);
+	  }
+	  
+	  if (this.settings.showDots) {
+		  const svgDots = `
+			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
+				<circle cx="${gridSize/2}" cy="${gridSize/2}" r="${gridDotRadius/1.5}" fill="${gridLine}" />
+			</svg>
+			`.replace(/\r?\n/g, " ");
+		
+		const svgDotsBig = `
+			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize*4}" height="${gridSize*4}">
+				<circle cx="${gridSize/2}" cy="${gridSize/2}" r="${gridDotRadius*2}" fill="${gridLine}" />
+			</svg>
+			`.replace(/\r?\n/g, " ");
+		
+		bgArr.push(svgDots, svgDotsBig);
+	  }
+
+	  style.backgroundImage = bgArr.map(s => `url('data:image/svg+xml;utf8,${s}')`).join(",");
+	  style.backgroundPosition = `${-gridSize/2} ${-gridSize/2}`;
 
       return style;
     },
@@ -413,6 +445,32 @@ html, body {
 
   --shadow-rgb: 0, 0, 0;
   --grid-lines: #444466;
+}
+
+[data-theme="cydark"] {
+  --text-color-light: #d9e5e9;
+  --text-color-dark: #d9e5e9;
+  --primary-100: #465c68; /* passage hover */
+  --primary-200: #354852; /* passage */
+  --primary-300: #7591a1; /* passage highlight  */
+  --primary-400: #222d33; /* map background */
+  --primary-500: #172024; /* layout background (around map) */
+  --primary-600: #ffd5da; /* arrow-highlight inner */
+  --primary-700: #ff0060; /* arrow inner */
+  --primary-800: #33000a; /* arrow-highlight outer */
+
+  --gray-100: #8ecafa; /* outline for toolbar button when .active */
+  --gray-500: #647682; /* passage outline  */
+  --gray-600: #8ea3b4; /* passage-border (hover & highlight) */
+
+  --accent-800: #172024;  /* toolbar button background */
+  --accent-500: #222d33; /* toolbar button hover */
+  --accent-400: #4c606b; /* toolbar background */
+
+  --highlight: #ffd5da; /* the drop location for a passage when dragging with snap to grid enabled */
+
+  --shadow-rgb: 23, 32, 36;
+  --grid-lines: #5c778a;
 }
 </style>
 

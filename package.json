@@ -279,13 +279,25 @@
 		"viewsWelcome": [
 			{
 				"view": "t3lt-passages-list",
-				"contents": "Passage list turned off.\n[Enable](command:twee3LanguageTools.passage.list)"
+				"contents": "Passage listing is turned off.\n[Enable](command:twee3LanguageTools.passage.list)"
 			}
 		],
 		"commands": [
 			{
-				"command": "twee3LanguageTools.UI.show",
-				"title": "Show Twee Story-map"
+				"command": "twee3LanguageTools.storyMap.show",
+				"title": "Show Story-map",
+				"icon": {
+					"dark":	"res/dark/storyMapTurnOn.svg",
+					"light": "res/light/StoryMapTurnOn.svg"
+				}
+			},
+			{
+				"command": "twee3LanguageTools.storyMap.stop",
+				"title": "Stop Story-map server",
+				"icon": {
+					"dark":	"res/dark/storyMapTurnOff.svg",
+					"light": "res/light/StoryMapTurnOff.svg"
+				}
 			},
 			{
 				"command": "twee3LanguageTools.passage.jump",
@@ -293,7 +305,11 @@
 			},
 			{
 				"command": "twee3LanguageTools.passage.list",
-				"title": "Toggle listing"
+				"title": "Toggle passage listing",
+				"icon": {
+					"dark": "res/dark/passageListToggle.svg",
+					"light": "res/light/passageListToggle.svg"
+				}
 			},
 			{
 				"command": "twee3LanguageTools.passage.group.none",
@@ -319,6 +335,16 @@
 		],
 		"menus": {
 			"view/title": [
+				{
+					"command": "twee3LanguageTools.storyMap.show",
+					"when": "view == t3lt-passages-list && !t3lt.storyMap",
+					"group": "navigation"
+				},
+				{
+					"command": "twee3LanguageTools.storyMap.stop",
+					"when": "view == t3lt-passages-list && t3lt.storyMap",
+					"group": "navigation"
+				},
 				{
 					"command": "twee3LanguageTools.passage.list",
 					"when": "view == t3lt-passages-list",
