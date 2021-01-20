@@ -270,7 +270,9 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 
 
 interface CollectedMacroCacheEntry {
-	collectedMacros: CollectedMacros,
+	// We make this a promise to make so if there is two requests at the 'same' time, it won't try
+	// doing the expensive calculation twice
+	collectedMacros: Promise<CollectedMacros>,
 	// Last text-document version
 	version: number,
 }
@@ -281,30 +283,30 @@ class CollectedMacroCache {
 		this.cache = Object.create(null);
 	}
 
-	async create (document: vscode.TextDocument) {
+	create (document: vscode.TextDocument) {
 		const filename = document.fileName;
 		this.cache[filename] = {
-			collectedMacros: await collectUncached(document.getText()),
+			collectedMacros: collectUncached(document.getText()),
 			version: document.version,
 		};
 	}
 
-	async clearFilename (filename: string) {
+	clearFilename (filename: string) {
 		if (filename in this.cache) {
 			delete this.cache[filename];
 		}
 	}
 
-	async get (document: vscode.TextDocument): Promise<CollectedMacros> {
+	get (document: vscode.TextDocument): Promise<CollectedMacros> {
 		const filename = document.fileName;
 		if (filename in this.cache) {
 			if (document.version > this.cache[filename].version) {
 				// Changed file so we need to update
-				await this.create(document);
+				this.create(document);
 			}
 		} else {
 			// Not in cache so we need to create it
-			await this.create(document);
+			this.create(document);
 		}
 
 		return this.cache[filename].collectedMacros;
