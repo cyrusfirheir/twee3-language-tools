@@ -32,6 +32,11 @@ export interface PassageAndStyle {
     style: PassageStyle;
 }
 
+export interface PassageData {
+    storyData: { [key: string]: any };
+    list: RawPassage[];
+}
+
 export interface RawPassage {
     origin: string;
     name: string;

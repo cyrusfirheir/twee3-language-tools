@@ -17,7 +17,7 @@
         <template v-if="!draggedPassage">
           <!-- I would prefer if I could keep drawing lines while dragging -->
           <!-- But that just slows things down to a crawl, probably need canvas to fix -->
-          <PassageLinkLink
+          <PassageLinkLine
             v-for="linkedPassage in linkedPassages"
             :key="linkedPassage.key"
             :from="linkedPassage.from"
@@ -41,6 +41,15 @@
         class="passage"
       >
         {{ item.passage.name }}
+        <div class="passage-tags">
+          <template v-for="tag in item.passage.tags">
+            <div
+              v-if="tag in tagColors"
+              :key="`tag-${item.passage.name}-${tag}`"
+              class="passage-tag"
+              :style="{ backgroundColor: tagColors[tag] }"></div>
+          </template>
+        </div>
       </div>
       <div v-if="shadowPassage" :style="shadowPassage.style" class="passage shadow-passage"></div>
     </div>
@@ -50,17 +59,18 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { socket } from './socket';
-import { PassageAndStyle, Vector, Passage, RawPassage, LinkedPassage, PassageLink, PassageStyle } from './types';
+import { PassageAndStyle, Vector, Passage, RawPassage, LinkedPassage, PassageLink, PassageStyle, PassageData } from './types';
 import { linkPassage, parseRaw } from './util/passage-tools';
 import { cropLine } from './util/line-tools';
 
 import ToolBar from './components/ToolBar.vue';
-import PassageLinkLink from './components/PassageLinkLine.vue';
+import PassageLinkLine from './components/PassageLinkLine.vue';
 
 interface ComponentData {
     connected: boolean;
     theme: string;
     passages: LinkedPassage[];
+    tagColors: { [tag: string]: string };
     draggedPassage: LinkedPassage | null;
     initialDragItemPosition: Vector | null;
     initialDragPosition: Vector | null;
@@ -81,11 +91,12 @@ interface ComponentData {
 
 export default defineComponent({
   name: 'App',
-  components: { ToolBar, PassageLinkLink },
+  components: { ToolBar, PassageLinkLine },
   data: (): ComponentData => ({
     connected: false,
     theme: 'cydark',
     passages: [],
+    tagColors: {},
     draggedPassage: null,
     initialDragItemPosition: null,
     initialDragPosition: null,
@@ -360,15 +371,20 @@ export default defineComponent({
     },
   },
   created() {
+    socket.disconnect();
+    socket.connect();
     socket.on('connect', () => {
       console.log('connected');
     });
-    socket.on('passages', (passages: RawPassage[]) => {
-      console.log('Client received passages', { passages });
+    socket.on('passage-data', (passageData: PassageData) => {
+      const passages = passageData.list;
+      console.log('Client received passages', { passages, storyData: passageData.storyData });
       this.passages = passages
         // convert RawPassage to Passage
         .map((passageRaw) => parseRaw(passageRaw))
         .map((passage, index, allPassages) => linkPassage(passage, allPassages));
+      
+      this.tagColors = passageData?.storyData?.['tag-colors'] || {};
     });
     socket.on('disconnect', () => {
       console.log('socket disconnected');
@@ -534,5 +550,18 @@ svg {
     outline: solid var(--highlight) 1px;
     pointer-events: none;
   }
+}
+
+.passage-tags {
+  display: flex;
+  margin: 2px 0;
+  gap: 3px;
+}
+
+.passage-tag {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: solid #000 1px;
 }
 </style>

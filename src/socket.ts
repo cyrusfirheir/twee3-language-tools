@@ -17,8 +17,7 @@ export async function getPassageContent(passage: Passage): Promise<string> {
 	return restOfFile.substr(0, nextPassageMatch?.index);
 }
 
-export async function getLinkedPassageNames(passage: Passage): Promise<string[]> {
-	const passageContent = await getPassageContent(passage);
+export async function getLinkedPassageNames(passageContent: string): Promise<string[]> {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
 	return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => {
 		const link = part.split(']').shift() as string;
@@ -28,10 +27,19 @@ export async function getLinkedPassageNames(passage: Passage): Promise<string[]>
 	});
 };
 
-export async function sendPassagesToClient(ctx: vscode.ExtensionContext, client: socketio.Socket) {
+export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, client: socketio.Socket) {
+	let storyData = {};
 	const rawPassages = ctx.workspaceState.get("passages", []) as Passage[];
 	const passagePromises = rawPassages.map(async (passage) => {
-		const linksToNames = await getLinkedPassageNames(passage);
+		const passageContent = await getPassageContent(passage);
+		let linksToNames: string[] = [];
+		if (passage.name === 'StoryData') {
+			try {
+				storyData = JSON.parse(passageContent);
+			} catch(e) {};
+		} else {
+			linksToNames = await getLinkedPassageNames(passageContent);
+		}
 		return {
 			origin: passage.origin,
 			name: passage.name,
@@ -42,7 +50,7 @@ export async function sendPassagesToClient(ctx: vscode.ExtensionContext, client:
 	});
 	const passages = await Promise.all(passagePromises);
 	console.log(`Sending ${passages.length} passages to client`);
-	client.emit('passages', passages);
+	client.emit('passage-data', { storyData, list: passages });
 }
 
 export type Vector = { x: number; y: number; };

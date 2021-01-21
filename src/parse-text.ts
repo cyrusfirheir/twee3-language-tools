@@ -114,7 +114,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 			}
 		}
 	});
-
+	
 	await context.workspaceState.update("passages", passages);
 	provider?.refresh();
 	if (document.languageId === "twee3-sugarcube-2") sc2m.argumentCache.clearMacrosUsingPassage();
