@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.8.2",
+	"version": "0.8.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -243,17 +243,17 @@
 				},
 				"twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"markdownDescription": "Provides warnings for links like `[[passage]]` when `passage` is not a valid passage name. This could cause false positives in cases where you are using a global variable."
 				},
 				"twee3LanguageTools.sugarcube-2.error.argumentParsing": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"markdownDescription": "Provide errors about invalid argument syntax being passed into macros?"
 				},
 				"twee3LanguageTools.sugarcube-2.error.parameterValidation": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Depends upon `argumentParsing`."
 				},
 				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
