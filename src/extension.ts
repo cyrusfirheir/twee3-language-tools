@@ -57,6 +57,8 @@ const documentSelector: vscode.DocumentSelector = {
 };
 
 export async function activate(context: vscode.ExtensionContext) {
+	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
+
 	ctx = context;
 
 	const passageListProvider = new PassageListProvider(ctx);

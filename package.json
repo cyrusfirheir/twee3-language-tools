@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.8.4",
+	"version": "0.8.5",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -40,7 +40,8 @@
 		"onLanguage:twee3",
 		"onLanguage:twee3-chapbook-1",
 		"onLanguage:twee3-harlowe-3",
-		"onLanguage:twee3-sugarcube-2"
+		"onLanguage:twee3-sugarcube-2",
+		"workspaceContains:**/*.{tw,twee}"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -287,7 +288,7 @@
 				{
 					"id": "t3lt-passages-list",
 					"name": "Passages",
-					"when": "config.twee3LanguageTools.passage.list || resourceFilename =~ /.*?\\.tw(?:ee)?$/"
+					"when": "t3lt.extensionActive"
 				}
 			]
 		},
