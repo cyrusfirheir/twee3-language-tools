@@ -1,13 +1,21 @@
 # Changelog
 
+Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+
+## v0.8.1
+
+Improves performance for large files (thanks to @Goctionni and @MinusGix).
+
+---
+
 ## v0.8.0
 
 Adds:
 
-- A story map UI which opens in the browser (thanks to [@Goctionni](https://github.com/Goctionni)). Still in early stages, so feedback is welcome.
+- A story map UI which opens in the browser (thanks to @Goctionni). Still in early stages, so feedback is welcome.
 
 - SugarCube:
-	- Macro argument validation (thanks to [@MinusGix](https://github.com/MinusGix)).
+	- Macro argument validation (thanks to @MinusGix).
 
 ---
 
