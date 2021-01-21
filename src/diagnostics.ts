@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import headsplit from './headsplit';
 import { diagnostics as sc2 } from './sugarcube-2/macros';
+import { storyDataPassageHeaderRegex, storyDataPassageNameRegex } from './tweeProject';
 
 export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 	if (!/^twee3.*/.test(document.languageId)) return;
@@ -22,8 +23,8 @@ export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, d
 				});
 			}
 
-			if (/^::\s*StoryData\b/gm.test(line)) {
-				const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
+			if (storyDataPassageHeaderRegex.test(line)) {
+				const storydata = headsplit(raw, /^::(.*)/).find(el => storyDataPassageNameRegex.test(el.header));
 				if (storydata?.content) {
 					try {
 						JSON.parse(storydata.content);

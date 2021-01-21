@@ -505,7 +505,7 @@ function checkPassageId(passages: Passage[], passage: string, range: vscode.Rang
 		if (!passages.find(passage => passage.name === argPassage.value)) {
 			warningsOutput.push({
 				kind: ArgumentParseWarningKind.InvalidPassageName,
-				message: "Nonexistent passage",
+				message: `Nonexistent passage: "${argPassage.value}"`,
 				range,
 			});
 		}

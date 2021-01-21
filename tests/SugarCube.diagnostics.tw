@@ -16,6 +16,14 @@
 
 
 
+/* Passage validation */
+
+<<link "link text">><</link>>
+<<link "link text" >><</link>>
+<<link linktext >><</link>>
+<<link linktext>><</link>>
+
+
 /* container tag matching highlights */
 
 /* inline */

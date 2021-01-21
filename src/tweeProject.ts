@@ -1,10 +1,13 @@
 import * as vscode from "vscode";
 import headsplit from "./headsplit";
 
+export const storyDataPassageHeaderRegex = /^::\s*StoryData\b/gm;
+export const storyDataPassageNameRegex = /StoryData\b.*/;
+
 export function tweeProjectConfig(document: vscode.TextDocument) {
 	const raw = document.getText();
-	if (!raw.match(/^::\s*StoryData\b/gm)) return;
-	const storydata = headsplit(raw, /^::(.*)/).find(el => el.header === "StoryData");
+	if (!storyDataPassageHeaderRegex.test(raw)) return;
+	const storydata = headsplit(raw, /^::(.*)/).find(el => storyDataPassageNameRegex.test(el.header));
 	if (!storydata?.content) return;
 	let formatInfo: any = undefined;
 	try {
