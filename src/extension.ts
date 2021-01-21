@@ -124,8 +124,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	const storyMap: storyMapIO = { client: undefined, server: undefined, disconnectTimeout: undefined };
 
-	vscode.commands.executeCommand('setContext', 't3lt.storyMap', false);
-
 	function startUI() {
 		const port = 42069;
 

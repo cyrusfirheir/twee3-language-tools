@@ -9,6 +9,7 @@ pnpm-debug.log*
 .res.ignore
 publish.bat
 
+.vscode/settings.json
 
 # local env files
 .env.local

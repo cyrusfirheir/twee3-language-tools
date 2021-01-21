@@ -22,7 +22,7 @@ story-map/**
 
 .gitignore
 .eslintrc.js
-.browserlistrc
+.browserslistrc
 babel.config.js
 vetur.config.js
 vue.config.js
