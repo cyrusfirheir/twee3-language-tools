@@ -72,18 +72,19 @@ import PassageLinkLine from './components/PassageLinkLine.vue';
 export default class AppComponent extends Vue {
   connected = false;
   theme = 'cydark';
-  passages = [];
-  tagColors = {};
-  draggedPassage = null;
-  initialDragItemPosition = null;
-  initialDragPosition = null;
+  passages: LinkedPassage[] = [];
+  tagColors: { [tag: string]: string } = {};
+  draggedPassage: Passage = null;
+  initialDragItemPosition: Vector = null;
+  initialDragPosition: Vector = null;
   highestZIndex = 0;
   translate: Vector = { x: 0, y: 0 };
+  mapSize: Vector = { x: 0, y: 0 };
   zoom = 1;
-  hoveredElement = null;
-  linkedPassages = [];
-  highlightElements = [];
-  shadowPassage = null;
+  hoveredElement: PassageLink | LinkedPassage = null;
+  linkedPassages: PassageLink[] = [];
+  highlightElements: Array<PassageLink | Passage> = [];
+  shadowPassage: PassageAndStyle = null;
   settings = {
     showGrid: true,
     showDots: true,
@@ -112,19 +113,10 @@ export default class AppComponent extends Vue {
   }
 
   get svgStyle() {
-    let maxX = 0;
-    let maxY = 0;
     let theme = this.theme; // I need to read it so that this will be re-evaluated
-    for (const passage of (this.passages as LinkedPassage[])) {
-      const passageMaxX = passage.position.x + passage.size.x;
-      const passageMaxY = passage.position.y + passage.size.y;
-      maxX = Math.max(maxX, passageMaxX);
-      maxY = Math.max(maxY, passageMaxY);
-    }
-
     const style: { [key: string]: any } = {
-      width: `${maxX * 1.1}px`,
-      height: `${maxY * 1.1}px`,
+      width: `${this.mapSize.x}px`,
+      height: `${this.mapSize.y}px`,
     };
     const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines').replace(/#/g, '%23').trim();
     const gridSize = this.settings.gridSize;
@@ -169,7 +161,7 @@ export default class AppComponent extends Vue {
     return style;
   }
 
-  translateStr() {
+  get translateStr() {
     return `translate(${Math.round(this.translate.x * 1000) / 1000}px, ${Math.round(this.translate.y * 1000) / 1000}px)`;
   }
 
@@ -188,6 +180,7 @@ export default class AppComponent extends Vue {
         .map((passage, index, allPassages) => linkPassage(passage, allPassages));
       
       this.tagColors = passageData?.storyData?.['tag-colors'] || {};
+      this.initMapSize();
     });
     socket.on('disconnect', () => {
       console.log('socket disconnected');
@@ -206,8 +199,8 @@ export default class AppComponent extends Vue {
         const highlightLinks = linkedPassages.filter((linkedPassage) => linkedPassage.from === hoveredElement || linkedPassage.to === hoveredElement);
         highlightElements.push(...highlightLinks);
         // add linked passages
-        highlightElements.push(...this.hoveredElement.linksTo);
-        highlightElements.push(...this.hoveredElement.linkedFrom);
+        highlightElements.push(...hoveredElement.linksTo);
+        highlightElements.push(...hoveredElement.linkedFrom);
       } else if ('from' in hoveredElement) {
         // Its a passage link
         highlightElements.push(hoveredElement.from, hoveredElement.to);
@@ -248,7 +241,19 @@ export default class AppComponent extends Vue {
     document.body.setAttribute('data-theme', theme);
   }
 
-  getPassageStyle(passage: LinkedPassage): PassageStyle {
+  initMapSize() {
+    let maxX = 0;
+    let maxY = 0;
+    for (const passage of (this.passages as LinkedPassage[])) {
+      const passageMaxX = passage.position.x + passage.size.x;
+      const passageMaxY = passage.position.y + passage.size.y;
+      maxX = Math.max(maxX, passageMaxX);
+      maxY = Math.max(maxY, passageMaxY);
+    }
+    this.mapSize = { x: Math.ceil(maxX * 1.1), y: Math.ceil(maxY * 1.1) };
+  }
+
+  getPassageStyle(passage: Passage): PassageStyle {
     return {
       width: `${passage.size.x}px`,
       height: `${passage.size.y}px`,
@@ -297,7 +302,7 @@ export default class AppComponent extends Vue {
       this.draggedPassage.position.x = Math.max(0, Math.round(this.initialDragItemPosition.x - (delta.x / this.zoom)));
       this.draggedPassage.position.y = Math.max(0, Math.round(this.initialDragItemPosition.y - (delta.y / this.zoom)));
       if (this.settings.snapToGrid) {
-        const gridSnappedPassageClone = {
+        const gridSnappedPassageClone: Passage = {
           ...this.draggedPassage,
           position: this.getSnappedPassagePosition(this.draggedPassage.position),
         };
@@ -305,6 +310,13 @@ export default class AppComponent extends Vue {
           passage: gridSnappedPassageClone,
           style: this.getPassageStyle(gridSnappedPassageClone),
         };
+      }
+
+      if (this.draggedPassage.position.x * 1.1 > this.mapSize.x) {
+        this.mapSize.x = (this.draggedPassage.position.x + this.draggedPassage.size.x) * 1.1;
+      }
+      if (this.draggedPassage.position.y * 1.1 > this.mapSize.y) {
+        this.mapSize.y = this.draggedPassage.position.y * 1.1;
       }
     } else {
       // Drag map
@@ -328,6 +340,7 @@ export default class AppComponent extends Vue {
   }
 
   onWheel(event: WheelEvent) {
+    console.log('onWheel', event);
     const zoomAmount = (event.deltaY > 0)
       ? (event.deltaY / 1000)                   // deltaY 100  ->  .1
       : 1 - (1 / (1 + (event.deltaY / 1000)));  // deltaY -100 -> -.11111

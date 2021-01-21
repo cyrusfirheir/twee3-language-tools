@@ -16,6 +16,7 @@ export interface Passage {
     originalSize: Vector;
     zIndex?: number;
     dropShadow?: string;
+    key: string;
 }
 
 export interface LinkedPassage extends Passage {
