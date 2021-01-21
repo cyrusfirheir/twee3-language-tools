@@ -36,16 +36,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { Component, Vue, Prop } from 'vue-property-decorator';
 
-export default defineComponent({
-    props: {
-        color: {
-            type: String,
-            default: '#FFF',
-        },
-    },
-});
+@Component
+export default class Save extends Vue {
+  @Prop({ default: '#FFF' }) color: string;
+}
 </script>
 
 <style lang="scss" scoped>

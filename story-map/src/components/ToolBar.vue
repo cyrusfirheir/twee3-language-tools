@@ -6,7 +6,7 @@
         type="button"
         class="tb-button"
         :data-action="element.id"
-        :key="element.id"
+        :key="`toolbar-id-${element.id}`"
         :class="{ active: element.active }"
         :title="`element.text (${element.active ? 'On' : 'Off'})`"
         @click="onToggleClick(element)"
@@ -26,35 +26,41 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
 import Save from './svg/Save.vue';
 
-export default defineComponent({
-  name: "ToolBar",
-  components: {
-    Save,
-  },
-  props: {
-    unsavedChanges: Boolean,
-  },
-  data: () => ({
-    elements: [
-      {
-        id: "snap-to-grid",
-        tag: "button",
-        type: "toggle",
-        text: "Snap to grid",
-        active: false,
-      },
-    ],
-  }),
-  methods: {
-    onToggleClick(element) {
-      element.active = !element.active;
-      this.$emit("toggle", { id: element.id, value: element.active });
+import { Component, Vue, Prop } from "vue-property-decorator";
+
+interface ToolbarItemToggle {
+  id: string;
+  tag: string;
+  type: 'toggle';
+  text: string;
+  active: boolean;
+}
+
+type ToolbarItem = ToolbarItemToggle;
+
+@Component({
+  components: { Save },
+})
+export default class ToolBar extends Vue {
+  @Prop() unsavedChanges: boolean;
+
+  elements: ToolbarItem[] = [
+    {
+      id: 'snap-to-grid',
+      tag: 'button',
+      type: 'toggle',
+      text: 'Snap to grid',
+      active: false,
     },
-  },
-});
+  ];
+
+  onToggleClick(element: ToolbarItemToggle) {
+    element.active = !element.active;
+    this.$emit("toggle", { id: element.id, value: element.active });
+  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

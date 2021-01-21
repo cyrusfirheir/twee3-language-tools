@@ -19,19 +19,19 @@
           <!-- But that just slows things down to a crawl, probably need canvas to fix -->
           <PassageLinkLine
             v-for="linkedPassage in linkedPassages"
-            :key="linkedPassage.key"
+            :key="`link-line${linkedPassage.key}`"
             :from="linkedPassage.from"
             :to="linkedPassage.to"
             :twoWay="linkedPassage.twoWay"
             :highlight="highlightElements.includes(linkedPassage)"
-            @mouseenter="onHoverableMouseEnter(linkedPassage)"
-            @mouseleave="onHoverableMouseLeave(linkedPassage)"
+            @lineMouseenter="onHoverableMouseEnter(linkedPassage)"
+            @lineMouseleave="onHoverableMouseLeave(linkedPassage)"
           />
         </template>
       </svg>
       <div
         v-for="item in items"
-        :key="item.passage.name"
+        :key="`passage-${item.passage.name}`"
         :style="item.style"
         :class="{ highlight: highlightElements.includes(item.passage) }"
         @mouseenter="onHoverableMouseEnter(item.passage)"
@@ -57,322 +57,125 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { Component, Vue, Watch } from 'vue-property-decorator';
+
 import { socket } from './socket';
-import { PassageAndStyle, Vector, Passage, RawPassage, LinkedPassage, PassageLink, PassageStyle, PassageData } from './types';
+import { PassageAndStyle, Vector, Passage, LinkedPassage, PassageLink, PassageStyle, PassageData } from './types';
 import { linkPassage, parseRaw } from './util/passage-tools';
-import { cropLine } from './util/line-tools';
 
 import ToolBar from './components/ToolBar.vue';
 import PassageLinkLine from './components/PassageLinkLine.vue';
 
-interface ComponentData {
-    connected: boolean;
-    theme: string;
-    passages: LinkedPassage[];
-    tagColors: { [tag: string]: string };
-    draggedPassage: LinkedPassage | null;
-    initialDragItemPosition: Vector | null;
-    initialDragPosition: Vector | null;
-    highestZIndex: number;
-    translate: Vector;
-    zoom: number;
-    hoveredElement: PassageLink | LinkedPassage | null;
-    linkedPassages: PassageLink[];
-    highlightElements: Array<PassageLink | LinkedPassage>;
-    shadowPassage: PassageAndStyle | null;
-    settings: {
-	  showGrid: boolean;
-	  showDots: boolean;
-      snapToGrid: boolean;
-      gridSize: number;
-    };
-}
-
-export default defineComponent({
-  name: 'App',
+@Component({
   components: { ToolBar, PassageLinkLine },
-  data: (): ComponentData => ({
-    connected: false,
-    theme: 'cydark',
-    passages: [],
-    tagColors: {},
-    draggedPassage: null,
-    initialDragItemPosition: null,
-    initialDragPosition: null,
-    highestZIndex: 0,
-    translate: { x: 0, y: 0 },
-    zoom: 1,
-    hoveredElement: null,
-    linkedPassages: [],
-    highlightElements: [],
-    shadowPassage: null,
-    settings: {
-	  showGrid: true,
-	  showDots: true,
-      snapToGrid: false,
-      gridSize: 25,
-    },
-  }),
-  computed: {
-    items(): PassageAndStyle[] {
-      return this.passages.map((passage) => ({
-        passage,
-        style: this.getPassageStyle(passage),
-      }));
-    },
-    changedPassages(): LinkedPassage[] {
-      return this.passages.filter((passage) => {
-        if (passage.position.x !== passage.originalPosition.x) return true;
-        if (passage.position.y !== passage.originalPosition.y) return true;
-        if (passage.size.x !== passage.originalSize.x) return true;
-        if (passage.size.y !== passage.originalSize.y) return true;
-        return false;
-      });
-    },
-    unsavedChanges(): boolean {
-      return this.changedPassages.length > 0;
-    },
-    svgStyle() {
-      let maxX = 0;
-      let maxY = 0;
-      let theme = this.theme; // I need to read it so that this will be re-evaluated
-      for (const passage of (this.passages as LinkedPassage[])) {
-        const passageMaxX = passage.position.x + passage.size.x;
-        const passageMaxY = passage.position.y + passage.size.y;
-        maxX = Math.max(maxX, passageMaxX);
-        maxY = Math.max(maxY, passageMaxY);
-      }
+})
+export default class AppComponent extends Vue {
+  connected = false;
+  theme = 'cydark';
+  passages = [];
+  tagColors = {};
+  draggedPassage = null;
+  initialDragItemPosition = null;
+  initialDragPosition = null;
+  highestZIndex = 0;
+  translate: Vector = { x: 0, y: 0 };
+  zoom = 1;
+  hoveredElement = null;
+  linkedPassages = [];
+  highlightElements = [];
+  shadowPassage = null;
+  settings = {
+    showGrid: true,
+    showDots: true,
+    snapToGrid: false,
+    gridSize: 25,
+  };
 
-      const style: { [key: string]: any } = {
-        width: `${maxX * 1.1}px`,
-        height: `${maxY * 1.1}px`,
-      };
-	  const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines').replace(/#/g, '%23').trim();
-	  const gridSize = this.settings.gridSize;
-	  const gridDotRadius = 1.5;
+  get items(): PassageAndStyle[] {
+    return this.passages.map((passage) => ({
+      passage,
+      style: this.getPassageStyle(passage),
+    }));
+  }
 
-	  const bgArr: string[] = [];
+  get changedPassages(): LinkedPassage[] {
+    return this.passages.filter((passage) => {
+      if (passage.position.x !== passage.originalPosition.x) return true;
+      if (passage.position.y !== passage.originalPosition.y) return true;
+      if (passage.size.x !== passage.originalSize.x) return true;
+      if (passage.size.y !== passage.originalSize.y) return true;
+      return false;
+    });
+  }
+  get unsavedChanges(): boolean {
+    return this.changedPassages.length > 0;
+  }
 
-      if (this.settings.showGrid) {
-		const svgLines = `
-			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
-				<line x1="${gridSize/2}" y1="0" x2="${gridSize/2}" y2="${gridSize}" stroke-width="${gridDotRadius/3}" stroke="${gridLine}"></line>
-				<line x1="0" y1="${gridSize/2}" x2="${gridSize}" y2="${gridSize/2}" stroke-width="${gridDotRadius/3}" stroke="${gridLine}"></line>
-			</svg>
-			`.replace(/\r?\n/g, " ");
-		const svgLinesBig = `
-			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize*4}" height="${gridSize*4}">
-				<line x1="${gridSize/2}" y1="0" x2="${gridSize/2}" y2="${gridSize*4}" stroke-width="${gridDotRadius/2}" stroke="${gridLine}"></line>
-				<line x1="0" y1="${gridSize/2}" x2="${gridSize*4}" y2="${gridSize/2}" stroke-width="${gridDotRadius/2}" stroke="${gridLine}"></line>
-			</svg>
-			`.replace(/\r?\n/g, " ");
-		
-		bgArr.push(svgLines, svgLinesBig);
-	  }
-	  
-	  if (this.settings.showDots) {
-		  const svgDots = `
-			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
-				<circle cx="${gridSize/2}" cy="${gridSize/2}" r="${gridDotRadius/1.5}" fill="${gridLine}" />
-			</svg>
-			`.replace(/\r?\n/g, " ");
-		
-		const svgDotsBig = `
-			<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize*4}" height="${gridSize*4}">
-				<circle cx="${gridSize/2}" cy="${gridSize/2}" r="${gridDotRadius*2}" fill="${gridLine}" />
-			</svg>
-			`.replace(/\r?\n/g, " ");
-		
-		bgArr.push(svgDots, svgDotsBig);
-	  }
-
-	  style.backgroundImage = bgArr.map(s => `url('data:image/svg+xml;utf8,${s}')`).join(",");
-	  style.backgroundPosition = `${-gridSize/2} ${-gridSize/2}`;
-
-      return style;
-    },
-    translateStr() {
-      return `translate(${Math.round(this.translate.x * 1000) / 1000}px, ${Math.round(this.translate.y * 1000) / 1000}px)`;
-    },
-  },
-  watch: {
-    hoveredElement: {
-      deep: false,
-      handler: function(hoveredElement: PassageLink | LinkedPassage | null) {
-        const highlightElements: Array<Passage | PassageLink> = [];
-        if (hoveredElement) {
-          highlightElements.push(this.hoveredElement);
-          if ('name' in hoveredElement) {
-            // Its a passage
-            // add passage links
-            const linkedPassages: PassageLink[] = this.linkedPassages;
-            const highlightLinks = linkedPassages.filter((linkedPassage) => linkedPassage.from === hoveredElement || linkedPassage.to === hoveredElement);
-            highlightElements.push(...highlightLinks);
-            // add linked passages
-            highlightElements.push(...this.hoveredElement.linksTo);
-            highlightElements.push(...this.hoveredElement.linkedFrom);
-          } else if ('from' in hoveredElement) {
-            // Its a passage link
-            highlightElements.push(hoveredElement.from, hoveredElement.to);
-          }
-        }
-        this.highlightElements = highlightElements;
-      },
-    },
-    passages: {
-      deep: false,
-      handler: function(passages: LinkedPassage[]) {
-        const linkedPassages: PassageLink[] = [];
-        for (const passage of passages) {
-          for (const linkedPassage of passage.linksTo) {
-            // Check if this exact line already exists, it shouldn't but... Check anyway
-            if (linkedPassages.some((line) => line.from === passage && line.to === linkedPassage)) continue;
-            // Check if this line already exists in  the opposite direction
-            let existingLink = linkedPassages.find((line) => line.from === linkedPassage && line.to === passage);
-            if (existingLink) {
-              // A line between these passages already exists in the opposite direction
-              // make that line bi-directional
-              existingLink.twoWay = true;
-              continue;
-            }
-            // No link between these passages exists, create it
-            linkedPassages.push({
-              from: passage,
-              to: linkedPassage,
-              twoWay: false,
-              key: `link-${passage.name}-${linkedPassage.name}`,
-            });
-          }
-        }
-        this.linkedPassages = linkedPassages;
-      },
-    },
-    theme: {
-      immediate: true,
-      handler: (theme) => {
-        document.body.setAttribute('data-theme', theme);
-      },
+  get svgStyle() {
+    let maxX = 0;
+    let maxY = 0;
+    let theme = this.theme; // I need to read it so that this will be re-evaluated
+    for (const passage of (this.passages as LinkedPassage[])) {
+      const passageMaxX = passage.position.x + passage.size.x;
+      const passageMaxY = passage.position.y + passage.size.y;
+      maxX = Math.max(maxX, passageMaxX);
+      maxY = Math.max(maxY, passageMaxY);
     }
-  },
-  methods: {
-    getPassageStyle(passage: LinkedPassage): PassageStyle {
-      return {
-        width: `${passage.size.x}px`,
-        height: `${passage.size.y}px`,
-        left: `${passage.position.x}px`,
-        top: `${passage.position.y}px`,
-        ['z-index']: passage.zIndex || 0,
-      };
-    },
-    toggleSetting({ id, value }: { id: string; value: any }) {
-      if (id === 'snap-to-grid') {
-        this.settings.snapToGrid = value;
-      }
-    },
-    getSnappedPassagePosition(position: Vector): Vector {
-      const gridSize: number = this.settings.gridSize;
-      const halfGrid = gridSize / 2;
-      const offset: Vector = { x: position.x % gridSize, y: position.y % gridSize };
-      const target: Vector = {
-        x: position.x - offset.x + (offset.x < halfGrid ? 0 : gridSize),
-        y: position.y - offset.y + (offset.y < halfGrid ? 0 : gridSize),
-      }
-      return target;
-    },
-    onPassageMouseDown(passage: LinkedPassage, event: MouseEvent) {
-      this.highestZIndex++;
-      passage.zIndex = this.highestZIndex;
-      this.draggedPassage = passage;
 
-      this.initialDragItemPosition = { ... passage.position };
-      this.initialDragPosition = { x: event.clientX, y: event.clientY };
-    },
-    onMapMouseDown(event: MouseEvent) {
-      this.initialDragItemPosition = { ...this.translate };
-      this.initialDragPosition = { x: event.clientX, y: event.clientY };
-    },
-    onMouseMove(event: MouseEvent) {
-      if (!this.initialDragPosition || !this.initialDragItemPosition) return;
+    const style: { [key: string]: any } = {
+      width: `${maxX * 1.1}px`,
+      height: `${maxY * 1.1}px`,
+    };
+    const gridLine = getComputedStyle(document.body).getPropertyValue('--grid-lines').replace(/#/g, '%23').trim();
+    const gridSize = this.settings.gridSize;
+    const gridDotRadius = 1.5;
 
-      if (this.draggedPassage) {
-        const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
-        this.draggedPassage.position.x = Math.max(0, Math.round(this.initialDragItemPosition.x - (delta.x / this.zoom)));
-        this.draggedPassage.position.y = Math.max(0, Math.round(this.initialDragItemPosition.y - (delta.y / this.zoom)));
-        if (this.settings.snapToGrid) {
-          const gridSnappedPassageClone = {
-            ...this.draggedPassage,
-            position: this.getSnappedPassagePosition(this.draggedPassage.position),
-          };
-          this.shadowPassage = {
-            passage: gridSnappedPassageClone,
-            style: this.getPassageStyle(gridSnappedPassageClone),
-          };
-        }
-      } else {
-        // Drag map
-        const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
-        this.translate.x = Math.round(this.initialDragItemPosition.x - delta.x);
-        this.translate.y = Math.round(this.initialDragItemPosition.y - delta.y);
-      }
-    },
-    onMouseUp(event: MouseEvent) {
-      if (this.draggedPassage) {
-        this.draggedPassage.dropShadow = undefined;
-        if (this.settings.snapToGrid) {
-          this.draggedPassage.position = this.getSnappedPassagePosition(this.draggedPassage.position);
-          this.shadowPassage = null;
-        }
-      }
-      this.initialDragPosition = null;
-      this.initialDragItemPosition = null;
-      this.draggedPassage = null;
-    },
-    onWheel(event: WheelEvent) {
-      const zoomAmount = (event.deltaY > 0)
-        ? (event.deltaY / 1000)                   // deltaY 100  ->  .1
-        : 1 - (1 / (1 + (event.deltaY / 1000)));  // deltaY -100 -> -.11111
+    const bgArr: string[] = [];
 
-      const zoomMod = 1 - zoomAmount;
+    if (this.settings.showGrid) {
+      const svgLines = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
+          <line x1="${gridSize/2}" y1="0" x2="${gridSize/2}" y2="${gridSize}" stroke-width="${gridDotRadius/3}" stroke="${gridLine}"></line>
+          <line x1="0" y1="${gridSize/2}" x2="${gridSize}" y2="${gridSize/2}" stroke-width="${gridDotRadius/3}" stroke="${gridLine}"></line>
+        </svg>
+        `.replace(/\r?\n/g, " ");
+      const svgLinesBig = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize*4}" height="${gridSize*4}">
+          <line x1="${gridSize/2}" y1="0" x2="${gridSize/2}" y2="${gridSize*4}" stroke-width="${gridDotRadius/2}" stroke="${gridLine}"></line>
+          <line x1="0" y1="${gridSize/2}" x2="${gridSize*4}" y2="${gridSize/2}" stroke-width="${gridDotRadius/2}" stroke="${gridLine}"></line>
+        </svg>
+        `.replace(/\r?\n/g, " ");
+  
+      bgArr.push(svgLines, svgLinesBig);
+    }
+  
+    if (this.settings.showDots) {
+      const svgDots = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize}" height="${gridSize}">
+          <circle cx="${gridSize/2}" cy="${gridSize/2}" r="${gridDotRadius/1.5}" fill="${gridLine}" />
+        </svg>`.replace(/\r?\n/g, " ");
+    
+      const svgDotsBig = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${gridSize*4}" height="${gridSize*4}">
+          <circle cx="${gridSize/2}" cy="${gridSize/2}" r="${gridDotRadius*2}" fill="${gridLine}" />
+        </svg>`.replace(/\r?\n/g, " ");
+    
+      bgArr.push(svgDots, svgDotsBig);
+    }
 
-      const leftOfClientX = event.clientX - this.translate.x;
-      const leftOfClientXTarget = leftOfClientX * zoomMod;
-      this.translate.x += (leftOfClientX - leftOfClientXTarget);
-      const topOfClientY = event.clientY - this.translate.y;
-      const topOfClientYTarget = topOfClientY * zoomMod;
-      this.translate.y += (topOfClientY - topOfClientYTarget);
-      this.zoom *= zoomMod;
-    },
-    onHoverableMouseEnter(element: PassageLink | LinkedPassage) {
-      this.hoveredElement = element;
-    },
-    onHoverableMouseLeave(element: PassageLink | LinkedPassage) {
-      if (this.hoveredElement === element || this.hoveredElement.key === element['key']) {
-        this.hoveredElement = null;
-      }
-    },
-    openPassage(passage: LinkedPassage) {
-      socket.emit('open-passage', { name: passage.name, origin: passage.origin });
-      console.log('passage was doubleclicked', passage);
-    },
-    saveChanges() {
-      socket.emit('update-passages', this.changedPassages.map((passage) => ({
-        name: passage.name,
-        origin: passage.origin,
-        position: passage.position,
-        size: passage.size,
-        tags: passage.tags,
-      })));
-      // This should probably be done differently
-      this.changedPassages.forEach((passage) => {
-        passage.originalPosition = { ...passage.position };
-        passage.originalSize = { ...passage.size };
-      });
-    },
-  },
+    style.backgroundImage = bgArr.map(s => `url('data:image/svg+xml;utf8,${s}')`).join(",");
+    style.backgroundPosition = `${-gridSize/2} ${-gridSize/2}`;
+
+    return style;
+  }
+
+  translateStr() {
+    return `translate(${Math.round(this.translate.x * 1000) / 1000}px, ${Math.round(this.translate.y * 1000) / 1000}px)`;
+  }
+
   created() {
-    socket.disconnect();
-    socket.connect();
+    // socket.disconnect();
+    // socket.connect();
     socket.on('connect', () => {
       console.log('connected');
     });
@@ -389,8 +192,187 @@ export default defineComponent({
     socket.on('disconnect', () => {
       console.log('socket disconnected');
     });
-  },
-});
+  }
+
+  @Watch('hoveredElement', { deep: false })
+  updateHighlights (hoveredElement: PassageLink | LinkedPassage | null) {
+    const highlightElements: Array<Passage | PassageLink> = [];
+    if (hoveredElement) {
+      highlightElements.push(this.hoveredElement);
+      if ('name' in hoveredElement) {
+        // Its a passage
+        // add passage links
+        const linkedPassages: PassageLink[] = this.linkedPassages;
+        const highlightLinks = linkedPassages.filter((linkedPassage) => linkedPassage.from === hoveredElement || linkedPassage.to === hoveredElement);
+        highlightElements.push(...highlightLinks);
+        // add linked passages
+        highlightElements.push(...this.hoveredElement.linksTo);
+        highlightElements.push(...this.hoveredElement.linkedFrom);
+      } else if ('from' in hoveredElement) {
+        // Its a passage link
+        highlightElements.push(hoveredElement.from, hoveredElement.to);
+      }
+    }
+    this.highlightElements = highlightElements;
+  }
+
+  @Watch('passages', { deep: false })
+  updatePassageLinks(passages: LinkedPassage[]) {
+    const linkedPassages: PassageLink[] = [];
+    for (const passage of passages) {
+      for (const linkedPassage of passage.linksTo) {
+        // Check if this exact line already exists, it shouldn't but... Check anyway
+        if (linkedPassages.some((line) => line.from === passage && line.to === linkedPassage)) continue;
+        // Check if this line already exists in  the opposite direction
+        let existingLink = linkedPassages.find((line) => line.from === linkedPassage && line.to === passage);
+        if (existingLink) {
+          // A line between these passages already exists in the opposite direction
+          // make that line bi-directional
+          existingLink.twoWay = true;
+          continue;
+        }
+        // No link between these passages exists, create it
+        linkedPassages.push({
+          from: passage,
+          to: linkedPassage,
+          twoWay: false,
+          key: `link-${passage.name}-${linkedPassage.name}`,
+        });
+      }
+    }
+    this.linkedPassages = linkedPassages;
+  }
+
+  @Watch('theme', { immediate: true })
+  updateThemeAttribute(theme) {
+    document.body.setAttribute('data-theme', theme);
+  }
+
+  getPassageStyle(passage: LinkedPassage): PassageStyle {
+    return {
+      width: `${passage.size.x}px`,
+      height: `${passage.size.y}px`,
+      left: `${passage.position.x}px`,
+      top: `${passage.position.y}px`,
+      ['z-index']: passage.zIndex || 0,
+    };
+  }
+
+  toggleSetting({ id, value }: { id: string; value: any }) {
+    if (id === 'snap-to-grid') {
+      this.settings.snapToGrid = value;
+    }
+  }
+  
+  getSnappedPassagePosition(position: Vector): Vector {
+    const gridSize: number = this.settings.gridSize;
+    const halfGrid = gridSize / 2;
+    const offset: Vector = { x: position.x % gridSize, y: position.y % gridSize };
+    const target: Vector = {
+      x: position.x - offset.x + (offset.x < halfGrid ? 0 : gridSize),
+      y: position.y - offset.y + (offset.y < halfGrid ? 0 : gridSize),
+    }
+    return target;
+  }
+
+  onPassageMouseDown(passage: LinkedPassage, event: MouseEvent) {
+    this.highestZIndex++;
+    passage.zIndex = this.highestZIndex;
+    this.draggedPassage = passage;
+
+    this.initialDragItemPosition = { ... passage.position };
+    this.initialDragPosition = { x: event.clientX, y: event.clientY };
+  }
+
+  onMapMouseDown(event: MouseEvent) {
+    this.initialDragItemPosition = { ...this.translate };
+    this.initialDragPosition = { x: event.clientX, y: event.clientY };
+  }
+
+  onMouseMove(event: MouseEvent) {
+    if (!this.initialDragPosition || !this.initialDragItemPosition) return;
+
+    if (this.draggedPassage) {
+      const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
+      this.draggedPassage.position.x = Math.max(0, Math.round(this.initialDragItemPosition.x - (delta.x / this.zoom)));
+      this.draggedPassage.position.y = Math.max(0, Math.round(this.initialDragItemPosition.y - (delta.y / this.zoom)));
+      if (this.settings.snapToGrid) {
+        const gridSnappedPassageClone = {
+          ...this.draggedPassage,
+          position: this.getSnappedPassagePosition(this.draggedPassage.position),
+        };
+        this.shadowPassage = {
+          passage: gridSnappedPassageClone,
+          style: this.getPassageStyle(gridSnappedPassageClone),
+        };
+      }
+    } else {
+      // Drag map
+      const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
+      this.translate.x = Math.round(this.initialDragItemPosition.x - delta.x);
+      this.translate.y = Math.round(this.initialDragItemPosition.y - delta.y);
+    }
+  }
+
+  onMouseUp(event: MouseEvent) {
+    if (this.draggedPassage) {
+      this.draggedPassage.dropShadow = undefined;
+      if (this.settings.snapToGrid) {
+        this.draggedPassage.position = this.getSnappedPassagePosition(this.draggedPassage.position);
+        this.shadowPassage = null;
+      }
+    }
+    this.initialDragPosition = null;
+    this.initialDragItemPosition = null;
+    this.draggedPassage = null;
+  }
+
+  onWheel(event: WheelEvent) {
+    const zoomAmount = (event.deltaY > 0)
+      ? (event.deltaY / 1000)                   // deltaY 100  ->  .1
+      : 1 - (1 / (1 + (event.deltaY / 1000)));  // deltaY -100 -> -.11111
+
+    const zoomMod = 1 - zoomAmount;
+
+    const leftOfClientX = event.clientX - this.translate.x;
+    const leftOfClientXTarget = leftOfClientX * zoomMod;
+    this.translate.x += (leftOfClientX - leftOfClientXTarget);
+    const topOfClientY = event.clientY - this.translate.y;
+    const topOfClientYTarget = topOfClientY * zoomMod;
+    this.translate.y += (topOfClientY - topOfClientYTarget);
+    this.zoom *= zoomMod;
+  }
+
+  onHoverableMouseEnter(element: PassageLink | LinkedPassage) {
+    this.hoveredElement = element;
+  }
+
+  onHoverableMouseLeave(element: PassageLink | LinkedPassage) {
+    if (this.hoveredElement === element || this.hoveredElement.key === element['key']) {
+      this.hoveredElement = null;
+    }
+  }
+
+  openPassage(passage: LinkedPassage) {
+    socket.emit('open-passage', { name: passage.name, origin: passage.origin });
+    console.log('passage was doubleclicked', passage);
+  }
+
+  saveChanges() {
+    socket.emit('update-passages', this.changedPassages.map((passage) => ({
+      name: passage.name,
+      origin: passage.origin,
+      position: passage.position,
+      size: passage.size,
+      tags: passage.tags,
+    })));
+    // This should probably be done differently
+    this.changedPassages.forEach((passage) => {
+      passage.originalPosition = { ...passage.position };
+      passage.originalSize = { ...passage.size };
+    });
+  }
+}
 </script>
 
 <style lang="scss">

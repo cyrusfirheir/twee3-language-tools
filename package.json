@@ -409,7 +409,6 @@
 		"@vue/cli-plugin-babel": "~4.5.0",
 		"@vue/cli-plugin-typescript": "~4.5.0",
 		"@vue/cli-service": "~4.5.0",
-		"@vue/compiler-sfc": "^3.0.0",
 		"bufferutil": "^4.0.3",
 		"eslint": "^7.0.0",
 		"mocha": "^7.1.2",
@@ -419,7 +418,7 @@
 		"ts-loader": "^8.0.13",
 		"typescript": "^3.9.7",
 		"utf-8-validate": "^5.0.4",
-		"vue": "^3.0.0",
+		"vue-template-compiler": "2.6.12",
 		"webpack": "^4.44.1",
 		"webpack-cli": "^3.3.12"
 	},
@@ -430,6 +429,9 @@
 		"socket.io": "^3.0.5",
 		"socket.io-client": "^3.0.5",
 		"uuid": "^8.3.2",
+		"vue": "2.6.12",
+		"vue-class-component": "7.2.6",
+		"vue-property-decorator": "8.5.1",
 		"yaml": "^1.10.0"
 	}
 }
