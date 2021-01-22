@@ -28,7 +28,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					if (!origins.includes(el.origin)) {
 						origins.push(el.origin);
 						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
-						let p = new Passage(el.origin, el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
+						let p = new Passage(el.origin, el.range, el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
 						p.tooltip = el.origin.replace(wF, "").substring(1);
 						files.push(p);
 					}
@@ -50,7 +50,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					if (!origins.includes(_origin)) {
 						origins.push(_origin);
 						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
-						let p = new Passage(_origin, _origin.replace(wF, ""), vscode.TreeItemCollapsibleState.Expanded);
+						let p = new Passage(_origin, el.range, _origin.replace(wF, ""), vscode.TreeItemCollapsibleState.Expanded);
 						p.tooltip = _origin.replace(wF, "");
 						folders.push(p);
 					}
@@ -71,12 +71,12 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					el.tags?.forEach(elem => {
 						if (!tags.includes(elem)) {
 							tags.push(elem);
-							let p = new Passage(el.origin, elem, vscode.TreeItemCollapsibleState.Expanded);
+							let p = new Passage(el.origin, el.range, elem, vscode.TreeItemCollapsibleState.Expanded);
 							groups.push(p);
 						}
 					});
 				});
-				let ungrouped = new Passage("", "", vscode.TreeItemCollapsibleState.Expanded);
+				let ungrouped = new Passage("", new vscode.Range(0,0,0,0), "", vscode.TreeItemCollapsibleState.Expanded);
 				ungrouped.description = "Untagged";
 				groups.sort((a, b) => a.name.localeCompare(b.name)).push(ungrouped);
 
@@ -106,11 +106,17 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 export class Passage extends vscode.TreeItem {
 	constructor(
 		public origin: string,
+		public range: vscode.Range,
 		public name: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public tags?: string[],
-		public meta?: string,
+		public meta?: any,
 	) {
 		super(name, collapsibleState);
+	}
+
+	async getContent() {
+		const doc = await vscode.workspace.openTextDocument(this.origin);
+		return doc.getText(new vscode.Range(this.range.start.translate(1), this.range.end));
 	}
 }

@@ -104,16 +104,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	function jumpToPassage(passage: { name: string; origin: string }) {
+	function jumpToPassage(passage: Passage) {
 		vscode.window.showTextDocument(vscode.Uri.file(passage.origin)).then(editor => {
-			const regexp = new RegExp(
-				"^::\\s*" +
-				passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-				"\\s*(\\[|\\{|$)"
-			);
-			const lines = editor.document.getText().split(/\r?\n/);
-			const start = Math.max(0, lines.findIndex(el => regexp.test(el)));
-			editor.revealRange(new vscode.Range(start, 0, start, 0), vscode.TextEditorRevealType.AtTop);
+			editor.revealRange(passage.range, vscode.TextEditorRevealType.AtTop);
 		});
 	}
 

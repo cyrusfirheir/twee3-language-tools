@@ -2,7 +2,7 @@ import { RawPassage, Passage, Vector, LinkedPassage } from '../types';
 
 export const parseRaw = (passageIn: RawPassage): Passage => {
   const lastIndex = passageIn.origin.lastIndexOf('/');
-  const meta = JSON.parse(passageIn.meta || '{}');
+  const meta = passageIn.meta;
   const positionArr = (meta.position || '0,0').split(',').map((str: string) => parseFloat(str));
   const sizeArr = (meta.size || '100,100').split(',').map((str: string) => parseFloat(str));
   const position: Vector = {

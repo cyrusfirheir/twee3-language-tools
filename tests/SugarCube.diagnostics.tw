@@ -70,6 +70,21 @@
 </sTyLe>
 
 
+<<textbox "$stringVar" "text" autofocus>>
+<<numberbox "$stringVar" 20 autofocus>>
+
+<<cycle text autoselect>><</cycle>>
+
+
+
+
+
+
+
+<<button [img["Link"]]>><</button>>
+
+
+
 
 /* hover tips tests */
 
