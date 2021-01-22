@@ -3,7 +3,7 @@
 		"serve": "vue-cli-service serve",
 		"build": "vue-cli-service build",
 		"lint": "vue-cli-service lint",
-		"vscode:prepublish": "npm run clean && webpack --mode production",
+		"vscode:prepublish": "npm run clean && npm run build && webpack --mode production",
 		"webpack": "webpack --mode development",
 		"webpack-dev": "webpack --mode development --watch",
 		"clean": "rimraf out"
@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.8.7",
+	"version": "0.8.8",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
