@@ -42,7 +42,7 @@ export interface RawPassage {
     origin: string;
     name: string;
     tags: string[];
-    meta: string;
+    meta: any;
     linksToNames: string[];
 }
 
