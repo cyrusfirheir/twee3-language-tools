@@ -294,7 +294,7 @@ export class Parameters {
      * Whether the variants are empty.
      */
     isEmpty(): boolean {
-        return this.variants.some(variant => !variant.isEmpty());
+        return !this.variants.some(variant => !variant.isEmpty());
     }
 }
 /**
