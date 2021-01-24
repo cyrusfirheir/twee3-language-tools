@@ -165,8 +165,8 @@ export default class AppComponent extends Vue {
     }
 
     style.backgroundImage = bgArr.map(s => `url('data:image/svg+xml;utf8,${s}')`).join(",");
-    style.backgroundPosition = `${-gridSize/2} ${-gridSize/2}`;
-
+	style.backgroundPosition = `-${gridSize/2}px -${gridSize/2}px`;
+	
     return style;
   }
 
