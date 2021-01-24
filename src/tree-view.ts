@@ -25,11 +25,10 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				let origins: string[] = [];
 				let files: Passage[] = [];
 				passages.forEach(el => {
-					if (!origins.includes(el.origin)) {
-						origins.push(el.origin);
-						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
-						let p = new Passage(el.origin, el.range, el.origin.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
-						p.tooltip = el.origin.replace(wF, "").substring(1);
+					if (!origins.includes(el.origin.full)) {
+						origins.push(el.origin.full);
+						let p = new Passage(el.origin, el.range, el.origin.path.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
+						p.tooltip = el.origin.path.substring(1);
 						files.push(p);
 					}
 				});
@@ -46,19 +45,23 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				let origins: string[] = [];
 				let folders: Passage[] = [];
 				passages.forEach(el => {
-					const _origin = el.origin.split("/").slice(0, -1).join("/");
-					if (!origins.includes(_origin)) {
-						origins.push(_origin);
-						const wF = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(el.origin))?.uri.path || "";
-						let p = new Passage(_origin, el.range, _origin.replace(wF, ""), vscode.TreeItemCollapsibleState.Expanded);
-						p.tooltip = _origin.replace(wF, "");
+					const _path = el.origin.path.split("/").slice(0, -1).join("/");
+					const _origin = {
+						root: el.origin.root,
+						path: _path,
+						full: el.origin.root + _path
+					};
+					if (!origins.includes(_origin.full)) {
+						origins.push(_origin.full);
+						let p = new Passage(_origin, el.range, _origin.path, vscode.TreeItemCollapsibleState.Expanded);
+						p.tooltip = _origin.path;
 						folders.push(p);
 					}
 				});
 
 				if (element) {
 					return Promise.resolve(passages
-						.filter(el => el.origin.split("/").slice(0, -1).join("/") === element.origin)
+						.filter(el => el.origin.path.split("/").slice(0, -1).join("/") === element.origin.path)
 						.sort((a, b) => a.name.localeCompare(b.name))
 					);
 				} else return Promise.resolve(folders.sort((a, b) => a.name.localeCompare(b.name)));
@@ -76,7 +79,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 						}
 					});
 				});
-				let ungrouped = new Passage("", new vscode.Range(0,0,0,0), "", vscode.TreeItemCollapsibleState.Expanded);
+				let ungrouped = new Passage({ root: "", path: "", full: "" }, new vscode.Range(0,0,0,0), "", vscode.TreeItemCollapsibleState.Expanded);
 				ungrouped.description = "Untagged";
 				groups.sort((a, b) => a.name.localeCompare(b.name)).push(ungrouped);
 
@@ -105,7 +108,11 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 export class Passage extends vscode.TreeItem {
 	constructor(
-		public origin: string,
+		public origin: {
+			root: string;
+			path: string;
+			full: string;
+		},
 		public range: vscode.Range,
 		public name: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -116,7 +123,7 @@ export class Passage extends vscode.TreeItem {
 	}
 
 	async getContent() {
-		const doc = await vscode.workspace.openTextDocument(this.origin);
+		const doc = await vscode.workspace.openTextDocument(this.origin.root + this.origin.path);
 		return doc.getText(new vscode.Range(this.range.start.translate(1), this.range.end));
 	}
 }

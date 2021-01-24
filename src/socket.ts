@@ -5,7 +5,7 @@ import * as socketio from 'socket.io';
 import { Passage } from './tree-view';
 
 export async function getPassageContent(passage: Passage): Promise<string> {
-	const doc = await vscode.workspace.openTextDocument(passage.origin);
+	const doc = await vscode.workspace.openTextDocument(passage.origin.full);
 	const fileContent = doc.getText();
 	const searchPassageRegexp = new RegExp("^::\\s*" + passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") + ".*?$", "m");
 	const anyPassageRegexp = new RegExp("^::\s*(.*)?(\[.*?\]\s*?)?(\{.*\}\s*)?$", "m");
