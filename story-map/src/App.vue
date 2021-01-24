@@ -318,9 +318,7 @@ export default defineComponent({
       this.draggedPassage = null;
     },
     onWheel(event: WheelEvent) {
-      const zoomAmount = (event.deltaY > 0)
-        ? (event.deltaY / 1000)                   // deltaY 100  ->  .1
-        : 1 - (1 / (1 + (event.deltaY / 1000)));  // deltaY -100 -> -.11111
+      const zoomAmount = Math.sign(event.deltaY) * 0.1; // hard coded for nao. can be made into setting.
 
       const zoomMod = 1 - zoomAmount;
 
