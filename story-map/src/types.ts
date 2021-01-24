@@ -4,7 +4,11 @@ export interface Vector {
 }
 
 export interface Passage {
-    origin: string;
+    origin: {
+        full: string;
+        path: string;
+        root: string;
+    };
     filename: string;
     path: string;
     name: string;
@@ -39,7 +43,11 @@ export interface PassageData {
 }
 
 export interface RawPassage {
-    origin: string;
+    origin: {
+        full: string;
+        path: string;
+        root: string;
+    };
     name: string;
     tags: string[];
     meta: any;

@@ -537,7 +537,7 @@ html, body {
   overflow: hidden;
 
   .show-sidebar & {
-    width: 350px;
+    width: 450px;
   }
 }
 

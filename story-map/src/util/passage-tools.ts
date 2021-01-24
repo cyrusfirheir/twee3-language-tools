@@ -1,7 +1,7 @@
 import { RawPassage, Passage, Vector, LinkedPassage } from '../types';
 
 export const parseRaw = (passageIn: RawPassage): Passage => {
-  const lastIndex = passageIn.origin.lastIndexOf('/');
+  const lastIndex = passageIn.origin.path.lastIndexOf('/');
   const meta = passageIn.meta || {};
   const positionArr = (meta.position || '0,0').split(',').map((str: string) => parseFloat(str));
   const sizeArr = (meta.size || '100,100').split(',').map((str: string) => parseFloat(str));
@@ -12,8 +12,8 @@ export const parseRaw = (passageIn: RawPassage): Passage => {
   const size: Vector = { x: sizeArr[0], y: sizeArr[1] };
   return {
     origin: passageIn.origin,
-    filename: passageIn.origin.substring(lastIndex + 1),
-    path: passageIn.origin.substring(0, lastIndex),
+    filename: passageIn.origin.path.substring(lastIndex + 1),
+    path: passageIn.origin.path.substring(0, lastIndex),
     name: passageIn.name,
     tags: passageIn.tags,
     linksToNames: passageIn.linksToNames,
