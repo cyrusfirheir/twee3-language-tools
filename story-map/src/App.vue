@@ -1,10 +1,10 @@
 <template>
   <div
     class="layout"
+    :class="{ 'show-sidebar': selectedPassage }"
     @mouseup="onMouseUp($event)"
     @mousemove="onMouseMove($event)"
     @mousedown="onMapMouseDown($event)"
-    @wheel.prevent="onWheel($event)"
   >
     <ToolBar
       class="toolbar"
@@ -12,46 +12,52 @@
       @saveChanges="saveChanges()"
       @toggle="toggleSetting($event)"
     />
-    <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }">
-      <svg :style="svgStyle">
-        <template v-if="!draggedPassage">
-          <!-- I would prefer if I could keep drawing lines while dragging -->
-          <!-- But that just slows things down to a crawl, probably need canvas to fix -->
-          <PassageLinkLine
-            v-for="linkedPassage in linkedPassages"
-            :key="`link-line${linkedPassage.key}`"
-            :from="linkedPassage.from"
-            :to="linkedPassage.to"
-            :twoWay="linkedPassage.twoWay"
-            :highlight="highlightElements.includes(linkedPassage)"
-            @lineMouseenter="onHoverableMouseEnter(linkedPassage)"
-            @lineMouseleave="onHoverableMouseLeave(linkedPassage)"
-          />
-        </template>
-      </svg>
-      <div
-        v-for="item in items"
-        :key="`passage-${item.passage.name}`"
-        :style="item.style"
-        :class="{ highlight: highlightElements.includes(item.passage) }"
-        @mouseenter="onHoverableMouseEnter(item.passage)"
-        @mouseleave="onHoverableMouseLeave(item.passage)"
-        @mousedown.stop="onPassageMouseDown(item.passage, $event)"
-        @dblclick="openPassage(item.passage)"
-        class="passage"
-      >
-        {{ item.passage.name }}
-        <div class="passage-tags">
-          <template v-for="tag in item.passage.tags">
-            <div
-              v-if="tag in tagColors"
-              :key="`tag-${item.passage.name}-${tag}`"
-              class="passage-tag"
-              :style="{ backgroundColor: tagColors[tag] }"></div>
+    <div class="sidebar">
+      <Sidebar :passage="selectedPassage" />
+    </div>
+    <div class="story-area" @click="deselectPassage()">
+      <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }" @wheel.prevent="onWheel($event)">
+        <svg :style="svgStyle">
+          <template v-if="!draggedPassage">
+            <!-- I would prefer if I could keep drawing lines while dragging -->
+            <!-- But that just slows things down to a crawl, probably need canvas to fix -->
+            <PassageLinkLine
+              v-for="linkedPassage in linkedPassages"
+              :key="`link-line${linkedPassage.key}`"
+              :from="linkedPassage.from"
+              :to="linkedPassage.to"
+              :twoWay="linkedPassage.twoWay"
+              :highlight="highlightElements.includes(linkedPassage) || (!hoveredElement && selectedPassage && linkedPassage.key === selectedPassage.key)"
+              @lineMouseenter="onHoverableMouseEnter(linkedPassage)"
+              @lineMouseleave="onHoverableMouseLeave(linkedPassage)"
+            />
           </template>
+        </svg>
+        <div
+          v-for="item in items"
+          :key="`passage-${item.passage.name}`"
+          :style="item.style"
+          :class="{ highlight: highlightElements.includes(item.passage) }"
+          @mouseenter="onHoverableMouseEnter(item.passage)"
+          @mouseleave="onHoverableMouseLeave(item.passage)"
+          @mousedown.stop="onPassageMouseDown(item.passage, $event)"
+          @click.stop="selectPassage(item.passage)"
+          @dblclick="openPassage(item.passage)"
+          class="passage"
+        >
+          {{ item.passage.name }}
+          <div class="passage-tags">
+            <template v-for="tag in item.passage.tags">
+              <div
+                v-if="tag in tagColors"
+                :key="`tag-${item.passage.name}-${tag}`"
+                class="passage-tag"
+                :style="{ backgroundColor: tagColors[tag] }"></div>
+            </template>
+          </div>
         </div>
+        <div v-if="shadowPassage" :style="shadowPassage.style" class="passage shadow-passage"></div>
       </div>
-      <div v-if="shadowPassage" :style="shadowPassage.style" class="passage shadow-passage"></div>
     </div>
   </div>
 </template>
@@ -65,9 +71,10 @@ import { linkPassage, parseRaw } from './util/passage-tools';
 
 import ToolBar from './components/ToolBar.vue';
 import PassageLinkLine from './components/PassageLinkLine.vue';
+import Sidebar from './components/Sidebar.vue';
 
 @Component({
-  components: { ToolBar, PassageLinkLine },
+  components: { ToolBar, PassageLinkLine, Sidebar },
 })
 export default class AppComponent extends Vue {
   connected = false;
@@ -81,6 +88,8 @@ export default class AppComponent extends Vue {
   translate: Vector = { x: 0, y: 0 };
   mapSize: Vector = { x: 0, y: 0 };
   zoom = 1;
+  mouseDownTimestamp: number;
+  selectedPassage: Passage = null;
   hoveredElement: PassageLink | LinkedPassage = null;
   linkedPassages: PassageLink[] = [];
   highlightElements: Array<PassageLink | Passage> = [];
@@ -166,8 +175,8 @@ export default class AppComponent extends Vue {
   }
 
   created() {
-    // socket.disconnect();
-    // socket.connect();
+    socket.disconnect();
+    socket.connect();
     socket.on('connect', () => {
       console.log('connected');
     });
@@ -287,11 +296,13 @@ export default class AppComponent extends Vue {
 
     this.initialDragItemPosition = { ... passage.position };
     this.initialDragPosition = { x: event.clientX, y: event.clientY };
+    this.mouseDownTimestamp = Date.now();
   }
 
   onMapMouseDown(event: MouseEvent) {
     this.initialDragItemPosition = { ...this.translate };
     this.initialDragPosition = { x: event.clientX, y: event.clientY };
+    this.mouseDownTimestamp = Date.now();
   }
 
   onMouseMove(event: MouseEvent) {
@@ -384,6 +395,16 @@ export default class AppComponent extends Vue {
       passage.originalPosition = { ...passage.position };
       passage.originalSize = { ...passage.size };
     });
+  }
+
+  selectPassage(passage: Passage) {
+    if (Date.now() - this.mouseDownTimestamp > 200) return;
+    this.selectedPassage = passage;
+  }
+
+  deselectPassage() {
+    if (Date.now() - this.mouseDownTimestamp > 200) return;
+    this.selectedPassage = null;
   }
 }
 </script>
@@ -487,20 +508,45 @@ html, body {
 
 <style lang="scss" scoped>
 .layout {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-areas: 
+    "titlebar titlebar"
+    "map sidebar";
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr auto;
   width: 100vw;
   height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
   background-color: var(--primary-500);
 }
 
 .toolbar {
+  grid-area: titlebar;
   z-index: 100;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background: rgba(0, 0, 0, .3);
+  border-left: solid rgba(255, 255, 255, .2) 1px;
+  box-shadow: 0 10px 20px rgba(var(--shadow-rgb),0.19), 0 6px 6px rgba(var(--shadow-rgb),0.23);
+  width: 0;
+  transition: width .3s ease-in-out;
+  overflow: hidden;
+
+  .show-sidebar & {
+    width: 350px;
+  }
+}
+
+.story-area {
+  grid-area: map;
+  overflow: hidden;
 }
 
 .story-map {
   position: relative;
-  flex: 1;
   transform-origin: top left;
 }
 
