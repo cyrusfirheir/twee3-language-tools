@@ -130,11 +130,6 @@ export default class Sidebar extends Vue {
         return false;
     }
 
-    @Watch('passage')
-    logPassage() {
-        console.log(this.passage);
-    }
-
     selectPassage(name: string) {
         this.$emit('selectPassage', name);
     }

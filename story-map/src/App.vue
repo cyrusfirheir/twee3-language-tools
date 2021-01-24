@@ -403,7 +403,6 @@ export default class AppComponent extends Vue {
 
   openPassage(passage: LinkedPassage) {
     socket.emit('open-passage', { name: passage.name, origin: passage.origin });
-    console.log('passage was doubleclicked', passage);
   }
 
   saveChanges() {
@@ -423,11 +422,8 @@ export default class AppComponent extends Vue {
   }
 
   selectPassage(passage: Passage, ignoreClicktime = false) {
-    console.log('selectPassage', { passage, ignoreClicktime, this: this });
     if (!ignoreClicktime && Date.now() - this.mouseDownTimestamp > 200) return;
-    console.log('should be setting');
     this.selectedPassage = passage;
-    console.log('this.selectedPassage', this.selectedPassage);
   }
 
   deselectPassage() {
