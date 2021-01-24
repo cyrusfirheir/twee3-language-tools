@@ -1,6 +1,6 @@
 - auto layout
-- include arrows
-- goto arrows
+- `<<include>>` arrows
+- `<<goto>>` arrows
 - icons for js/css/start/storydata/??
 - point to self arrow
 - undo / redo
