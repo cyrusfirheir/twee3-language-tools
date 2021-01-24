@@ -105,7 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	function jumpToPassage(passage: Passage) {
-		vscode.window.showTextDocument(vscode.Uri.file(passage.origin)).then(editor => {
+		vscode.window.showTextDocument(vscode.Uri.file(passage.origin.full)).then(editor => {
 			editor.revealRange(passage.range, vscode.TextEditorRevealType.AtTop);
 		});
 	}
@@ -247,7 +247,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			const removedFilePaths = e.files.map((file) => file.path);
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
-			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
+			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
 				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 				passageListProvider.refresh()
@@ -263,7 +263,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				let passages: Passage[] = ctx.workspaceState.get("passages", []);
 				passages.forEach(el => {
-					if (el.origin === file.oldUri.path) el.origin = file.newUri.path;
+					if (el.origin.full === file.oldUri.path) {
+						el.origin.root = vscode.workspace.getWorkspaceFolder(file.newUri)?.uri.path || "";
+						el.origin.path = file.newUri.path.replace(el.origin.root, "");
+						el.origin.full = file.newUri.path;
+					}
 				});
 				await ctx.workspaceState.update("passages", passages);
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();

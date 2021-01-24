@@ -13,7 +13,7 @@ interface IParsedToken {
 export const passageHeaderRegex = /(^::\s*)(.*?)(\[.*?\]\s*)?(\{.*?\}\s*)?$/;
 
 export const parseText = async function (context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
-	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin !== document.uri.path);
+	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin.full !== document.uri.path);
 	const newPassages: Passage[] = [];
 
 	const r: IParsedToken[] = [];
@@ -91,8 +91,11 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 				tokenModifiers: []
 			});
 
+			const root = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path || "";
+			const path = document.uri.path.replace(root, "");
+
 			let passage = new Passage(
-				document.uri.path,
+				{ root, path, full: document.uri.path },
 				new vscode.Range(i, 0, i + 1, 0),
 				passageName,
 				vscode.TreeItemCollapsibleState.None
