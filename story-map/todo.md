@@ -11,4 +11,5 @@
 - visual artifacts
 - reset passage position
 - change size
-- open in vscode
+- open in vscode (in sidebar button)
+- adjustable zoom speed
