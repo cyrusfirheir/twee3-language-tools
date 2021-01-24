@@ -159,14 +159,12 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>):
         let macroDefinition = list[key];
         if (macroDefinition.parameters === undefined) {
             continue;
-        }
-
-        if (macroDefinition.parameters === null || typeof (macroDefinition.parameters) !== 'object' || Array.isArray(macroDefinition.parameters)) {
-            errors.push(new Error(`Error while checking parameters of '${macroDefinition.name}': The parameters were not a valid object.`));
-            delete macroDefinition.parameters;
-            continue;
         } else if (macroDefinition.parameters instanceof Parameters) {
             // Ignore parameters that have already been parsed.
+            continue;
+        } else if (!Array.isArray(macroDefinition.parameters)) {
+            errors.push(new Error(`Error while checking parameters of '${macroDefinition.name}': The parameters were not an array of strings.`));
+            delete macroDefinition.parameters;
             continue;
         }
 
@@ -181,35 +179,32 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>):
 }
 
 export interface ChosenVariantInformation {
-    // The key of the chosen variant.
+    // The index of the chosen variant.
     // null if no variant was chosen
-    variantKey: string | null,
+    variantIndex: number | null,
     info: ValidateInformation,
 }
 export class Parameters {
-    variants: Record<string, Variant>;
+    variants: Variant[];
 
     /**
      * Construct a new Parameters instance from the unvalidated json.
      * @param variants The variants/'overloads' of the macro's parameters.
      * @throws {Error}
      */
-    constructor(variants: { [key: string]: any }) {
-        let result: Record<string, Variant> = {};
-        for (let key in variants) {
-            if (variants[key] === null || variants[key] === undefined) {
-                throw new Error(`Undefined/null variants are not allowed (variant: ${key}).`);
-            } else if (typeof (variants[key]) === "string") {
-                if (result.hasOwnProperty(key)) {
-                    // We already have the key, which is strange.
-                    // This probably isn't a duplicate key, but one like `__proto__`.
-                    throw new Error(`Duplicate or unsupported variant name ${key}`);
-                }
-                result[key] = new Variant(variants[key]);
+    constructor(variants: any[]) {
+        let result: Variant[] = [];
+
+        for (let i = 0; i < variants.length; i++) {
+            const variant = variants[i];
+            if (variants === null || variant === undefined) {
+                throw new Error(`Undefined/null variants are not allowed (variant index from 0: ${i}).`);
+            } else if (typeof(variant) === "string") {
+                result.push(new Variant(variant));
                 // Note: Later we could add support for objects to make so that variants could have
                 // configuration options
             } else {
-                throw new Error(`Invalid value, currently only string variants allowed. (variant: ${key})`);
+                throw new Error(`Invalid value, currently only string variants allowed. (variant index from 0: ${i})`);
             }
         }
         this.variants = result;
@@ -221,12 +216,7 @@ export class Parameters {
      * @param testFormat 
      */
     has (testFormat: Format): boolean {
-        for (const key in this.variants) {
-            if (this.variants[key].has(testFormat)) {
-                return true;
-            }
-        }
-        return false;
+        return this.variants.some(variant => variant.has(testFormat));
     }
 
     /**
@@ -246,14 +236,15 @@ export class Parameters {
      * Checks if two Parameters are loosely equivalent
      */
     compare(other: Parameters): boolean {
-        if (Object.keys(this.variants).length !== Object.keys(other.variants).length) {
-            // Different amount of keys so they cannot be equivalent.
+        if (this.variants.length !== other.variants.length) {
+            // Different amount of variants so they cannot be equivalent.
             return false;
         }
 
-        for (let key in this.variants) {
-            let left: Variant = this.variants[key];
-            let right: Variant | undefined = other.variants[key];
+        // Due to the order mattering, we don't have to do a more complicated check.
+        for (let i = 0; i < this.variants.length; i++) {
+            let left: Variant = this.variants[i];
+            let right: Variant | undefined = other.variants[i];
             if (right === undefined) {
                 // Certainly not equal. One of the keys is gone.
                 return false;
@@ -263,7 +254,7 @@ export class Parameters {
             }
         }
 
-        // We've checked the number of keys, and they both have all the same variants.
+        // We've checked the number of variants, and they both have all the same variants.
         return true;
     }
 
@@ -276,7 +267,7 @@ export class Parameters {
         // argument count. This certainly isn't the most accurate implementation but it
         // should work well enough for now.
         let highestVariant: ChosenVariantInformation = {
-            variantKey: null,
+            variantIndex: null,
             info: {
                 errors: [],
                 warnings: [],
@@ -286,14 +277,13 @@ export class Parameters {
         };
 
         // TODO: Add rank based on correct argument count?
-
-        for (const variantKey in this.variants) {
-            const variant = this.variants[variantKey];
+        for (let i = 0; i < this.variants.length; i++) {
+            const variant = this.variants[i];
             let info = variant.validate(args, stateInfo);
 
             if (info.rank > highestVariant.info.rank) {
                 highestVariant.info = info;
-                highestVariant.variantKey = variantKey;
+                highestVariant.variantIndex = i;
             }
         }
 
@@ -304,13 +294,7 @@ export class Parameters {
      * Whether the variants are empty.
      */
     isEmpty(): boolean {
-        for (let key in this.variants) {
-            if (!this.variants[key].isEmpty()) {
-                // We found a non-empty entry.
-                return false;
-            }
-        }
-        return true;
+        return this.variants.some(variant => !variant.isEmpty());
     }
 }
 /**
