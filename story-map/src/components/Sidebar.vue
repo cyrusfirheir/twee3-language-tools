@@ -2,7 +2,7 @@
     <div class="sidebar-outer" v-if="passage">
         <header class="titlebar">
             <h3>{{ passage.name }}</h3>
-            <button class="close">Close</button>
+            <button class="close" @click="selectPassage(null)">Close</button>
         </header>
         
         <h4>Path</h4>
