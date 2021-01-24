@@ -11,32 +11,61 @@
         </code>
 
         <h4>Links</h4>
-        <a
-            v-for="name in passage.linksToNames"
-            :key="`link-to-${name}`"
-            @click.prevent="selectPassage(name)"
-            href="#"
-            class="passage-link"
-        >
-            {{ name }}
-        </a>
+        <table class="linksTable" v-if="passage.linkedFrom.length || passage.linksTo.length">
+            <thead>
+                <tr>
+                    <th>Linked from</th>
+                    <th>Links to</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(x, n) in Math.max(passage.linkedFrom.length, passage.linksTo.length)" :key="`linksTable-row-${n}`">
+                    <td>
+                        <a v-if="passage.linkedFrom.length > n" href="#" @click.prevent="selectPassage(passage.linkedFrom[n])">
+                            {{ passage.linkedFrom[n].name }}
+                        </a>
+                    </td>
+                    <td>
+                        <a v-if="passage.linksTo.length > n" href="#" @click.prevent="selectPassage(passage.linksTo[n])">
+                            {{ passage.linksTo[n].name }}
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <span v-if="!passage.linksTo.length && !passage.linkedFrom.length">No links</span>
 
         <h4>Tags</h4>
-        <div v-for="tag in passage.tags" :key="`passage-tag-${tag}`" class="passage-tag">
-            {{ tag }} <button class="remove-tag">Remove</button>
-        </div>
-        <div class="add-tag-wrapper">
-            <input type="text" v-model="addTagModel">
-            <button class="add-tag-btn">Add tag</button>
-            <div class="tag-suggestion-list" v-if="tagSuggestions">
-                <div
-                    v-for="suggestion in tagSuggestions"
-                    :key="`tag-suggestion-${suggestion}`"
-                    class="tag-suggestion"
-                    @click="addTag(suggestion)"
+        <div class="passage-tags">
+            <div v-for="tag in passage.tags" :key="`passage-tag-${tag}`" class="passage-tag">
+                <span class="tag-color" v-if="tagColors[tag]" :style="{ backgroundColor: tagColors[tag] }"></span>
+                {{ tag }} <button class="remove-tag" @click="removeTag(tag)">Remove</button>
+            </div>
+            <div class="add-tag-wrapper">
+                <input
+                    type="text"
+                    v-model="addTagModel"
+                    placeholder="Add tag"
+                    @keydown.enter.prevent="addTag(activeTagSuggestion || addTagModel)"
+                    @keydown.esc.prevent="clearSuggestions()"
+                    @keydown.down.prevent="nextSuggestion()"
+                    @keydown.up.prevent="prevSuggestion()"
+                    @input="updateSuggestions()"
+                    @blur="clearSuggestions()"
                 >
-                    {{ suggestion }}
-                </div>
+                <button class="add-tag-btn" @click="addTag(addTagModel)">Add tag</button>
+            </div>
+        </div>
+        <div class="tag-suggestion-list" v-if="tagSuggestions && tagSuggestions.length">
+            <div
+                v-for="suggestion in tagSuggestions"
+                :key="`tag-suggestion-${suggestion}`"
+                class="tag-suggestion"
+                :class="{ active: activeTagSuggestion === suggestion }"
+                @mousedown="addTag(suggestion)"
+            >
+                {{ suggestion }}
+                <span class="suggestion-color" v-if="tagColors[suggestion]" :style="{ backgroundColor: tagColors[suggestion] }"></span>
             </div>
         </div>
 
@@ -55,25 +84,23 @@
 
         <h4>Actions</h4>
         <div class="actions">
-            <button class="action" disabled>Reset position</button>
-            <button class="action">Reset size</button>
-            <button class="action">Move to file</button>
-            <button class="action">Hide</button>
-            <button class="action">Open in VSCode</button>
+            <button class="action" :disabled="!hasMoved" @click="resetPosition()">Reset position</button>
+            <button class="action" :disabled="!hasResized" @click="resetSize()">Reset size</button>
+            <button class="action" :disabled="!hasChangedTags" @click="resetTags()">Reset tags</button>
+            <button class="action" disabled>Move to file</button>
+            <button class="action" disabled>Hide</button>
+            <button class="action" @click="openInVsCode()">Open in VSCode</button>
         </div>
-
-        <h1>Disclaimer</h1>
-        <p>most of the stuff above doesnt do anything</p>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
-import { Passage, Vector } from "../types";
+import { LinkedPassage, Vector } from "../types";
 
 @Component
 export default class Sidebar extends Vue {
-    @Prop() passage!: Passage;
+    @Prop() passage!: LinkedPassage;
     @Prop({ default: () => []}) allTags!: string[];
     @Prop({ default: () => ({})}) tagColors!: { [tag: string]: string };
 
@@ -88,25 +115,120 @@ export default class Sidebar extends Vue {
         { x: 200, y: 200 },
     ];
 
+    get hasMoved() {
+        return this.passage.position.x !== this.passage.originalPosition.x || this.passage.position.y !== this.passage.originalPosition.y;
+    }
+
+    get hasResized() {
+        return this.passage.size.x !== this.passage.originalSize.x || this.passage.size.y !== this.passage.originalSize.y;
+    }
+
+    get hasChangedTags() {
+        if (!this.passage) return false;
+        if (this.passage.tags.length !== this.passage.originalTags.length) return true;
+        if (this.passage.tags.some((tag, index) => tag !== this.passage.originalTags[index])) return true;
+        return false;
+    }
+
     @Watch('passage')
     logPassage() {
         console.log(this.passage);
     }
 
     selectPassage(name: string) {
-        this.$emit('select-passage', name);
+        this.$emit('selectPassage', name);
+    }
+
+    clearSuggestions() {
+        this.activeTagSuggestion = '';
+        this.tagSuggestions = [];
+    }
+
+    updateSuggestions() {
+        if (!this.addTagModel) {
+            this.tagSuggestions = [];
+        } else {
+            this.tagSuggestions = this.allTags.filter((tag) => tag.startsWith(this.addTagModel));
+        }
+    }
+
+    nextSuggestion() {
+        // If there is nothing to suggest, there is no next
+        if (!this.tagSuggestions || this.tagSuggestions.length === 0) {
+            this.activeTagSuggestion = '';
+            if (!this.addTagModel) {
+                this.tagSuggestions = this.allTags.slice();
+            }
+            return;
+        }
+
+        const index = this.tagSuggestions?.indexOf(this.activeTagSuggestion);
+        // Clear it is not in suggestions
+        if (index === undefined || index === -1) {
+            this.activeTagSuggestion = '';
+        }
+        // If no active suggestion, take the first
+        if (!this.activeTagSuggestion) {
+            this.activeTagSuggestion = this.tagSuggestions[0];
+        } else {
+            // Else take the next
+            this.activeTagSuggestion = this.tagSuggestions[(index + 1) % this.tagSuggestions.length];
+        }
+    }
+
+    prevSuggestion() {
+        // If there is nothing to suggest, there is no next
+        if (!this.tagSuggestions || this.tagSuggestions.length === 0) {
+            this.activeTagSuggestion = '';
+            return;
+        }
+
+        const index = this.tagSuggestions?.indexOf(this.activeTagSuggestion);
+        // Clear it is not in suggestions
+        if (index === undefined || index === -1) {
+            this.activeTagSuggestion = '';
+        }
+        // If no active suggestion, take the first
+        if (!this.activeTagSuggestion) {
+            this.activeTagSuggestion = this.tagSuggestions[this.tagSuggestions.length - 1];
+        } else {
+            // Else take the previous
+            this.activeTagSuggestion = this.tagSuggestions[(index + this.tagSuggestions.length - 1) % this.tagSuggestions.length];
+        }
     }
 
     addTag(tag: string) {
-        this.$emit('add-tag', tag);
+        this.addTagModel = '';
+        this.clearSuggestions();
+        this.$emit('addTag', tag);
+    }
+
+    removeTag(tag: string) {
+        this.$emit('removeTag', tag);
     }
 
     setSize(size: Vector) {
-        this.$emit('set-size', size);
+        this.$emit('setSize', size);
     }
 
     isSize(size: Vector) {
         return this.passage && this.passage.size.x === size.x && this.passage.size.y === size.y;
+    }
+
+    resetPosition() {
+        this.$emit('resetPosition');
+    }
+
+    resetSize() {
+        this.$emit('resetSize');
+    }
+
+    resetTags() {
+        this.$emit('resetTags');
+    }
+
+    openInVsCode() {
+        this.$emit('openInVsCode');
     }
 
     // reset position
@@ -161,7 +283,6 @@ export default class Sidebar extends Vue {
         overflow: hidden;
         border: 0;
         background-color: transparent;
-        vertical-align: top;
 
         &::before {
             content: '+';
@@ -184,27 +305,81 @@ export default class Sidebar extends Vue {
         }
     }
 
+    .linksTable {
+        min-width: 80%;
+        font-size: 14px;
+
+        th {
+            text-align: left;
+            font-weight: normal;
+            text-decoration: underline;
+        }
+
+        a {
+            display: block;
+            text-decoration: none;
+            color: rgba(255, 255, 255, .75);
+            font-size: 12px;
+            line-height: 1.35;
+
+            &:hover {
+                color: #FFF;
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .passage-tags {
+        display: flex;
+        gap: .2em;
+        flex-wrap: wrap;
+    }
+
     .passage-tag {
-        display: inline-block;
+        display: inline-flex;
         padding: 2px 4px;
         border: solid rgba(255, 255, 255, .75) 1px;
         border-radius: 3px;
-        margin: 2px;
+        align-items: center;
+        height: 25px;
+        gap: .3em;
+    }
+
+    .tag-color {
+        width: 8px;
+        height: 12px;
+        display: inline-block;
+        border-radius: 2px;
     }
 
     .remove-tag {
         @extend %close;
-        width: 16px;
-        height: 16px;
+        width: 24px;
+        height: 23px;
+        margin-right: -4px;
+        transition: background-color .1s ease-in-out;
+        border-left: solid rgba(255, 255, 255, .5) 1px;
 
         &::before {
+            color: rgba(255, 255, 255, .5);
             font-size: 20px;
+            transition: color .1s ease-in-out;
+        }
+
+        &:hover {
+            background-color: #FFF;
+
+            &::before {
+                color: #000;
+            }
         }
     }
 
     .add-tag-wrapper {
-        margin: .5em 0;
-        display: flex;
+        display: inline-flex;
+        border: solid #FFF 1px;
+        border-radius: 3px;
+        height: 25px;
     }
 
     .add-tag-wrapper input {
@@ -213,23 +388,87 @@ export default class Sidebar extends Vue {
         border-bottom-color: rgba(255, 255, 255, .5);
         border-radius: 4px;
         margin-right: .5em;
-        padding: 4px;
+        padding: 2px 4px;
         color:  #FFF;
-        flex: 1;
+        width: 100px;
+        outline: 0;
 
         &:focus {
-            border-bottom-color: transparent;
             background-color: rgba(255, 255, 255, .15);
         }
     }
 
     .add-tag-btn {
+        position: relative;
         padding: 4px;
-        border-radius: 4px;
-        background-color: rgba(255, 255, 255, .15);
+        background-color: transparent;
+        border-left: solid rgba(255, 255, 255, .35) 1px;
+        color: transparent;
+        font-size: 0;
+        overflow: hidden;
+        text-indent: -100vw;
+        width: 25px;
 
-        :focus + & {
+        &::before {
+            display: block;
+            content: '+';
+            position: absolute;
+            font-size: 20px;
+            color: rgba(255, 255, 255, .5);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-indent: 0;
+        }
+
+
+        :focus + &,
+        &:hover {
             background-color: #FFF;
+
+            &::before {
+                color: #000;
+            }
+        }
+    }
+
+    .tag-suggestion-list {
+        position: absolute;
+        width: 96%;
+        left: 2%;
+        z-index: 1;
+        background-color: #000;
+        border: solid #FFF 2px;
+        border-radius: 4px;
+        padding: 5px;
+        margin-top: 5px;
+    }
+
+    .tag-suggestion {
+        display: grid;
+        position: relative;
+        line-height: 1.4em;
+        grid-template-columns: 1fr auto;
+
+        &.active {
+            margin: 0 -5px;
+            padding: 0 5px;
+            background-color: #FFF;
+            color: #000;
+        }
+
+        &:hover {
+            margin: 0 -5px;
+            padding: 0 5px;
+            background-color: rgba(255, 255, 255, .7);
+            color: #000;
+        }
+
+        .suggestion-color {
+            align-self: center;
+            width: 10px;
+            height: 10px;
+            border: solid #000 1px;
         }
     }
 

@@ -54,16 +54,16 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 }
 
 export type Vector = { x: number; y: number; };
-export type UpdatePassage = { name: string; origin: string; position: Vector; size: Vector; tags?: string[] };
+export type UpdatePassage = { name: string; origin: { full: string; path: string; root: string; }; position: Vector; size: Vector; tags?: string[] };
 
 export async function updatePassages(passages: UpdatePassage[]) {
-	const files = [... new Set(passages.map(passage => passage.origin))];
+	const files = [... new Set(passages.map(passage => passage.origin.full))];
 	for (const file of files) {
 		const doc = await vscode.workspace.openTextDocument(file);
 		await doc.save();
 		let edited = doc.getText();
 
-		const filePassages = passages.filter(el => el.origin === file);
+		const filePassages = passages.filter(el => el.origin.full === file);
 		for (const passage of filePassages) {
 			const regexp = new RegExp(
 				"^::\\s*" +

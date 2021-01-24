@@ -21,6 +21,7 @@ export const parseRaw = (passageIn: RawPassage): Passage => {
     size: size,
     originalPosition: { ...position },
     originalSize: { ...size },
+    originalTags: [...passageIn.tags],
     key: `passage-${passageIn.origin}-${passageIn.name}`,
   };
 };

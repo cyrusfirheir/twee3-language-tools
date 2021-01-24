@@ -4,7 +4,6 @@
     :class="{ 'show-sidebar': selectedPassage }"
     @mouseup="onMouseUp($event)"
     @mousemove="onMouseMove($event)"
-    @mousedown="onMapMouseDown($event)"
   >
     <ToolBar
       class="toolbar"
@@ -13,9 +12,21 @@
       @toggle="toggleSetting($event)"
     />
     <div class="sidebar">
-      <Sidebar :passage="selectedPassage" />
+      <Sidebar
+        :passage="selectedPassage"
+        :allTags="allTags"
+        :tagColors="tagColors"
+        @setSize="setPassageSize(selectedPassage, $event)"
+        @resetSize="resetPassageSize(selectedPassage)"
+        @resetPosition="resetPassagePosition(selectedPassage)"
+        @resetTags="resetPassageTags(selectedPassage)"
+        @addTag="addPassageTag(selectedPassage, $event)"
+        @removeTag="removePassageTag(selectedPassage, $event)"
+        @selectPassage="selectPassage($event, true)"
+        @openInVsCode="openPassage(selectedPassage)"
+      />
     </div>
-    <div class="story-area" @click="deselectPassage()">
+    <div class="story-area" @click="deselectPassage()" @mousedown="onMapMouseDown($event)">
       <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }" @wheel.prevent="onWheel($event)">
         <svg :style="svgStyle">
           <template v-if="!draggedPassage">
@@ -37,7 +48,10 @@
           v-for="item in items"
           :key="`passage-${item.passage.name}`"
           :style="item.style"
-          :class="{ highlight: highlightElements.includes(item.passage) }"
+          :class="{
+            highlight: highlightElements.includes(item.passage),
+            selected: (selectedPassage === item.passage)
+          }"
           @mouseenter="onHoverableMouseEnter(item.passage)"
           @mouseleave="onHoverableMouseLeave(item.passage)"
           @mousedown.stop="onPassageMouseDown(item.passage, $event)"
@@ -81,6 +95,7 @@ export default class AppComponent extends Vue {
   connected = false;
   theme = 'cydark';
   passages: LinkedPassage[] = [];
+  allTags: string[] = [];
   tagColors: { [tag: string]: string } = {};
   draggedPassage: Passage = null;
   initialDragItemPosition: Vector = null;
@@ -115,6 +130,8 @@ export default class AppComponent extends Vue {
       if (passage.position.y !== passage.originalPosition.y) return true;
       if (passage.size.x !== passage.originalSize.x) return true;
       if (passage.size.y !== passage.originalSize.y) return true;
+      if (passage.tags.length !== passage.originalTags.length) return true;
+      if (passage.tags.some((tag, index) => tag !==  passage.originalTags[index])) return true;
       return false;
     });
   }
@@ -190,6 +207,12 @@ export default class AppComponent extends Vue {
         .map((passage, index, allPassages) => linkPassage(passage, allPassages));
       
       this.tagColors = passageData?.storyData?.['tag-colors'] || {};
+      let allTags = ['script', 'stylesheet'];
+      if (passageData?.storyData?.format === 'SugarCube') {
+        allTags.push('widget', 'nobr');
+      }
+      this.passages.forEach((passage) => (allTags = [...new Set([...allTags, ...passage.tags])]));
+      this.allTags = allTags;
       this.initMapSize();
     });
     socket.on('disconnect', () => {
@@ -395,17 +418,49 @@ export default class AppComponent extends Vue {
     this.changedPassages.forEach((passage) => {
       passage.originalPosition = { ...passage.position };
       passage.originalSize = { ...passage.size };
+      passage.originalTags = [ ...passage.originalTags ];
     });
   }
 
-  selectPassage(passage: Passage) {
-    if (Date.now() - this.mouseDownTimestamp > 200) return;
+  selectPassage(passage: Passage, ignoreClicktime = false) {
+    console.log('selectPassage', { passage, ignoreClicktime, this: this });
+    if (!ignoreClicktime && Date.now() - this.mouseDownTimestamp > 200) return;
+    console.log('should be setting');
     this.selectedPassage = passage;
+    console.log('this.selectedPassage', this.selectedPassage);
   }
 
   deselectPassage() {
     if (Date.now() - this.mouseDownTimestamp > 200) return;
     this.selectedPassage = null;
+  }
+
+  setPassageSize(passage: Passage, size: Vector) {
+    passage.size = { ...size };
+  }
+
+  resetPassageSize(passage: Passage) {
+    passage.size = { ... passage.originalSize };
+  }
+
+  resetPassagePosition(passage: Passage) {
+    passage.position = { ...passage.originalPosition };
+  }
+
+  resetPassageTags(passage: Passage) {
+    passage.tags = [ ...passage.originalTags ];
+  }
+
+  addPassageTag(passage: Passage, tag: string) {
+    if (passage.tags.some((oldTag) => !oldTag.toLowerCase().localeCompare(tag.trim().toLowerCase()))){
+      console.warn(`tried to add tag to passage already having that tag`, passage, tag.trim());
+      return;
+    }
+    passage.tags.push(tag.trim());
+  }
+
+  removePassageTag(passage: Passage, tag: string) {
+    passage.tags = passage.tags.filter((curTag) => curTag !== tag);
   }
 }
 </script>
@@ -580,7 +635,8 @@ svg {
     padding: 4px;
   }
 
-  &:hover {
+  &:hover,
+  &.selected {
     background-color: var(--primary-100);
     border-color: var(--gray-600);
     border-width: 2px;

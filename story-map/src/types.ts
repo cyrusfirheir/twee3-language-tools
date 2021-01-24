@@ -18,6 +18,7 @@ export interface Passage {
     size: Vector;
     originalPosition: Vector;
     originalSize: Vector;
+    originalTags: string[];
     zIndex?: number;
     dropShadow?: string;
     key: string;
