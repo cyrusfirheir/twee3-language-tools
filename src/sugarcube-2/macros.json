@@ -244,7 +244,8 @@
 		"name": "numberbox",
 		"description": "Creates a number input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<numberbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-numberbox)",
 		"parameters": [
-			"text &+ number |+ (passage |+ 'autofocus')"
+			"text &+ number |+ 'autofocus'",
+			"text &+ number |+ passage |+ 'autofocus'"
 		]
 	},
 	"radiobutton": {
@@ -265,6 +266,7 @@
 		"name": "textbox",
 		"description": "Creates a text input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<textbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-textbox)",
 		"parameters": [
+			"text &+ text |+ 'autofocus'",
 			"text &+ text |+ passage |+ 'autofocus'"
 		]
 	},
