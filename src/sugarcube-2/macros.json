@@ -25,7 +25,7 @@
 		"name": "script",
 		"container": true,
 		"description": "Silently executes its contents as *pure* JavaScript code—i.e., it performs no story or temporary variable substitution or TwineScript operator processing. For instances where you need to run some pure JavaScript and don't want to waste time performing extra processing on code that has no story or temporary variables or TwineScript operators in it and/or worry about the parser possibly clobbering the code.\n\nUsage:\n\n```\n<<script>> … <</script>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-script)",
-		"parameters": {}
+		"parameters": []
 	},
 
 	"=": {
@@ -41,16 +41,16 @@
 	"include": {
 		"name": "include",
 		"description": "Outputs the contents of the passage with the given name, optionally wrapping it within an HTML element. May be called either with the passage name or with a link markup.\n\nUsage:\n\n```\n<<include passageName [elementName]>>\n<<include linkMarkup [elementName]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-include)",
-		"parameters": {
-			"passage": "passage |+ text",
-			"link": "linkNoSetter |+ text"
-		}
+		"parameters": [
+			"passage |+ text",
+			"linkNoSetter |+ text"
+		]
 	},
 	"nobr": {
 		"name": "nobr",
 		"container": true,
 		"description": "Executes its contents and outputs the result, after removing leading/trailing newlines and replacing all remaining sequences of newlines with single spaces.\n\nUsage:\n\n```\n<<nobr>> … <</nobr>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-nobr)",
-		"parameters": {}
+		"parameters": []
 	},
 	"print": {
 		"name": "print",
@@ -61,7 +61,7 @@
 		"name": "silently",
 		"container": true,
 		"description": "Causes any output generated within its body to be discarded, except for errors (which will be displayed). Generally, only really useful for formatting blocks of macros for ease of use/readability, while ensuring that no output is generated, from spacing or whatnot.\n\nUsage:\n\n```\n<<silently>> … <</silently>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-silently)",
-		"parameters": {}
+		"parameters": []
 	},
 	"type": {
 		"name": "type",
@@ -110,7 +110,7 @@
 			"for"
 		],
 		"description": "Used within `<<for>>` macros. Terminates the execution of the current `<<for>>`.\n\nUsage:\n\n```\n<<break>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-break)",
-		"parameters": {}
+		"parameters": []
 	},
 	"continue": {
 		"name": "continue",
@@ -118,7 +118,7 @@
 			"for"
 		],
 		"description": "Used within `<<for>>` macros. Terminates the execution of the current iteration of the current `<<for>>` and begins execution of the next iteration.\n\nUsage:\n\n```\n<<continue>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-continue)",
-		"parameters": {}
+		"parameters": []
 	},
 	"switch": {
 		"name": "switch",
@@ -150,18 +150,18 @@
 		"container": true,
 		"description": "Creates a button that silently executes its contents when clicked, optionally forwarding the player to another passage. May be called either with the link text and passage name as separate arguments, with a link markup, or with an image markup.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<button linkText [passageName]>> … <</button>>\n<<button linkMarkup>> … <</button>>\n<<button imageMarkup>> … <</button>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-button)",
 		"selfClose": true,
-		"parameters": {
-			"separate": "text |+ passage",
-			"link": "linkNoSetter",
-			"image": "imageNoSetter"
-		}
+		"parameters": [
+			"text |+ passage",
+			"linkNoSetter",
+			"imageNoSetter"
+		]
 	},
 	"checkbox": {
 		"name": "checkbox",
 		"description": "Creates a checkbox, used to modify the value of the variable with the given name.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<checkbox receiverName uncheckedValue checkedValue [autocheck|checked]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-checkbox)",
-		"parameters": {
-			"checkbox": "text &+ bool|text|null|undefined|number|NaN &+ bool|text|null|undefined|number|NaN |+ 'autocheck'|'checked'"
-		}
+		"parameters": [
+			"text &+ bool|text|null|undefined|number|NaN &+ bool|text|null|undefined|number|NaN |+ 'autocheck'|'checked'"
+		]
 	},
 	"cycle": {
 		"name": "cycle",
@@ -171,9 +171,9 @@
 		],
 		"container": true,
 		"description": "Creates a cycling link, used to modify the value of the variable with the given name. The cycling options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<cycle receiverName [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n<</cycle>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-cycle)",
-		"parameters": {
-			"cycle": "text |+ 'autoselect'"
-		}
+		"parameters": [
+			"text |+ 'autoselect'"
+		]
 	},
 	"option": {
 		"name": "option",
@@ -181,9 +181,9 @@
 			"cycle",
 			"listbox"
 		],
-		"parameters": {
-			"option": "text |+ (text |+ 'selected')"
-		}
+		"parameters": [
+			"text |+ (text |+ 'selected')"
+		]
 	},
 	"optionsfrom": {
 		"name": "optionsfrom",
@@ -198,35 +198,35 @@
 		"container": true,
 		"description": "Creates a link that silently executes its contents when clicked, optionally forwarding the player to another passage. May be called either with the link text and passage name as separate arguments, with a link markup, or with an image markup.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<link linkText [passageName]>> … <</link>>\n<<link linkMarkup>> … <</link>>\n<<link imageMarkup>> … <</link>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-link)",
 		"selfClose": true,
-		"parameters": {
-			"separate": "text |+ passage",
-			"link": "linkNoSetter",
-			"image": "imageNoSetter"
-		}
+		"parameters": [
+			"text |+ passage",
+			"linkNoSetter",
+			"imageNoSetter"
+		]
 	},
 	"linkappend": {
 		"name": "linkappend",
 		"container": true,
 		"description": "Creates a single-use link that deactivates itself and appends its contents to its link text when clicked. Essentially, a combination of `<<link>>` and `<<append>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<linkappend linkText [transition|t8n]>> … <</linkappend>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-linkappend)",
-		"parameters": {
-			"linkappend": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"linkprepend": {
 		"name": "linkprepend",
 		"container": true,
 		"description": "Creates a single-use link that deactivates itself and prepends its contents to its link text when clicked. Essentially, a combination of `<<link>>` and `<<prepend>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<linkprepend linkText [transition|t8n]>> … <</linkprepend>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-linkprepend)",
-		"parameters": {
-			"linkprepend": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"linkreplace": {
 		"name": "linkreplace",
 		"container": true,
 		"description": "Creates a single-use link that deactivates itself and replaces its link text with its contents when clicked. Essentially, a combination of `<<link>>` and `<<replace>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<linkreplace linkText [transition|t8n]>> … <</linkreplace>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-linkreplace)",
-		"parameters": {
-			"linkreplace": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"listbox": {
 		"name": "listbox",
@@ -236,134 +236,136 @@
 		],
 		"container": true,
 		"description": "Creates a listbox, used to modify the value of the variable with the given name. The list options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<listbox receiverName [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n<</listbox>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-listbox)",
-		"parameters": {
-			"listbox": "text |+ 'autoselect'"
-		}
+		"parameters": [
+			"text |+ 'autoselect'"
+		]
 	},
 	"numberbox": {
 		"name": "numberbox",
 		"description": "Creates a number input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<numberbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-numberbox)",
-		"parameters": {
-			"numberbox": "text &+ number |+ (passage |+ 'autofocus')"
-		}
+		"parameters": [
+			"text &+ number |+ 'autofocus'",
+			"text &+ number |+ passage |+ 'autofocus'"
+		]
 	},
 	"radiobutton": {
 		"name": "radiobutton",
 		"description": "Creates a radio button, used to modify the value of the variable with the given name. Multiple `<<radiobutton>>` macros may be set up to modify the same variable, which makes them part of a radio button group.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<radiobutton receiverName checkedValue [autocheck|checked]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-radiobutton)",
-		"parameters": {
-			"radiobutton": "text &+ bool|number|text|null|undefined|NaN |+ 'autocheck'|'checked'"
-		}
+		"parameters": [
+			"text &+ bool|number|text|null|undefined|NaN |+ 'autocheck'|'checked'"
+		]
 	},
 	"textarea": {
 		"name": "textarea",
 		"description": "Creates a multiline text input block, used to modify the value of the variable with the given name.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<textarea receiverName defaultValue [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-textarea)",
-		"parameters": {
-			"textarea": "text &+ text |+ 'autofocus'"
-		}
+		"parameters": [
+			"text &+ text |+ 'autofocus'"
+		]
 	},
 	"textbox": {
 		"name": "textbox",
 		"description": "Creates a text input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<textbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-textbox)",
-		"parameters": {
-			"textbox": "text &+ text |+ passage |+ 'autofocus'"
-		}
+		"parameters": [
+			"text &+ text |+ 'autofocus'",
+			"text &+ text |+ passage |+ 'autofocus'"
+		]
 	},
 	
 	"actions": {
 		"name": "actions",
 		"description": "Creates a list of single-use passage links. Each link removes itself and all other `<<actions>>` links to the same passage after being activated. May be called either with a list of passages, with a list of link markup, or with a list of image markup. Probably most useful when paired with `<<include>>`.\n\nUsage:\n\n```\n<<actions passageList>>\n<<actions linkMarkupList>>\n<<actions imageMarkupList>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-actions)",
-		"parameters": {
-			"passage": "passage &+ ...passage",
-			"link": "link &+ ...link",
-			"image": "image &+ ...image"
-		}
+		"parameters": [
+			"passage &+ ...passage",
+			"link &+ ...link",
+			"image &+ ...image"
+		]
 	},
 	"back": {
 		"name": "back",
 		"description": "Creates a link that undoes past moments within the story history. May be called with, optional, link text or with a link or image markup.\n\nUsage:\n\n```\n<<back [linkText]>>\n<<back linkMarkup>>\n<<back imageMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-back)",
-		"parameters": {
-			"text": "|+ text",
-			"link": "linkNoSetter",
-			"image": "imageNoSetter"
-		}
+		"parameters": [
+			"|+ text",
+			"linkNoSetter",
+			"imageNoSetter"
+		]
 	},
 	"choice": {
 		"name": "choice",
 		"description": "Creates a single-use passage link that deactivates itself and all other `<<choice>>` links within the originating passage when activated. May be called either with the passage name and link text as separate arguments, with a link markup, or with a image markup.\n\nUsage:\n\n```\n<<choice passageName [linkText]>>\n<<choice linkMarkup>>\n<<choice imageMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-choice)",
-		"parameters": {
-			"separate": "passage |+ text",
-			"link": "link",
-			"image": "image"
-		}
+		"parameters": [
+			"passage |+ text",
+			"link",
+			"image"
+		]
 	},
 	"return": {
 		"name": "return",
 		"description": "Creates a link that navigates forward to a previously visited passage. May be called with, optional, link text or with a link or image markup.\n\nUsage:\n\n```\n<<return [linkText]>>\n<<return linkMarkup>>\n<<return imageMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-return)",
-		"parameters": {
-			"text": "|+ text",
-			"link": "linkNoSetter",
-			"image": "imageNoSetter"
-		}
+		"parameters": [
+			"|+ text",
+			"linkNoSetter",
+			"imageNoSetter"
+		]
 	},
 	
 	"addclass": {
 		"name": "addclass",
 		"description": "Adds classes to the selected element(s).\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<addclass selector classNames>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-addclass)",
-		"parameters": {
-			"addclass": "text |+ text"
-		}
+		"parameters": [
+			"text |+ text"
+		]
 	},
 	"append": {
 		"name": "append",
 		"container": true,
 		"description": "Executes its contents and appends the output to the contents of the selected element(s).\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<append selector [transition|t8n]>> … <</append>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-append)",
-		"parameters": {
-			"append": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"copy": {
 		"name": "copy",
 		"description": "Outputs a copy of the contents of the selected element(s).\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<copy selector>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-copy)",
-		"parameters": {
-			"copy": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	"prepend": {
 		"name": "prepend",
 		"container": true,
 		"description": "Executes its contents and prepends the output to the contents of the selected element(s).\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<prepend selector [transition|t8n]>> … <</prepend>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-prepend)",
-		"parameters": {
-			"prepend": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"remove": {
 		"name": "remove",
 		"description": "Removes the selected element(s).\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<remove selector>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-remove)",
-		"parameters": {
-			"remove": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	"removeclass": {
 		"name": "removeclass",
 		"description": "Removes classes from the selected element(s).\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<removeclass selector [classNames]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-removeclass)",
-		"parameters": {
-			"removeclass": "text |+ text"
-		}
+		"parameters": [
+			"text |+ text"
+		]
 	},
 	"replace": {
 		"name": "replace",
 		"container": true,
 		"description": "Executes its contents and replaces the contents of the selected element(s) with the output.\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<replace selector [transition|t8n]>> … <</replace>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-replace)",
-		"parameters": {
-			"replace": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"toggleclass": {
 		"name": "toggleclass",
 		"description": "Toggles classes on the selected element(s)—i.e., adding them if they don't exist, removing them if they do.\n\nSEE: [DOM macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-dom-warning)\n\nUsage:\n\n```\n<<toggleclass selector classNames>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-toggleclass)",
-		"parameters": {
-			"toggleclass": "text |+ text"
-		}
+		"parameters": [
+			"text |+ text"
+		]
 	},
 	
 	"audio": {
@@ -373,9 +375,9 @@
 	"cacheaudio": {
 		"name": "cacheaudio",
 		"description": "Caches an audio track for use by the other audio macros.\n\nUsage:\n\n```\n<<cacheaudio trackId sourceList>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-cacheaudio)",
-		"parameters": {
-			"cacheaudio": "text &+ text &+ ...text"
-		}
+		"parameters": [
+			"text &+ text &+ ...text"
+		]
 	},
 	"createaudiogroup": {
 		"name": "createaudiogroup",
@@ -384,9 +386,9 @@
 		],
 		"container": true,
 		"description": "Collects tracks, which must be set up via `<<cacheaudio>>`, into a group via its `<<track>>` children. Groups are useful for applying actions to multiple tracks simultaneously and/or excluding the included tracks from a larger set when applying actions.\n\nUsage:\n\n```\n<<createaudiogroup groupId>>\n\t[<<track trackId>> …]\n<</createaudiogroup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-createaudiogroup)",
-		"parameters": {
-			"createaudiogroup": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	"track": {
 		"name": "track",
@@ -402,9 +404,9 @@
 		],
 		"container": true,
 		"description": "Collects tracks, which must be set up via `<<cacheaudio>>`, into a playlist via its `<<track>>` children.\n\nUsage:\n\n```\n<<createplaylist listId>>\n\t[<<track trackId actionList>> …]\n<</createplaylist>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-createplaylist)",
-		"parameters": {
-			"createplaylist": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	"playlist": {
 		"name": "playlist",
@@ -417,32 +419,32 @@
 	"removeaudiogroup": {
 		"name": "removeaudiogroup",
 		"description": "Removes the audio group with the given ID.\n\nUsage:\n\n```\n<<removeaudiogroup groupId>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-masteraudio)",
-		"parameters": {
-			"removeaudiogroup": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	"removeplaylist": {
 		"name": "removeplaylist",
 		"description": "Removes the playlist with the given ID.\n\nUsage:\n\n```\n<<removeplaylist listId>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-removeplaylist)",
-		"parameters": {
-			"removeplaylist": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	"waitforaudio": {
 		"name": "waitforaudio",
 		"description": "Displays the loading screen until all currently registered audio has either loaded to a playable state or aborted loading due to errors. Requires tracks to be set up via `<<cacheaudio>>`.\n\nUsage:\n\n```\n<<waitforaudio>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-waitforaudio)",
 		"skipArgs": true,
-		"parameters": {}
+		"parameters": []
 	},
 
 
 	"goto": {
 		"name": "goto",
 		"description": "Immediately forwards the player to the passage with the given name. May be called either with the passage name or with a link markup.\n\nUsage:\n\n```\n<<goto passageName>>\n<<goto linkMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-goto)",
-		"parameters": {
-			"passage": "passage",
-			"goto": "linkNoSetter"
-		}
+		"parameters": [
+			"passage",
+			"linkNoSetter"
+		]
 	},
 	"repeat": {
 		"name": "repeat",
@@ -451,9 +453,9 @@
 		],
 		"container": true,
 		"description": "Repeatedly executes its contents after the given delay, inserting any output into the passage in its place. May be terminated by a `<<stop>>` macro.\n\nUsage:\n\n```\n<<repeat delay [transition|t8n]>> … <</repeat>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-repeat)",
-		"parameters": {
-			"repeat": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"stop": {
 		"name": "stop",
@@ -461,7 +463,7 @@
 			"repeat"
 		],
 		"description": "Used within `<<repeat>>` macros. Terminates the execution of the current `<<repeat>>`.\n\nUsage:\n\n```\n<<stop>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-stop)",
-		"parameters": {}
+		"parameters": []
 	},
 	"timed": {
 		"name": "timed",
@@ -470,26 +472,26 @@
 		],
 		"container": true,
 		"description": "Executes its contents after the given delay, inserting any output into the passage in its place. Additional timed executions may be chained via `<<next>>`.\n\nUsage:\n\n```\n<<timed delay [transition|t8n]>> …\n\t[<<next [delay]>> …]\n<</timed>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-timed)",
-		"parameters": {
-			"timed": "text |+ 'transition'|'t8n'"
-		}
+		"parameters": [
+			"text |+ 'transition'|'t8n'"
+		]
 	},
 	"next": {
 		"name": "next",
 		"parents": [
 			"timed"
 		],
-		"parameters": {
-			"next": "|+ text"
-		}
+		"parameters": [
+			"|+ text"
+		]
 	},
 	"widget": {
 		"name": "widget",
 		"container": true,
 		"description": "Creates a new widget macro (henceforth, widget) with the given name. Widgets allow you to create macros by using the standard macros and markup that you use normally within your story. Widgets may access arguments passed to them via the `$args` array-like object—see below for details.\n\nUsage:\n\n```\n<<widget widgetName>> … <</widget>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-widget)",
-		"parameters": {
-			"widget": "text"
-		}
+		"parameters": [
+			"text"
+		]
 	},
 	
 	"click": {
@@ -500,11 +502,11 @@
 		"deprecatedSuggestions": [
 			"macro: <<link>>"
 		],
-		"parameters": {
-			"text": "text |+ passage",
-			"link": "linkNoSetter",
-			"image": "imageNoSetter"
-		}
+		"parameters": [
+			"text |+ passage",
+			"linkNoSetter",
+			"imageNoSetter"
+		]
 	},
 	"display": {
 		"name": "display",
@@ -512,10 +514,10 @@
 		"deprecatedSuggestions": [
 			"macro: <<include>>"
 		],
-		"parameters": {
-			"passage": "passage |+ text",
-			"link":"linkNoSetter |+ text"
-		}
+		"parameters": [
+			"passage |+ text",
+			"linkNoSetter |+ text"
+		]
 	},
 	"forget": {
 		"name": "forget",
@@ -547,6 +549,6 @@
 		"deprecatedSuggestions": [
 			"macro: <<audio>> (<<audio ':all' stop>>)"
 		],
-		"parameters": {}
+		"parameters": []
 	}
 }

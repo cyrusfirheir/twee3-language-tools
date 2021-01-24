@@ -231,7 +231,7 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 			.findIndex((index) => index > exIndex) + lineEnd;
 		const ex0Length = ex[0].length;
 		lineEnd = lineIndices.slice(lineStart)
-			.findIndex((index) => index > exIndex + ex0Length) + lineStart;
+			.findIndex((index) => index >= exIndex + ex0Length) + lineStart;
 		const charStart = exIndex - (lineStart ? lineIndices[lineStart - 1] : 0) - 1;
         const charEnd = charStart + ex0Length;
 
@@ -603,7 +603,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("parameterValidation") && highestVariant !== null && cur.parameters instanceof Parameters) {
 					const parameters: Parameters = cur.parameters;
-					if (highestVariant.variantKey === null) {
+					if (highestVariant.variantIndex === null) {
 						if (parameters.isEmpty()) {
 							// There are no parameters!
 							if (parsedArguments.arguments.length > 0) {
@@ -690,7 +690,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 							d.push({
 								severity: vscode.DiagnosticSeverity.Error,
 								range,
-								message: `Too many arguments for variant '${highestVariant.variantKey}'`,
+								message: `Too many arguments for variant '#${highestVariant.variantIndex}'`,
 								source: `sc2-ex`,
 								code: 111,
 							})

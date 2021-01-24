@@ -68,6 +68,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import { socket } from './socket';
 import { PassageAndStyle, Vector, Passage, LinkedPassage, PassageLink, PassageStyle, PassageData } from './types';
 import { linkPassage, parseRaw } from './util/passage-tools';
+import { getScrollDistance } from './util/scroll-distance-calc';
 
 import ToolBar from './components/ToolBar.vue';
 import PassageLinkLine from './components/PassageLinkLine.vue';
@@ -165,7 +166,7 @@ export default class AppComponent extends Vue {
     }
 
     style.backgroundImage = bgArr.map(s => `url('data:image/svg+xml;utf8,${s}')`).join(",");
-	style.backgroundPosition = `-${gridSize/2}px -${gridSize/2}px`;
+	  style.backgroundPosition = `-${gridSize/2}px -${gridSize/2}px`;
 	
     return style;
   }
@@ -351,10 +352,10 @@ export default class AppComponent extends Vue {
   }
 
   onWheel(event: WheelEvent) {
-    console.log('onWheel', event);
-    const zoomAmount = (event.deltaY > 0)
-      ? (event.deltaY / 1000)                   // deltaY 100  ->  .1
-      : 1 - (1 / (1 + (event.deltaY / 1000)));  // deltaY -100 -> -.11111
+    const scrollAmount = getScrollDistance(event);
+    const zoomAmount = (scrollAmount > 0)
+      ? (scrollAmount / 1000)                   // deltaY 100  ->  .1
+      : 1 - (1 / (1 + (scrollAmount / 1000)));  // deltaY -100 -> -.11111
 
     const zoomMod = 1 - zoomAmount;
 
