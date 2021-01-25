@@ -62,44 +62,58 @@ macroFileWatcher.onDidDelete(async (e) => {
  * Cache of macro definitions.
  * Updated whenever the files change.
  */
-let macroCache: Record<string, macroDef> | null = null;
-export const macroList = async function (): Promise<Record<string, macroDef>> {
+let macroCache: Promise<Record<string, macroDef>> | null = null;
+export const macroList = function (): Promise<Record<string, macroDef>> {
 	if (macroCache === null) {
-		await updateMacroCache();
+		updateMacroCache();
 	}
 
-	// After updating macro list, it should not be null.
-	return macroCache as Record<string, macroDef>;
+	if (macroCache === null) {
+		// Macro cache is still null.. probably an error.
+		// Just return a promise for an empty object.
+		return Promise.resolve({});
+	} else {
+		// After updating macro list, it should not be null.
+		return macroCache;
+	}
 }
 
 /**
  * Update the cache with by parsing the files.
  */
-const updateMacroCache = async function () {
-	let list = await parseMacroList();
-	// Before we cache it, we parse the parameters into a more useful format.
-	let errors = parseMacroParameters(list);
-	// We can continue despite errors from parsing the parameters, but we report them.
-	if (errors.length > 0) {
-		// Note: Since this is called early on, these messages might not be displayed.
-		let errorMessages: string = errors.map(err => err.message).join(", \n");
-		vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
-	}
+const updateMacroCache = function () {
+	// Essentially we get the last macroCache (if there was one) and the parsed macros
+	let list = Promise.all([macroCache, parseMacroList()])
+		.then(([lastMacroCache, list]) => {
+		// Before we cache it, we parse the parameters into a more useful format.
+		let errors = parseMacroParameters(list);
+		// We can continue despite errors from parsing the parameters, but we report them.
+		if (errors.length > 0) {
+			// Note: Since this is called early on, these messages might not be displayed.
+			let errorMessages: string = errors.map(err => err.message).join(", \n");
+			vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
+		}
 
-	// Check for changed macros and clear those from the arguments cache.
-	if (macroCache !== null) {
-		for (const key in macroCache) {
-			if (key in list) {
-				if (!isMacroFunctionallyEquivalent(macroCache[key], list[key])) {
-					// They weren't equivalent, thus we remove it from cache.
+		// Check for changed macros and clear those from the arguments cache.
+		if (lastMacroCache !== null) {
+			for (const key in lastMacroCache) {
+				if (key in list) {
+					if (!isMacroFunctionallyEquivalent(lastMacroCache[key], list[key])) {
+						// They weren't equivalent, thus we remove it from cache.
+						argumentCache.clearMacro(key);
+					}
+				} else {
+					// The macro no longer exists. Remove it from cache.
 					argumentCache.clearMacro(key);
 				}
-			} else {
-				// The macro no longer exists. Remove it from cache.
-				argumentCache.clearMacro(key);
 			}
 		}
-	}
+
+		return list;
+	}, function () {
+		// No list.
+		return null;
+	});
 
 	macroCache = list;
 }
