@@ -227,7 +227,7 @@ export enum LinkSyntax {
 export interface ImageArgument {
 	type: ArgType.Image,
 	range: vscode.Range,
-	image: Evaluatable<string, string>,
+	image: string,
 	passage?: Evaluatable<string, string>,
 	align?: 'left' | 'right',
 	// TODO: This could be evaluatable
@@ -466,7 +466,9 @@ export function parseArguments(source: UnparsedMacroArguments, lexRange: vscode.
 						let arg: ImageArgument = {
 							type: ArgType.Image,
 							// TODO: should we assume that source is a string?
-							image: checkPassageId(state.passages, markup.source as string, range, args.warnings),
+							// TODO: This can actually be a passage through some Twine 1.4, but
+							// that isn't currently handled. (See SugarCube parserlib.js #691)
+							image: markup.source as string,
 							range,
 						};
 
