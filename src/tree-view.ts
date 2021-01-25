@@ -142,3 +142,15 @@ export class Passage extends vscode.TreeItem {
 		return doc.getText(new vscode.Range(this.range.start.translate(1), this.range.end));
 	}
 }
+
+export function jumpToPassage(passage: Passage | OpenPassageParams) {
+	vscode.window.showTextDocument(vscode.Uri.file(passage.origin.full)).then(editor => {
+		const range = (passage.range instanceof vscode.Range) ? passage.range : new vscode.Range(
+			passage.range.startLine,
+			passage.range.startCharacter,
+			passage.range.endLine,
+			passage.range.endCharacter,
+		);
+		editor.revealRange(range, vscode.TextEditorRevealType.AtTop);
+	});
+}
