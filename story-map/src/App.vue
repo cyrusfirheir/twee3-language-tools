@@ -331,6 +331,10 @@ export default class AppComponent extends Vue {
   }
 
   onPassageMouseDown(passage: LinkedPassage, event: MouseEvent) {
+    // Middle mouse is drag map
+    if (event.button === 1) {
+      return this.onMapMouseDown(event);
+    }
     this.highestZIndex++;
     passage.zIndex = this.highestZIndex;
     this.draggedPassage = passage;
