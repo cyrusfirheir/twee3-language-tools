@@ -16,9 +16,10 @@ Made possible through contributions from [@Goctionni](https://github.com/Goction
     ![Passage List](https://imgur.com/3WObntl.png)  
 
 - A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar. Currently implemented features:  
-	- Snap to grid (button on top-left)  
-	- Arrows to linked passages  
-	- Saving position changes to file  
+	- Snap to grid (button on top-left.)  
+	- Arrows to linked passages.  
+	- Passage tags, position, and size editing via a sidebar. Changes can be saved to file.  
+
 
 	![Story Map](https://imgur.com/pjtlOrC.png)
 

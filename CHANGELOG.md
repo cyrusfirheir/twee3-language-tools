@@ -2,6 +2,16 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.9.0
+
+- Fixes numerous bugs with argument parsing and validtion.
+
+- Adds a sidebar to the storymap.
+	
+	![Sidebar](https://imgur.com/8XkfJVs.png)
+
+---
+
 ## v0.8.1
 
 Improves performance for large files (thanks to @Goctionni and @MinusGix).
