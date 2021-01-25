@@ -95,7 +95,7 @@ export default class AppComponent extends Vue {
   connected = false;
   theme = 'cydark';
   passages: LinkedPassage[] = [];
-  allTags: string[] = [];
+  storyData: { [key: string]: any } = {};
   tagColors: { [tag: string]: string } = {};
   draggedPassage: Passage = null;
   initialDragItemPosition: Vector = null;
@@ -116,6 +116,28 @@ export default class AppComponent extends Vue {
     snapToGrid: false,
     gridSize: 25,
   };
+
+  get allTags(): string[] {
+    const { passages, storyData } = this;
+    // twee 3 tags
+    let allTags = ['script', 'stylesheet'];
+    // sugarcube tags
+    if (storyData?.format === 'SugarCube') {
+      allTags.push('widget', 'nobr');
+    }
+    // if no passages are loaded yet, thats all
+    if (!passages) return allTags;
+
+    // else also add all tags from passages
+    for (const passage of passages) {
+      for (const tag of passage.tags) {
+        if (!allTags.includes(tag)) {
+          allTags.push(tag);
+        }
+      }
+    };
+    return allTags;
+  }
 
   get items(): PassageAndStyle[] {
     return this.passages.map((passage) => ({
@@ -206,13 +228,8 @@ export default class AppComponent extends Vue {
         .map((passageRaw) => parseRaw(passageRaw))
         .map((passage, index, allPassages) => linkPassage(passage, allPassages));
       
+      this.storyData = passageData.storyData;
       this.tagColors = passageData?.storyData?.['tag-colors'] || {};
-      let allTags = ['script', 'stylesheet'];
-      if (passageData?.storyData?.format === 'SugarCube') {
-        allTags.push('widget', 'nobr');
-      }
-      this.passages.forEach((passage) => (allTags = [...new Set([...allTags, ...passage.tags])]));
-      this.allTags = allTags;
       this.initMapSize();
     });
     socket.on('disconnect', () => {
@@ -402,7 +419,7 @@ export default class AppComponent extends Vue {
   }
 
   openPassage(passage: LinkedPassage) {
-    socket.emit('open-passage', { name: passage.name, origin: passage.origin });
+    socket.emit('open-passage', { name: passage.name, origin: passage.origin, range: passage.range });
   }
 
   saveChanges() {

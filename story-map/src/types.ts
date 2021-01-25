@@ -9,6 +9,12 @@ export interface Passage {
         path: string;
         root: string;
     };
+    range: {
+        startLine: number;
+        startCharacter: number;
+        endLine: number;
+        endCharacter: number;
+    };
     filename: string;
     path: string;
     name: string;
@@ -48,6 +54,12 @@ export interface RawPassage {
         full: string;
         path: string;
         root: string;
+    };
+    range: {
+        startLine: number;
+        startCharacter: number;
+        endLine: number;
+        endCharacter: number;
     };
     name: string;
     tags: string[];

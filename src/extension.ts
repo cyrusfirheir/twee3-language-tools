@@ -15,7 +15,7 @@ import { updateDiagnostics } from './diagnostics';
 import { tweeProjectConfig, changeStoryFormat } from "./tweeProject";
 import { updatePassages, sendPassageDataToClient } from "./socket";
 
-import { PassageListProvider, Passage } from './tree-view';
+import { PassageListProvider, Passage, OpenPassageParams } from './tree-view';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
@@ -104,9 +104,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	function jumpToPassage(passage: Passage) {
+	function jumpToPassage(passage: Passage | OpenPassageParams) {
 		vscode.window.showTextDocument(vscode.Uri.file(passage.origin.full)).then(editor => {
-			editor.revealRange(passage.range, vscode.TextEditorRevealType.AtTop);
+			const range = (passage.range instanceof vscode.Range) ? passage.range : new vscode.Range(
+				passage.range.startLine,
+				passage.range.startCharacter,
+				passage.range.endLine,
+				passage.range.endCharacter,
+			);
+			editor.revealRange(range, vscode.TextEditorRevealType.AtTop);
 		});
 	}
 

@@ -42,6 +42,12 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 		}
 		return {
 			origin: passage.origin,
+			range: {
+				startLine: passage.range.start.line,
+				startCharacter: passage.range.start.character,
+				endLine: passage.range.end.line,
+				endCharacter: passage.range.end.character,
+			},
 			name: passage.name,
 			tags: passage.tags,
 			meta: passage.meta,

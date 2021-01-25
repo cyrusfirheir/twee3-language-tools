@@ -12,6 +12,7 @@ export const parseRaw = (passageIn: RawPassage): Passage => {
   const size: Vector = { x: sizeArr[0], y: sizeArr[1] };
   return {
     origin: passageIn.origin,
+    range: passageIn.range,
     filename: passageIn.origin.path.substring(lastIndex + 1),
     path: passageIn.origin.path.substring(0, lastIndex),
     name: passageIn.name,

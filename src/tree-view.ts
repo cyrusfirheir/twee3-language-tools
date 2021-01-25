@@ -106,6 +106,21 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 	}
 }
 
+export interface OpenPassageParams {
+	name: string;
+	origin: {
+		root: string;
+		path: string;
+		full: string;
+	};
+	range: {
+		startLine: number;
+		startCharacter: number;
+		endLine: number;
+		endCharacter: number;
+	};
+}
+
 export class Passage extends vscode.TreeItem {
 	constructor(
 		public origin: {
