@@ -4,7 +4,17 @@ export interface Vector {
 }
 
 export interface Passage {
-    origin: string;
+    origin: {
+        full: string;
+        path: string;
+        root: string;
+    };
+    range: {
+        startLine: number;
+        startCharacter: number;
+        endLine: number;
+        endCharacter: number;
+    };
     filename: string;
     path: string;
     name: string;
@@ -14,8 +24,10 @@ export interface Passage {
     size: Vector;
     originalPosition: Vector;
     originalSize: Vector;
+    originalTags: string[];
     zIndex?: number;
     dropShadow?: string;
+    key: string;
 }
 
 export interface LinkedPassage extends Passage {
@@ -32,8 +44,23 @@ export interface PassageAndStyle {
     style: PassageStyle;
 }
 
+export interface PassageData {
+    storyData: { [key: string]: any };
+    list: RawPassage[];
+}
+
 export interface RawPassage {
-    origin: string;
+    origin: {
+        full: string;
+        path: string;
+        root: string;
+    };
+    range: {
+        startLine: number;
+        startCharacter: number;
+        endLine: number;
+        endCharacter: number;
+    };
     name: string;
     tags: string[];
     meta: any;

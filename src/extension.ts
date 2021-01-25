@@ -13,9 +13,9 @@ import * as socketio from 'socket.io';
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
 import { tweeProjectConfig, changeStoryFormat } from "./tweeProject";
-import { updatePassages, sendPassagesToClient } from "./socket";
+import { updatePassages, sendPassageDataToClient } from "./socket";
 
-import { PassageListProvider, Passage } from './tree-view';
+import { PassageListProvider, Passage, OpenPassageParams } from './tree-view';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
@@ -104,9 +104,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	function jumpToPassage(passage: Passage) {
-		vscode.window.showTextDocument(vscode.Uri.file(passage.origin)).then(editor => {
-			editor.revealRange(passage.range, vscode.TextEditorRevealType.AtTop);
+	function jumpToPassage(passage: Passage | OpenPassageParams) {
+		vscode.window.showTextDocument(vscode.Uri.file(passage.origin.full)).then(editor => {
+			const range = (passage.range instanceof vscode.Range) ? passage.range : new vscode.Range(
+				passage.range.startLine,
+				passage.range.startCharacter,
+				passage.range.endLine,
+				passage.range.endCharacter,
+			);
+			editor.revealRange(range, vscode.TextEditorRevealType.AtTop);
 		});
 	}
 
@@ -129,14 +135,14 @@ export async function activate(context: vscode.ExtensionContext) {
 		storyMap.server = new Server(app);
 		storyMap.server.listen(port, () => console.log(`Server connected on ${hostUrl}`));
 
-		const io = new socketio.Server(storyMap.server);
+		const io = new socketio.Server(storyMap.server, { cors: { origin: 'http://localhost:8080' } });
 		io.on('connection', (client: socketio.Socket) => {
 			if (storyMap.client) storyMap.client.disconnect(true);
 			if (storyMap.disconnectTimeout) clearTimeout(storyMap.disconnectTimeout);
 
 			storyMap.client = client;
 			console.log('client connected');
-			sendPassagesToClient(ctx, client);
+			sendPassageDataToClient(ctx, client);
 
 			client.on('open-passage', jumpToPassage);
 			client.on('update-passages', updatePassages);
@@ -247,9 +253,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			const removedFilePaths = e.files.map((file) => file.path);
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
-			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin));
+			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
-				if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
+				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 				passageListProvider.refresh()
 			});
 		})
@@ -263,11 +269,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				let passages: Passage[] = ctx.workspaceState.get("passages", []);
 				passages.forEach(el => {
-					if (el.origin === file.oldUri.path) el.origin = file.newUri.path;
+					if (el.origin.full === file.oldUri.path) {
+						el.origin.root = vscode.workspace.getWorkspaceFolder(file.newUri)?.uri.path || "";
+						el.origin.path = file.newUri.path.replace(el.origin.root, "");
+						el.origin.full = file.newUri.path;
+					}
 				});
 				await ctx.workspaceState.update("passages", passages);
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-				if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
+				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 			}
 		})
 		,
@@ -275,7 +285,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			tweeProjectConfig(document);
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-			if (storyMap.client) sendPassagesToClient(ctx, storyMap.client);
+			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 		})
 		,
 		vscode.window.registerTreeDataProvider(

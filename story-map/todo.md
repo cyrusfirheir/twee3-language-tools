@@ -1,0 +1,15 @@
+- auto layout
+- `<<include>>` arrows
+- `<<goto>>` arrows
+- icons for js/css/start/storydata/??
+- point to self arrow
+- undo / redo
+- multi select
+- move to file
+- tags in sidepanel
+- hide/unhide passages
+- visual artifacts
+- reset passage position
+- change size
+- open in vscode (in sidebar button)
+- adjustable zoom speed
