@@ -69,13 +69,6 @@
 	}
 </sTyLe>
 
-
-/* wonky image link */
-<<button [img["Link"]]>><</button>>
-
-
-
-
 /* hover tips tests */
 
 <<capture>><</capture>>
