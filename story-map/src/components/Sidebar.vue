@@ -100,9 +100,13 @@ import { LinkedPassage, Vector } from "../types";
 
 @Component
 export default class Sidebar extends Vue {
-    @Prop() passage!: LinkedPassage;
+    @Prop({ default: () => []}) passages!: LinkedPassage[];
     @Prop({ default: () => []}) allTags!: string[];
     @Prop({ default: () => ({})}) tagColors!: { [tag: string]: string };
+
+    get passage(): LinkedPassage {
+        return this.passages[0];
+    }
 
     props = ['filename', 'key', 'linksToNames', 'name', 'origin', 'position', 'size', 'tags', 'path'];
     tagSuggestions: string[] | null = null;

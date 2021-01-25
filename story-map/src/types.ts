@@ -22,11 +22,12 @@ export interface Passage {
     tags: string[];
     position: Vector;
     size: Vector;
+    drawPosition: Vector | null;
     originalPosition: Vector;
     originalSize: Vector;
     originalTags: string[];
     zIndex?: number;
-    dropShadow?: string;
+    dropShadow?: Vector;
     key: string;
 }
 

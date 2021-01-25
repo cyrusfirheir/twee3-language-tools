@@ -1,7 +1,7 @@
 <template>
   <div
     class="layout"
-    :class="{ 'show-sidebar': selectedPassage }"
+    :class="{ 'show-sidebar': selectedPassages.length }"
     @mouseup="onMouseUp($event)"
     @mousemove="onMouseMove($event)"
   >
@@ -13,17 +13,17 @@
     />
     <div class="sidebar">
       <Sidebar
-        :passage="selectedPassage"
+        :passages="selectedPassages"
         :allTags="allTags"
         :tagColors="tagColors"
-        @setSize="setPassageSize(selectedPassage, $event)"
-        @resetSize="resetPassageSize(selectedPassage)"
-        @resetPosition="resetPassagePosition(selectedPassage)"
-        @resetTags="resetPassageTags(selectedPassage)"
-        @addTag="addPassageTag(selectedPassage, $event)"
-        @removeTag="removePassageTag(selectedPassage, $event)"
-        @selectPassage="selectPassage($event, true)"
-        @openInVsCode="openPassage(selectedPassage)"
+        @setSize="setPassageSize(selectedPassages, $event)"
+        @resetSize="resetPassageSize(selectedPassages)"
+        @resetPosition="resetPassagePosition(selectedPassages)"
+        @resetTags="resetPassageTags(selectedPassages)"
+        @addTag="addPassageTag(selectedPassages, $event)"
+        @removeTag="removePassageTag(selectedPassages, $event)"
+        @selectPassage="selectPassage($event, null)"
+        @openInVsCode="openPassage(selectedPassages)"
       />
     </div>
     <div class="story-area" @click="deselectPassage()" @mousedown="onMapMouseDown($event)">
@@ -38,7 +38,7 @@
               :from="linkedPassage.from"
               :to="linkedPassage.to"
               :twoWay="linkedPassage.twoWay"
-              :highlight="highlightElements.includes(linkedPassage) || (!hoveredElement && selectedPassage && linkedPassage.key === selectedPassage.key)"
+              :highlight="highlightElements.includes(linkedPassage) || (!hoveredElement && selectedPassages.some((selPassage) => selPassage.key  === linkedPassage.key))"
               @lineMouseenter="onHoverableMouseEnter(linkedPassage)"
               @lineMouseleave="onHoverableMouseLeave(linkedPassage)"
             />
@@ -50,16 +50,21 @@
           :style="item.style"
           :class="{
             highlight: highlightElements.includes(item.passage),
-            selected: (selectedPassage === item.passage)
+            selected: selectedPassages.includes(item.passage),
           }"
           @mouseenter="onHoverableMouseEnter(item.passage)"
           @mouseleave="onHoverableMouseLeave(item.passage)"
           @mousedown.stop="onPassageMouseDown(item.passage, $event)"
-          @click.stop="selectPassage(item.passage)"
+          @click.stop="selectPassage(item.passage, $event)"
           @dblclick="openPassage(item.passage)"
           class="passage"
         >
           {{ item.passage.name }}
+          <div
+            v-if="item.passage.dropShadow"
+            class="passage-shadow"
+            :style="{ left: `${item.passage.dropShadow.x}px`, top: `${item.passage.dropShadow.y}px` }"
+          ></div>
           <div class="passage-tags">
             <template v-for="tag in item.passage.tags">
               <div
@@ -70,7 +75,6 @@
             </template>
           </div>
         </div>
-        <div v-if="shadowPassage" :style="shadowPassage.style" class="passage shadow-passage"></div>
       </div>
     </div>
   </div>
@@ -98,18 +102,17 @@ export default class AppComponent extends Vue {
   storyData: { [key: string]: any } = {};
   tagColors: { [tag: string]: string } = {};
   draggedPassage: Passage = null;
-  initialDragItemPosition: Vector = null;
+  initialDragMapPosition: Vector = null;
   initialDragPosition: Vector = null;
   highestZIndex = 0;
   translate: Vector = { x: 0, y: 0 };
   mapSize: Vector = { x: 0, y: 0 };
   zoom = 1;
   mouseDownTimestamp: number;
-  selectedPassage: Passage = null;
+  selectedPassages: Passage[] = [];
   hoveredElement: PassageLink | LinkedPassage = null;
   linkedPassages: PassageLink[] = [];
   highlightElements: Array<PassageLink | Passage> = [];
-  shadowPassage: PassageAndStyle = null;
   settings = {
     showGrid: true,
     showDots: true,
@@ -304,11 +307,12 @@ export default class AppComponent extends Vue {
   }
 
   getPassageStyle(passage: Passage): PassageStyle {
+    const position = passage.drawPosition || passage.position;
     return {
       width: `${passage.size.x}px`,
       height: `${passage.size.y}px`,
-      left: `${passage.position.x}px`,
-      top: `${passage.position.y}px`,
+      left: `${position.x}px`,
+      top: `${position.y}px`,
       ['z-index']: passage.zIndex || 0,
     };
   }
@@ -339,59 +343,66 @@ export default class AppComponent extends Vue {
     passage.zIndex = this.highestZIndex;
     this.draggedPassage = passage;
 
-    this.initialDragItemPosition = { ... passage.position };
     this.initialDragPosition = { x: event.clientX, y: event.clientY };
     this.mouseDownTimestamp = Date.now();
   }
 
   onMapMouseDown(event: MouseEvent) {
-    this.initialDragItemPosition = { ...this.translate };
+    this.initialDragMapPosition = { ...this.translate };
     this.initialDragPosition = { x: event.clientX, y: event.clientY };
     this.mouseDownTimestamp = Date.now();
   }
 
   onMouseMove(event: MouseEvent) {
-    if (!this.initialDragPosition || !this.initialDragItemPosition) return;
+    if (!this.initialDragPosition || (!this.initialDragMapPosition && !this.draggedPassage)) return;
 
     if (this.draggedPassage) {
-      const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
-      this.draggedPassage.position.x = Math.max(0, Math.round(this.initialDragItemPosition.x - (delta.x / this.zoom)));
-      this.draggedPassage.position.y = Math.max(0, Math.round(this.initialDragItemPosition.y - (delta.y / this.zoom)));
-      if (this.settings.snapToGrid) {
-        const gridSnappedPassageClone: Passage = {
-          ...this.draggedPassage,
-          position: this.getSnappedPassagePosition(this.draggedPassage.position),
-        };
-        this.shadowPassage = {
-          passage: gridSnappedPassageClone,
-          style: this.getPassageStyle(gridSnappedPassageClone),
-        };
-      }
+      const dragPassages = [this.draggedPassage, ...this.selectedPassages];
+      for (const dragPassage of dragPassages) {
+        const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
+        const x = Math.max(0, Math.round(dragPassage.position.x - (delta.x / this.zoom)));
+        const y = Math.max(0, Math.round(dragPassage.position.y - (delta.y / this.zoom)));
+        dragPassage.drawPosition = { x, y };
 
-      if (this.draggedPassage.position.x * 1.1 > this.mapSize.x) {
-        this.mapSize.x = (this.draggedPassage.position.x + this.draggedPassage.size.x) * 1.1;
-      }
-      if (this.draggedPassage.position.y * 1.1 > this.mapSize.y) {
-        this.mapSize.y = this.draggedPassage.position.y * 1.1;
+        // Snap to grid
+        if (this.settings.snapToGrid) {
+          const shadowPosition = this.getSnappedPassagePosition(dragPassage.drawPosition);
+          dragPassage.dropShadow = {
+            x: shadowPosition.x - dragPassage.drawPosition.x,
+            y: shadowPosition.y - dragPassage.drawPosition.y,
+          };
+        }
+
+        // resize map if needed
+        if (dragPassage.drawPosition.x * 1.1 > this.mapSize.x) {
+          this.mapSize.x = (dragPassage.drawPosition.x + dragPassage.size.x) * 1.1;
+        }
+        if (dragPassage.drawPosition.y * 1.1 > this.mapSize.y) {
+          this.mapSize.y = dragPassage.drawPosition.y * 1.1;
+        }
       }
     } else {
       // Drag map
       const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
-      this.translate.x = Math.round(this.initialDragItemPosition.x - delta.x);
-      this.translate.y = Math.round(this.initialDragItemPosition.y - delta.y);
+      this.translate.x = Math.round(this.initialDragMapPosition.x - delta.x);
+      this.translate.y = Math.round(this.initialDragMapPosition.y - delta.y);
     }
   }
 
   onMouseUp(event: MouseEvent) {
     if (this.draggedPassage) {
-      this.draggedPassage.dropShadow = undefined;
-      if (this.settings.snapToGrid) {
-        this.draggedPassage.position = this.getSnappedPassagePosition(this.draggedPassage.position);
-        this.shadowPassage = null;
+      const dragPassages = [this.draggedPassage, ...this.selectedPassages];
+      for (const dragPassage of dragPassages) {
+        dragPassage.dropShadow = undefined;
+        dragPassage.position = dragPassage.drawPosition || dragPassage.position;
+        dragPassage.drawPosition = null;
+        if (this.settings.snapToGrid) {
+          dragPassage.position = this.getSnappedPassagePosition(dragPassage.position);
+        }
       }
     }
     this.initialDragPosition = null;
-    this.initialDragItemPosition = null;
+    this.initialDragMapPosition = null;
     this.draggedPassage = null;
   }
 
@@ -442,14 +453,20 @@ export default class AppComponent extends Vue {
     });
   }
 
-  selectPassage(passage: Passage, ignoreClicktime = false) {
-    if (!ignoreClicktime && Date.now() - this.mouseDownTimestamp > 200) return;
-    this.selectedPassage = passage;
+  selectPassage(passage: Passage, event: MouseEvent) {
+    // If there is an event, there is a click. If there's a click
+    // The click should not be too long
+    if (event && Date.now() - this.mouseDownTimestamp > 200) return;
+    if (event?.ctrlKey) {
+      this.selectedPassages.push(passage);
+    } else {
+      this.selectedPassages = [passage];
+    }
   }
 
   deselectPassage() {
     if (Date.now() - this.mouseDownTimestamp > 200) return;
-    this.selectedPassage = null;
+    this.selectedPassages = [];
   }
 
   setPassageSize(passage: Passage, size: Vector) {
@@ -633,7 +650,7 @@ svg {
 
 .passage {
   position: absolute;
-  overflow: hidden;
+  overflow: visible;
   background-color: var(--primary-200);
   border: solid var(--gray-500) 1px;
   border-radius: 3px;
@@ -660,10 +677,15 @@ svg {
     padding: 4px;
   }
 
-  &.shadow-passage {
+  .passage-shadow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
     background: 0;
+    border: 0;
     outline: solid var(--highlight) 1px;
     pointer-events: none;
+    z-index: 1;
   }
 }
 

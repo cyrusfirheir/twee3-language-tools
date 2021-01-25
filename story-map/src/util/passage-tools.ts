@@ -20,6 +20,7 @@ export const parseRaw = (passageIn: RawPassage): Passage => {
     linksToNames: passageIn.linksToNames,
     position: position,
     size: size,
+    drawPosition: null,
     originalPosition: { ...position },
     originalSize: { ...size },
     originalTags: [...passageIn.tags],
