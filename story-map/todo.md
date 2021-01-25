@@ -1,15 +1,23 @@
+# Frontend
+- multi select
+  - move to file (sidebar)
+- changelog
+- undo / redo
 - auto layout
+- edit tag colors
 - `<<include>>` arrows
 - `<<goto>>` arrows
 - icons for js/css/start/storydata/??
 - point to self arrow
-- undo / redo
-- multi select
-- move to file
-- tags in sidepanel
-- hide/unhide passages
+- right click menu
+  - change size
+  - reset passage position
+  - move to file
 - visual artifacts
-- reset passage position
-- change size
-- open in vscode (in sidebar button)
+- hide/unhide passages
+- create screenshot
 - adjustable zoom speed
+
+# Backend
+- config storage (in vscode config)
+- data storage (in json file)
