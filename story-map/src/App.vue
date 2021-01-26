@@ -458,7 +458,9 @@ export default class AppComponent extends Vue {
     // The click should not be too long
     if (event && Date.now() - this.mouseDownTimestamp > 200) return;
     if (event?.ctrlKey) {
-      this.selectedPassages.push(passage);
+      if (!this.selectedPassages.includes(passage)) {
+        this.selectedPassages.push(passage);
+      }
     } else {
       this.selectedPassages = [passage];
     }

@@ -1,15 +1,15 @@
 <template>
-    <div class="sidebar-outer" v-if="passage">
+    <div class="sidebar-outer" v-if="passages.length">
         <header class="titlebar">
-            <h3>{{ passage.name }}</h3>
+            <div class="passages">
+                <div class="passage-head" v-for="passage in passages" :key="`passage-head-${passage.key}`">
+                    <h3>{{ passage.name }}</h3>
+                    <code class="block">{{ passage.origin.path }}</code>
+                </div>
+            </div>
             <button class="close" @click="selectPassage(null)">Close</button>
         </header>
         
-        <h4>Path</h4>
-        <code class="block">
-            {{ passage.origin.path }}
-        </code>
-
         <h4>Links</h4>
         <table class="linksTable" v-if="passage.linkedFrom.length || passage.linksTo.length">
             <thead>
@@ -251,11 +251,22 @@ export default class Sidebar extends Vue {
 
     .titlebar {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         
         h3 {
             flex: 1;
             margin: 0;
+        }
+
+        .passages {
+            flex: 1;
+            padding-top: 4px;
+        }
+
+        code {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
         }
     }
 
