@@ -18,9 +18,6 @@
 			"include": "#link-markup"
 		},
 		{
-			"include": "#style-decorators"
-		},
-		{
 			"include": "#script-tag"
 		},
 		{
@@ -265,32 +262,6 @@
 							"name": "punctuation.definition.tag.begin.html"
 						}
 					}
-				}
-			]
-		},
-		"style-decorators": {
-			"patterns": [
-				{
-					"begin": "//",
-					"end": "//",
-					"name": "markup.italic.markdown"
-				},
-				{
-					"begin": "''",
-					"end": "''",
-					"name": "markup.bold.markdown"
-				},
-				{
-					"match": "^>+",
-					"name": "markup.quote.markdown"
-				},
-				{
-					"match": "^!.*",
-					"name": "entity.name.section.markdown"
-				},
-				{
-					"match": "^\\*|^#",
-					"name": "punctuation.definition.metadata.markdown"
 				}
 			]
 		},
