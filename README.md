@@ -4,6 +4,30 @@ Syntax highlighting for HTML and select storyformats (see [Features](#features))
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+---
+
+## **Requirements**
+
+The extension relies on a workspace (or a folder) being open. If single files are to be edited, the storyformat must be configured manually.
+
+Supported file extensions:
+
+- `.tw`
+- `.twee`
+
+To set the correct storyformat for the files, a `StoryData` passage with the storyformat (and version) (see example below) mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
+
+```json
+:: StoryData
+{
+	"ifid": "514BB5F3-27EC-40E4-936B-45A21A048BCC",
+	"format": "SugarCube",
+	"format-version": "2.33.2"
+}
+```
+
+---
+
 ## **Features**
 
 ### Twee
@@ -55,28 +79,6 @@ Made possible through contributions from [@Goctionni](https://github.com/Goction
 	- Invalid argument syntax in macros (Contributed by @MinusGix):
 		- [Screenshot - diagnostics](https://imgur.com/xw1OFUt.png)
 	- Argument validation (Contributed by @MinusGix): [Read here](docs/parameters.md) for more information.
-
----
-
-## **Requirements**
-
-The extension relies on a workspace (or a folder) being open. If single files are to be edited, the storyformat must be configured manually.
-
-Supported file extensions:
-
-- `.tw`
-- `.twee`
-
-To set the correct storyformat for the files, a `StoryData` passage with the storyformat (and version) (see example below) mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
-
-```json
-:: StoryData
-{
-	"ifid": "514BB5F3-27EC-40E4-936B-45A21A048BCC",
-	"format": "SugarCube",
-	"format-version": "2.33.2"
-}
-```
 
 ---
 
