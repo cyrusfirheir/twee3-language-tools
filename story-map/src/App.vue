@@ -574,9 +574,9 @@ html, body {
 [data-theme="cydark"] {
   --text-color-light: #d9e5e9;
   --text-color-dark: #d9e5e9;
-  --primary-100: #465c68; /* passage hover */
+  --primary-100: #7591a1; /* passage hover */
   --primary-200: #354852; /* passage */
-  --primary-300: #7591a1; /* passage highlight  */
+  --primary-300: #465c68; /* passage highlight  */
   --primary-400: #222d33; /* map background */
   --primary-500: #172024; /* layout background (around map) */
   --primary-600: #ffd5da; /* arrow-highlight inner */
