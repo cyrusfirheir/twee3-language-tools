@@ -49,7 +49,7 @@
           :key="`passage-${item.passage.name}`"
           :style="item.style"
           :class="{
-            highlight: highlightElements.includes(item.passage),
+            highlight: highlightElements.includes(item.passage) || passagesInDragArea.includes(item.passage),
             selected: selectedPassages.includes(item.passage),
           }"
           @mouseenter="onHoverableMouseEnter(item.passage)"
@@ -75,6 +75,7 @@
             </template>
           </div>
         </div>
+        <div class="drag-area" v-if="dragSelectPosition" :style="dragSelectStyle"></div>
       </div>
     </div>
   </div>
@@ -102,8 +103,9 @@ export default class AppComponent extends Vue {
   storyData: { [key: string]: any } = {};
   tagColors: { [tag: string]: string } = {};
   draggedPassage: Passage = null;
-  initialDragMapPosition: Vector = null;
-  initialDragPosition: Vector = null;
+  initialDragMapPosition: null | Vector = null;
+  initialDragPosition: null | Vector = null;
+  dragSelectPosition: null | Vector = null;
   highestZIndex = 0;
   translate: Vector = { x: 0, y: 0 };
   mapSize: Vector = { x: 0, y: 0 };
@@ -215,6 +217,55 @@ export default class AppComponent extends Vue {
 
   get translateStr() {
     return `translate(${Math.round(this.translate.x * 1000) / 1000}px, ${Math.round(this.translate.y * 1000) / 1000}px)`;
+  }
+
+  get dragArea(): null | [Vector, Vector] {
+    const v1 = this.initialDragPosition;
+    const v2 = this.dragSelectPosition;
+    const scale = this.zoom;
+    const translate = this.translate;
+    if (!v2) return null;
+    const x1 = (Math.min(v1.x, v2.x) - translate.x) / scale;
+    const x2 = (Math.max(v1.x, v2.x) - translate.x) / scale;
+    const y1 = (Math.min(v1.y, v2.y) - translate.y - 56) / scale;
+    const y2 = (Math.max(v1.y, v2.y) - translate.y - 56) / scale;
+    // now I need to do stuff with scale and translate
+    return [
+      { x: x1, y: y1 },
+      { x: x2, y: y2 },
+    ];
+  }
+
+  get dragSelectStyle() {
+    const area = this.dragArea;
+    if (!area) {
+      return {};
+    }
+    return {
+      left: `${area[0].x}px`,
+      top: `${area[0].y}px`,
+      width: `${area[1].x - area[0].x}px`,
+      height: `${area[1].y - area[0].y}px`,
+    }
+  }
+
+  get passagesInDragArea(): Passage[] {
+    const area = this.dragArea;
+    if (!area) {
+      return [];
+    }
+    return this.passages.filter((passage) => {
+      const pos = (passage.drawPosition || passage.position);
+      const center: Vector = {
+        x: pos.x + (passage.size.x / 2),
+        y: pos.y + (passage.size.y / 2),
+      };
+      if (center.x < area[0].x) return false;
+      if (center.x > area[1].x) return false;
+      if (center.y < area[0].y) return false;
+      if (center.y > area[1].y) return false;
+      return true;
+    });
   }
 
   created() {
@@ -338,6 +389,8 @@ export default class AppComponent extends Vue {
     // Middle mouse is drag map
     if (event.button === 1) {
       return this.onMapMouseDown(event);
+    } else if (event.shiftKey) {
+      return this.onDragSelectStart(event);
     }
     this.highestZIndex++;
     passage.zIndex = this.highestZIndex;
@@ -348,15 +401,26 @@ export default class AppComponent extends Vue {
   }
 
   onMapMouseDown(event: MouseEvent) {
+    if (event.shiftKey) {
+      return this.onDragSelectStart(event);
+    }
     this.initialDragMapPosition = { ...this.translate };
     this.initialDragPosition = { x: event.clientX, y: event.clientY };
     this.mouseDownTimestamp = Date.now();
   }
 
-  onMouseMove(event: MouseEvent) {
-    if (!this.initialDragPosition || (!this.initialDragMapPosition && !this.draggedPassage)) return;
+  onDragSelectStart(event: MouseEvent) {
+    this.initialDragPosition = { x: event.clientX, y: event.clientY };
+    this.dragSelectPosition = { x: event.clientX, y: event.clientY };
+    this.mouseDownTimestamp = Date.now();
+  }
 
-    if (this.draggedPassage) {
+  onMouseMove(event: MouseEvent) {
+    if (!this.initialDragPosition || (!this.initialDragMapPosition && !this.draggedPassage && !this.dragSelectPosition)) return;
+
+    if (this.dragSelectPosition) {
+      this.dragSelectPosition = { x: event.clientX, y: event.clientY };
+    } else if (this.draggedPassage) {
       const dragPassages = [this.draggedPassage, ...this.selectedPassages];
       for (const dragPassage of dragPassages) {
         const delta: Vector = { x: this.initialDragPosition.x - event.clientX, y: this.initialDragPosition.y - event.clientY };
@@ -390,7 +454,22 @@ export default class AppComponent extends Vue {
   }
 
   onMouseUp(event: MouseEvent) {
-    if (this.draggedPassage) {
+    if (this.dragSelectPosition) {
+      const selected = this.passagesInDragArea;
+      if (event.ctrlKey) {
+        // If the control key is pressed, add to selection
+        for (const item of selected) {
+          if (!this.selectedPassages.includes(item)) {
+            this.selectedPassages.push(item);
+          }
+        }
+      } else {
+        // Else replace selection
+        this.selectedPassages = selected;
+      }
+      this.dragSelectPosition = null;
+    }
+    else if (this.draggedPassage) {
       const dragPassages = [this.draggedPassage, ...this.selectedPassages];
       for (const dragPassage of dragPassages) {
         dragPassage.dropShadow = undefined;
@@ -702,5 +781,11 @@ svg {
   height: 10px;
   border-radius: 3px;
   border: solid #000 1px;
+}
+
+.drag-area {
+  position: absolute;
+  border: dashed #FFF 1px;
+  background-color: rgba(255, 255, 255, .1);
 }
 </style>

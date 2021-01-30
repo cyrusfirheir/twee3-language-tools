@@ -17,6 +17,7 @@
 - hide/unhide passages
 - create screenshot
 - adjustable zoom speed
+- exit without save - are you sure?
 
 # Backend
 - config storage (in vscode config)
