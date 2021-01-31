@@ -17,6 +17,8 @@ import { updatePassages, sendPassageDataToClient } from "./socket";
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
 
+import { testMove, moveToFile } from './file-ops';
+
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 //#endregion
@@ -156,6 +158,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand,
+		vscode.commands.registerCommand("twee3LanguageTools.moveFile", function() {
+			moveToFile(testMove);
+		}),
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
