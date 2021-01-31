@@ -15,40 +15,6 @@ interface MoveData {
 	}>;
 }
 
-export const testMove: MoveData = {
-	toFile: "f:/projects/twee3-language-tools/tests/new.tw",
-	passages: [
-		{
-			name: "Passage Name",
-			range: {
-				lineStart: 17,
-				charStart: 0,
-				lineEnd: 18,
-				charEnd: 0
-			},
-			origin: {
-				full: "f:/projects/twee3-language-tools/tests/Twee.tw",
-				path: "/Twee.tw",
-				root: "f:/projects/twee3-language-tools/tests"
-			}
-		},
-		{
-			name: "Script passage",
-			range: {
-				lineStart: 36,
-				charStart: 0,
-				lineEnd: 39,
-				charEnd: 0
-			},
-			origin: {
-				full: "f:/projects/twee3-language-tools/tests/Twee.tw",
-				path: "/Twee.tw",
-				root: "f:/projects/twee3-language-tools/tests"
-			}
-		},
-	]
-};
-
 export async function moveToFile(moveData: MoveData) {
 	let doc: vscode.TextDocument | undefined = undefined;
 	const text: string[] = [];

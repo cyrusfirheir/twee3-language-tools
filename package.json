@@ -300,10 +300,6 @@
 		],
 		"commands": [
 			{
-				"command": "twee3LanguageTools.moveFile",
-				"title": "move file"
-			},
-			{
 				"command": "twee3LanguageTools.storyMap.show",
 				"title": "Show Story-map",
 				"icon": {
