@@ -16,16 +16,8 @@ interface MoveData {
 }
 
 export async function moveToFile(moveData: MoveData) {
-	let doc: vscode.TextDocument | undefined = undefined;
-	const text: string[] = [];
-
-	try {
-		doc = await vscode.workspace.openTextDocument(vscode.Uri.file(moveData.toFile));
-		text.push(doc.getText());
-	} catch (ex) {
-		console.warn(`"${moveData.toFile}" does not exist! Creating...`)
-	}
-
+	let text: string[] = [];
+	
 	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
 	for (const file of files) {
 		const fDoc = await vscode.workspace.openTextDocument(file);
@@ -45,6 +37,15 @@ export async function moveToFile(moveData: MoveData) {
 		}
 
 		await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(edited, "utf-8"));
+	}
+
+	let doc: vscode.TextDocument | undefined = undefined;
+
+	try {
+		doc = await vscode.workspace.openTextDocument(vscode.Uri.file(moveData.toFile));
+		text.unshift(doc.getText());
+	} catch (ex) {
+		console.warn(`"${moveData.toFile}" does not exist! Creating...`)
 	}
 
 	return vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(text.join("\n\n"), "utf-8"));
