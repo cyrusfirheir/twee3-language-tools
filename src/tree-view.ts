@@ -35,7 +35,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 				if (element) {
 					return Promise.resolve(passages
-						.filter(el => el.origin === element.origin)
+						.filter(el => el.origin.full === element.origin.full)
 						.sort((a, b) => a.name.localeCompare(b.name))
 					);
 				} else return Promise.resolve(files.sort((a, b) => a.name.localeCompare(b.name)));
