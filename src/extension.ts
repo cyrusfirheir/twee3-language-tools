@@ -12,10 +12,12 @@ import * as socketio from 'socket.io';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
-import { tweeProjectConfig, changeStoryFormat } from "./tweeProject";
+import { tweeProjectConfig, changeStoryFormat } from './tweeProject';
 import { updatePassages, sendPassageDataToClient } from "./socket";
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
+
+import { testMove, moveToFile } from './file-ops';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
@@ -60,7 +62,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
 
 	ctx = context;
-
+	
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
@@ -156,6 +158,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand,
+		vscode.commands.registerCommand("twee3LanguageTools.moveFile", function() {
+			moveToFile(testMove);
+		}),
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
