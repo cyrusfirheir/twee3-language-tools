@@ -4,7 +4,7 @@ import * as socketio from 'socket.io';
 
 import { Passage } from './tree-view';
 
-export async function getLinkedPassageNames(passageContent: string): Promise<string[]> {
+export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
 	return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => {
 		const link = part.split(']').shift() as string;
@@ -25,7 +25,7 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 				storyData = JSON.parse(passageContent);
 			} catch(e) {};
 		} else {
-			linksToNames = await getLinkedPassageNames(passageContent);
+			linksToNames = getLinkedPassageNames(passageContent);
 		}
 		return {
 			origin: passage.origin,
