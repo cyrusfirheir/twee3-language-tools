@@ -716,7 +716,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 			d.push({
 				severity: vscode.DiagnosticSeverity.Warning,
 				range: el.range,
-				message: `\nUnrecognized macro! '${el.name}' has not been defined in config files!\n\n`,
+				message: `\nUnrecognized macro/widget! '${el.name}' has not been defined in config files!\n\n`,
 				source: 'sc2-ex',
 				code: 100
 			});
