@@ -184,7 +184,9 @@ const collectCleanList = [
 	["<script>", "</script>"],
 	["<style>", "</style>"],
 	["^::.*?\\[\\s*script\\s*\\]", "^(?=::)"],
-	["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"]
+	["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"],
+
+	["/\\*\\s*@sc-parsing-off\\s*\\*/", "/\\*\\s*@sc-parsing-on\\s*\\*/"] /* temporary parsing disabling measure */
 ].map(el => {
 	const searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;
 	return new RegExp(searchString, "gmi");
