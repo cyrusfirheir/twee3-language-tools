@@ -249,7 +249,13 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 		lineEnd = lineIndices.slice(lineStart)
 			.findIndex((index) => index >= exIndex + ex0Length) + lineStart;
 		const charStart = exIndex - (lineStart ? lineIndices[lineStart - 1] : 0) - 1;
-        const charEnd = charStart + ex0Length;
+		let charEnd = 0;
+		if (lineStart != lineEnd) {
+			// Non-equal lines
+			charEnd = lineIndices[lineEnd] - lineIndices[lineEnd - 1] - 1;
+		} else {
+			charEnd = charStart + ex0Length;
+		}
 
 		let range = new vscode.Range(lineStart, charStart, lineEnd, charEnd);
 
