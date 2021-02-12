@@ -30,7 +30,7 @@ export interface macroDef {
 	skipArgs?: boolean,
 }
 
-export const decor = vscode.window.createTextEditorDecorationType({
+export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
 	backgroundColor: new vscode.ThemeColor("editorBracketMatch.background"),
 	borderRadius: "0.25rem",
 	textDecoration: "underline",
@@ -50,12 +50,15 @@ const macroFileWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSy
 );
 macroFileWatcher.onDidChange(async (e) => {
 	await updateMacroCache();
+	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
 macroFileWatcher.onDidCreate(async (e) => {
 	await updateMacroCache();
+	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
 macroFileWatcher.onDidDelete(async (e) => {
 	await updateMacroCache();
+	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
 
 /**
@@ -116,6 +119,7 @@ const updateMacroCache = function () {
 	});
 
 	macroCache = list;
+	return macroCache;
 }
 
 /**

@@ -181,7 +181,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						r.push(target.range, collected.macros[target.pair].range);
 					}
 				});
-				e.textEditor.setDecorations(sc2m.decor, r);
+				e.textEditor.setDecorations(sc2m.macroTagMatchingDecor, r);
 			}
 		})
 		,
@@ -282,7 +282,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		)
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.refreshDiagnostics", () => {
-			let doc = vscode.window.activeTextEditor?.document;
+			const doc = vscode.window.activeTextEditor?.document;
 			if (doc) updateDiagnostics(ctx, doc, collection);
 		})
 		,
