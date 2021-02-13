@@ -2,6 +2,12 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.10.0
+
+Story Map: Adds an icon indicating the start passage.
+
+---
+
 ## v0.9.2
 
 Removes custom style markup highlighting which overwrote syntax highlighting for higher priority elements.

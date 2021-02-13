@@ -28,7 +28,7 @@
     </div>
     <div class="story-area" @click="deselectPassage()" @mousedown="onMapMouseDown($event)">
       <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }" @wheel.prevent="onWheel($event)">
-        <svg :style="svgStyle">
+        <svg class="story-map-back" :style="svgStyle">
           <template v-if="!draggedPassage">
             <!-- I would prefer if I could keep drawing lines while dragging -->
             <!-- But that just slows things down to a crawl, probably need canvas to fix -->
@@ -60,6 +60,18 @@
           class="passage"
         >
           {{ item.passage.name }}
+
+          <svg
+            v-if="!storyData.start && item.passage.name === 'Start' || item.passage.name === storyData.start"
+            :style="{
+              width: Math.min(Math.max((36/zoom), 16), item.passage.size.x - 10) + 'px',
+              height: Math.min(Math.max((36/zoom), 16), item.passage.size.y - 10) + 'px'  
+            }"
+            viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
+          >
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M14.491 1c-3.598.004-6.654 1.983-8.835 4H1.5l-.5.5v3l.147.354.991.991.001.009 4 4 .009.001.999.999L7.5 15h3l.5-.5v-4.154c2.019-2.178 3.996-5.233 3.992-8.846l-.501-.5zM2 6h2.643a23.828 23.828 0 0 0-2.225 2.71L2 8.294V6zm5.7 8l-.42-.423a23.59 23.59 0 0 0 2.715-2.216V14H7.7zm-1.143-1.144L3.136 9.437C4.128 8 8.379 2.355 13.978 2.016c-.326 5.612-5.987 9.853-7.421 10.84zM4 15v-1H2v-2H1v3h3zm6.748-7.667a1.5 1.5 0 1 0-2.496-1.666 1.5 1.5 0 0 0 2.495 1.666z" />
+          </svg>
+
           <div class="passage-tags">
             <template v-for="tag in item.passage.tags">
               <div
@@ -560,6 +572,9 @@ html, body {
   --primary-700: #ff0060; /* arrow inner */
   --primary-800: #33000a; /* arrow-highlight outer */
 
+  --start-passage-rocket-back: #ff0060; 
+  --start-passage-rocket-color: #ffd5da;
+
   --gray-100: #8ecafa; /* outline for toolbar button when .active */
   --gray-500: #647682; /* passage outline  */
   --gray-600: #8ea3b4; /* passage-border (hover & highlight) */
@@ -619,7 +634,7 @@ html, body {
   transform-origin: top left;
 }
 
-svg {
+.story-map-back {
   min-width: 100%;
   min-height: 100%;
   border-radius: 8px;
@@ -631,7 +646,7 @@ svg {
   position: absolute;
   overflow: hidden;
   background-color: var(--primary-200);
-  border: solid var(--gray-500) 1px;
+  border: 1px solid var(--gray-500);
   border-radius: 3px;
   color: var(--text-color-dark);
   padding: 5px;
@@ -640,6 +655,18 @@ svg {
   cursor: grab;
   transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
   box-shadow: 0 1px 3px rgba(var(--shadow-rgb),0.12), 0 1px 2px rgba(var(--shadow-rgb),0.24);
+
+  svg {
+    position: absolute;
+    right: 0; bottom: 0;
+    margin: 5px;
+    padding: 2px;
+    
+    fill: var(--start-passage-rocket-color);
+    background-color: var(--start-passage-rocket-back);
+    box-shadow: 0 1px 3px rgba(var(--shadow-rgb),.12),0 1px 2px rgba(var(--shadow-rgb),.23);
+    border-radius: 3px;
+  }
 
   &.highlight {
     background-color: var(--primary-300);
@@ -654,6 +681,10 @@ svg {
     border-color: var(--gray-600);
     border-width: 2px;
     padding: 4px;
+
+    svg {
+      margin: 4px;
+    }
   }
 
   &.shadow-passage {
