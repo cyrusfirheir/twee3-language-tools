@@ -6,10 +6,10 @@ interface MoveData {
 	passages: Array<{
 		name: string;
 		range: {
-			lineStart: number;
-			charStart: number;
-			lineEnd: number;
-			charEnd: number;
+			startLine: number;
+			startCharacter: number;
+			endLine: number;
+			endCharacter: number;
 		};
 		origin: PassageOrigin;
 	}>;
@@ -27,7 +27,7 @@ export async function moveToFile(moveData: MoveData) {
 		const filePassages = moveData.passages.filter(el => el.origin.full === file);
 		for (const passage of filePassages) {
 			const p = new Passage(passage.origin, new vscode.Range(
-				passage.range.lineStart, passage.range.charStart, passage.range.lineEnd, passage.range.charEnd
+				passage.range.startLine, passage.range.startCharacter, passage.range.endLine, passage.range.endCharacter
 			), passage.name, vscode.TreeItemCollapsibleState.None);
 			const content = await p.getContent(true);
 

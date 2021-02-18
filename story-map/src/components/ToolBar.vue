@@ -52,7 +52,7 @@ export default class ToolBar extends Vue {
       tag: 'button',
       type: 'toggle',
       text: 'Snap to grid',
-      active: false,
+      active: true,
     },
   ];
 

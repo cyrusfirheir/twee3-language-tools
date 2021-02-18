@@ -125,7 +125,7 @@ export default class AppComponent extends Vue {
   settings = {
     showGrid: true,
     showDots: true,
-    snapToGrid: false,
+    snapToGrid: true,
     gridSize: 25,
   };
 
@@ -438,6 +438,7 @@ export default class AppComponent extends Vue {
     socket.emit('update-passages', this.changedPassages.map((passage) => ({
       name: passage.name,
       origin: passage.origin,
+      range: passage.range,
       position: passage.position,
       size: passage.size,
       tags: passage.tags,

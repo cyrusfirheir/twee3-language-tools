@@ -2,6 +2,14 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.10.1
+
+Fixes: Broken StoryMap-to-file updates when passage headers start with identical strings, i.e. modifying tags/metadata of `:: Passage Something` and `:: Passage Somethng Else` would end up affecting the header which comes first in the file.
+
+Adds: Icon for `Jump-to-Passage` in the passage list.
+
+---
+
 ## v0.10.0
 
 Story Map: Adds an icon indicating the start passage.

@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.10.0",
+	"version": "0.10.1",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -279,7 +279,7 @@
 				{
 					"id": "twee3-language-tools",
 					"title": "T3LT",
-					"icon": "res/tree-view.svg"
+					"icon": "res/treeView.svg"
 				}
 			]
 		},
@@ -325,7 +325,11 @@
 			},
 			{
 				"command": "twee3LanguageTools.passage.jump",
-				"title": "Jump"
+				"title": "Jump",
+				"icon": {
+					"dark": "res/dark/jumpToPassage.svg",
+					"light": "res/light/jumpToPassage.svg"
+				}
 			},
 			{
 				"command": "twee3LanguageTools.passage.group.none",
