@@ -4,5 +4,5 @@
 	"twee3LanguageTools.sugarcube-2.error.argumentParsing": true,
 	"twee3LanguageTools.sugarcube-2.error.parameterValidation": true,
 	"twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking": true,
-	"twee3LanguageTools.passage.group": "File"
+	"twee3LanguageTools.passage.group": "None"
 }

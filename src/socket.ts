@@ -4,20 +4,7 @@ import * as socketio from 'socket.io';
 
 import { Passage } from './tree-view';
 
-export async function getPassageContent(passage: Passage): Promise<string> {
-	const doc = await vscode.workspace.openTextDocument(passage.origin.full);
-	const fileContent = doc.getText();
-	const searchPassageRegexp = new RegExp("^::\\s*" + passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") + ".*?$", "m");
-	const anyPassageRegexp = new RegExp("^::\s*(.*)?(\[.*?\]\s*?)?(\{.*\}\s*)?$", "m");
-	const passageStartMatch = fileContent.match(searchPassageRegexp);
-	if (!passageStartMatch || !('index' in passageStartMatch)) throw new Error('Cannot find passage title in origin-file');
-	const contentStart = (passageStartMatch.index as number) + passageStartMatch[0].length;
-	const restOfFile = fileContent.substr(contentStart);
-	const nextPassageMatch = restOfFile.match(anyPassageRegexp);
-	return restOfFile.substr(0, nextPassageMatch?.index);
-}
-
-export async function getLinkedPassageNames(passageContent: string): Promise<string[]> {
+export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
 	return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => {
 		const link = part.split(']').shift() as string;
@@ -31,14 +18,14 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 	let storyData = {};
 	const rawPassages = ctx.workspaceState.get("passages", []) as Passage[];
 	const passagePromises = rawPassages.map(async (passage) => {
-		const passageContent = await getPassageContent(passage);
+		const passageContent = await passage.getContent();
 		let linksToNames: string[] = [];
 		if (passage.name === 'StoryData') {
 			try {
 				storyData = JSON.parse(passageContent);
 			} catch(e) {};
 		} else {
-			linksToNames = await getLinkedPassageNames(passageContent);
+			linksToNames = getLinkedPassageNames(passageContent);
 		}
 		return {
 			origin: passage.origin,

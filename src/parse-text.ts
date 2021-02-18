@@ -103,7 +103,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 
 			let previous = newPassages.pop();
 			if (previous) {
-				previous.range = new vscode.Range(previous.range.start, new vscode.Position(i - 1, 0));
+				previous.range = new vscode.Range(previous.range.start, new vscode.Position(i, 0));
 				newPassages.push(previous);
 			}
 
