@@ -12,7 +12,7 @@ import * as socketio from 'socket.io';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
-import { tweeProjectConfig, changeStoryFormat } from "./tweeProject";
+import { tweeProjectConfig, changeStoryFormat } from './tweeProject';
 import { updatePassages, sendPassageDataToClient } from "./socket";
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
@@ -60,7 +60,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
 
 	ctx = context;
-
+	
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
@@ -181,7 +181,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						r.push(target.range, collected.macros[target.pair].range);
 					}
 				});
-				e.textEditor.setDecorations(sc2m.decor, r);
+				e.textEditor.setDecorations(sc2m.macroTagMatchingDecor, r);
 			}
 		})
 		,
@@ -282,7 +282,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		)
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.refreshDiagnostics", () => {
-			let doc = vscode.window.activeTextEditor?.document;
+			const doc = vscode.window.activeTextEditor?.document;
 			if (doc) updateDiagnostics(ctx, doc, collection);
 		})
 		,

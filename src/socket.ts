@@ -2,22 +2,9 @@ import * as vscode from "vscode";
 
 import * as socketio from 'socket.io';
 
-import { Passage } from './tree-view';
+import { OpenPassageParams, Passage } from './tree-view';
 
-export async function getPassageContent(passage: Passage): Promise<string> {
-	const doc = await vscode.workspace.openTextDocument(passage.origin.full);
-	const fileContent = doc.getText();
-	const searchPassageRegexp = new RegExp("^::\\s*" + passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") + ".*?$", "m");
-	const anyPassageRegexp = new RegExp("^::\s*(.*)?(\[.*?\]\s*?)?(\{.*\}\s*)?$", "m");
-	const passageStartMatch = fileContent.match(searchPassageRegexp);
-	if (!passageStartMatch || !('index' in passageStartMatch)) throw new Error('Cannot find passage title in origin-file');
-	const contentStart = (passageStartMatch.index as number) + passageStartMatch[0].length;
-	const restOfFile = fileContent.substr(contentStart);
-	const nextPassageMatch = restOfFile.match(anyPassageRegexp);
-	return restOfFile.substr(0, nextPassageMatch?.index);
-}
-
-export async function getLinkedPassageNames(passageContent: string): Promise<string[]> {
+export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
 	return parts.filter((part) => part.indexOf(']]') !== -1).map((part) => {
 		const link = part.split(']').shift() as string;
@@ -31,14 +18,14 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 	let storyData = {};
 	const rawPassages = ctx.workspaceState.get("passages", []) as Passage[];
 	const passagePromises = rawPassages.map(async (passage) => {
-		const passageContent = await getPassageContent(passage);
+		const passageContent = await passage.getContent();
 		let linksToNames: string[] = [];
 		if (passage.name === 'StoryData') {
 			try {
 				storyData = JSON.parse(passageContent);
 			} catch(e) {};
 		} else {
-			linksToNames = await getLinkedPassageNames(passageContent);
+			linksToNames = getLinkedPassageNames(passageContent);
 		}
 		return {
 			origin: passage.origin,
@@ -60,7 +47,14 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 }
 
 export type Vector = { x: number; y: number; };
-export type UpdatePassage = { name: string; origin: { full: string; path: string; root: string; }; position: Vector; size: Vector; tags?: string[] };
+export type UpdatePassage = {
+	name: string;
+	origin: { full: string; path: string; root: string; };
+	range: OpenPassageParams["range"];
+	position: Vector;
+	size: Vector;
+	tags?: string[]
+};
 
 export async function updatePassages(passages: UpdatePassage[]) {
 	const files = [... new Set(passages.map(passage => passage.origin.full))];
@@ -71,16 +65,19 @@ export async function updatePassages(passages: UpdatePassage[]) {
 
 		const filePassages = passages.filter(el => el.origin.full === file);
 		for (const passage of filePassages) {
-			const regexp = new RegExp(
-				"^::\\s*" +
-				passage.name.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&") +
-				".*?$"
-			, "m");
-
+			const p = new Passage(passage.origin, new vscode.Range(
+				passage.range.startLine, passage.range.startCharacter, passage.range.endLine, passage.range.endCharacter
+			), passage.name, vscode.TreeItemCollapsibleState.None);
+			
+			const header = await p.getHeader();
+			
 			let pMeta: any = { position: `${passage.position.x},${passage.position.y}` };
 			if (passage.size.x !== 100 || passage.size.y !== 100) pMeta.size = `${passage.size.x},${passage.size.y}`;
 
-			edited = edited.replace(regexp, `:: ${passage.name} ` + (passage.tags?.length ? `[${passage.tags.join(" ")}] ` : "") + JSON.stringify(pMeta));
+			edited = edited.replace(
+				header,
+				`:: ${passage.name} ` + (passage.tags?.length ? `[${passage.tags.join(" ")}] ` : "") + JSON.stringify(pMeta)
+			);
 		}
 
 		await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));

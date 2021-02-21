@@ -30,7 +30,7 @@ export interface macroDef {
 	skipArgs?: boolean,
 }
 
-export const decor = vscode.window.createTextEditorDecorationType({
+export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
 	backgroundColor: new vscode.ThemeColor("editorBracketMatch.background"),
 	borderRadius: "0.25rem",
 	textDecoration: "underline",
@@ -50,12 +50,15 @@ const macroFileWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSy
 );
 macroFileWatcher.onDidChange(async (e) => {
 	await updateMacroCache();
+	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
 macroFileWatcher.onDidCreate(async (e) => {
 	await updateMacroCache();
+	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
 macroFileWatcher.onDidDelete(async (e) => {
 	await updateMacroCache();
+	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
 
 /**
@@ -116,6 +119,7 @@ const updateMacroCache = function () {
 	});
 
 	macroCache = list;
+	return macroCache;
 }
 
 /**
@@ -184,7 +188,9 @@ const collectCleanList = [
 	["<script>", "</script>"],
 	["<style>", "</style>"],
 	["^::.*?\\[\\s*script\\s*\\]", "^(?=::)"],
-	["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"]
+	["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"],
+
+	["/\\*\\s*@t3lt-parse-off\\s*\\*/", "/\\*\\s*@t3lt-parse-on\\s*\\*/"] /* temporary parsing disabling measure */
 ].map(el => {
 	const searchString = `(${el[0]})((?:.|\r?\n)*?)(${el[1]})`;
 	return new RegExp(searchString, "gmi");
@@ -247,8 +253,12 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 		lineEnd = lineIndices.slice(lineStart)
 			.findIndex((index) => index >= exIndex + ex0Length) + lineStart;
 		const charStart = exIndex - (lineStart ? lineIndices[lineStart - 1] : 0) - 1;
-        const charEnd = charStart + ex0Length;
 
+		let charEnd = ex[0].split(/\r?\n/g).pop()?.length || 0;
+		if (lineStart === lineEnd) {
+			charEnd += charStart;
+		}
+		
 		let range = new vscode.Range(lineStart, charStart, lineEnd, charEnd);
 
 		if (selfClosingMacrosEnabled && ex[4] === "/") {
@@ -716,7 +726,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 			d.push({
 				severity: vscode.DiagnosticSeverity.Warning,
 				range: el.range,
-				message: `\nUnrecognized macro! '${el.name}' has not been defined in config files!\n\n`,
+				message: `\nUnrecognized macro/widget! '${el.name}' has not been defined in config files!\n\n`,
 				source: 'sc2-ex',
 				code: 100
 			});

@@ -18,9 +18,6 @@
 			"include": "#link-markup"
 		},
 		{
-			"include": "#style-decorators"
-		},
-		{
 			"include": "#script-tag"
 		},
 		{
@@ -244,55 +241,28 @@
 		},
 		"link-markup": {
 			"name": "meta.markup.underline.link.twee3",
-			"begin": "(\\[(?:img)?\\[)",
-			"beginCaptures": {
+			"match": "(?i)(\\[(?:img)?\\[)(.*?)(\\]\\])",
+			"captures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
-				}
-			},
-			"end": "(\\]\\])",
-			"endCaptures": {
-				"1": {
+				},
+				"2": {
+					"name": "entity.name.function.twee3",
+					"patterns": [
+						{
+							"match": "((?<!\\\\)(?:\\||\\]\\[|->|<-))",
+							"captures": {
+								"1": {
+									"name": "punctuation.definition.tag.begin.html"
+								}
+							}
+						}
+					]
+				},
+				"3": {
 					"name": "punctuation.definition.tag.end.html"
 				}
-			},
-			"contentName": "entity.name.function.twee3",
-			"patterns": [
-				{
-					"match": "((?<!\\\\)(?:\\||\\]\\[|->|<-))",
-					"captures": {
-						"1": {
-							"name": "punctuation.definition.tag.begin.html"
-						}
-					}
-				}
-			]
-		},
-		"style-decorators": {
-			"patterns": [
-				{
-					"begin": "//",
-					"end": "//",
-					"name": "markup.italic.markdown"
-				},
-				{
-					"begin": "''",
-					"end": "''",
-					"name": "markup.bold.markdown"
-				},
-				{
-					"match": "^>+",
-					"name": "markup.quote.markdown"
-				},
-				{
-					"match": "^!.*",
-					"name": "entity.name.section.markdown"
-				},
-				{
-					"match": "^\\*|^#",
-					"name": "punctuation.definition.metadata.markdown"
-				}
-			]
+			}
 		},
 		"script-tag": {
 			"begin": "(?i)(<)(script)\\b(?=[^>]*(?:(?:type=('text/javascript'|\"text/javascript\")|lang=(javascript|'javascript'|\"javascript\")))?)(?![^/>]*/>\\s*$)",

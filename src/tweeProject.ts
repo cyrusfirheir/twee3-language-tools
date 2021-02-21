@@ -16,7 +16,12 @@ export function tweeProjectConfig(document: vscode.TextDocument) {
 		vscode.window.showErrorMessage("Malformed StoryData JSON!");
 		return;
 	}
-	const format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
+	let format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
+
+	/* SC v3 - v2 alias hook */
+	if (format === "sugarcube-3") format = "sugarcube-2";
+	/* will be removed when v2 doesn't work for v3 anymore (>_<) */
+
 	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
 	if (config.get("current") !== format) {
 		config.update("current", format)

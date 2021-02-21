@@ -182,7 +182,7 @@
 			"listbox"
 		],
 		"parameters": [
-			"text |+ (text |+ 'selected')"
+			"text |+ (bool|text|null|undefined|number|NaN |+ 'selected')"
 		]
 	},
 	"optionsfrom": {

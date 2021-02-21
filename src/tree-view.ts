@@ -35,7 +35,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 
 				if (element) {
 					return Promise.resolve(passages
-						.filter(el => el.origin === element.origin)
+						.filter(el => el.origin.full === element.origin.full)
 						.sort((a, b) => a.name.localeCompare(b.name))
 					);
 				} else return Promise.resolve(files.sort((a, b) => a.name.localeCompare(b.name)));
@@ -106,13 +106,15 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 	}
 }
 
+export interface PassageOrigin {
+	root: string;
+	path: string;
+	full: string;
+}
+
 export interface OpenPassageParams {
 	name: string;
-	origin: {
-		root: string;
-		path: string;
-		full: string;
-	};
+	origin: PassageOrigin;
 	range: {
 		startLine: number;
 		startCharacter: number;
@@ -123,11 +125,7 @@ export interface OpenPassageParams {
 
 export class Passage extends vscode.TreeItem {
 	constructor(
-		public origin: {
-			root: string;
-			path: string;
-			full: string;
-		},
+		public origin: PassageOrigin,
 		public range: vscode.Range,
 		public name: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -137,9 +135,14 @@ export class Passage extends vscode.TreeItem {
 		super(name, collapsibleState);
 	}
 
-	async getContent() {
+	async getHeader() {
 		const doc = await vscode.workspace.openTextDocument(this.origin.root + this.origin.path);
-		return doc.getText(new vscode.Range(this.range.start.translate(1), this.range.end));
+		return doc.lineAt(this.range.start).text;
+	}
+
+	async getContent(header=false) {
+		const doc = await vscode.workspace.openTextDocument(this.origin.root + this.origin.path);
+		return doc.getText(new vscode.Range(this.range.start.translate(header ? 0 : 1), this.range.end));
 	}
 }
 
