@@ -85,3 +85,20 @@ export interface PassageLink {
     twoWay: boolean;
     key: string;
 }
+
+export interface TweeWorkspaceFile {
+    name: string;
+    parent: TweeWorkspaceFolder;
+}
+
+export interface TweeWorkspaceFolderContent {
+    folders: TweeWorkspaceFolder[];
+    files: TweeWorkspaceFile[];
+}
+
+export interface TweeWorkspaceFolder {
+    name: string;
+    parent: TweeWorkspaceFolder | null;
+    relativePath: string;
+    content: TweeWorkspaceFolderContent;
+}
