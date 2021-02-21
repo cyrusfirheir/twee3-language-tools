@@ -20,9 +20,9 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 ```json
 :: StoryData
 {
-	"ifid": "514BB5F3-27EC-40E4-936B-45A21A048BCC",
-	"format": "SugarCube",
-	"format-version": "2.33.2"
+	"ifid": "<ifid here>",
+	"format": "<story format>",
+	"format-version": "<story format version>"
 }
 ```
 
