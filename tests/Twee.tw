@@ -34,10 +34,10 @@ Twee 3 Language Tools tests
 
 <!-- special tag name test -->
 
-:: Script passage [script] {"position":"200,650"}
+:: Script passage [script] {"position":"225,500"}
 console.log("This is a script passage.");
 
-:: Style passage [stylesheet] {"position":"75,650"}
+:: Style passage [stylesheet] {"position":"100,500"}
 .this-is a .stylesheet {
 	position: absolute;
 }

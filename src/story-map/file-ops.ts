@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Passage, PassageOrigin } from "./tree-view";
+import { Passage, PassageOrigin } from "../tree-view";
 
 interface MoveData {
 	toFile: string;
