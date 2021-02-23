@@ -2,18 +2,15 @@
 //#region 
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
-import * as glob from 'glob';
-
-import express from 'express';
-import path from 'path';
-import open from 'open';
-import { Server } from 'http';
-import * as socketio from 'socket.io';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
-import { tweeProjectConfig, changeStoryFormat } from './tweeProject';
-import { updatePassages, sendPassageDataToClient } from "./socket";
+import { tweeProjectConfig, changeStoryFormat } from './twee-project';
+
+import { sendPassageDataToClient } from "./story-map/socket";
+import { startUI, stopUI, storyMapIO } from "./story-map/index";
+
+import { fileGlob, getWorkspace } from './file-ops';
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
 
@@ -73,20 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	await start();
-
-	function fileGlob() {
-		let include: string[] = vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);
-		if (!include.length) include.push("**");
-		let exclude: string[] = vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("exclude", []);
-		let files: string[] = [];
-		vscode.workspace.workspaceFolders?.forEach(el => {
-			include.forEach(elem => {
-				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude })];
-			})
-		});
-		return files;
-	}
-
+	
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
@@ -95,8 +79,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		})
 	}
-
-	fileGlob().forEach(file => prepare(file));
+	
+	fileGlob().forEach(file => prepare(file));	
 
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
@@ -104,55 +88,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	interface storyMapIO {
-		client: socketio.Socket | undefined;
-		server: Server | undefined;
-		disconnectTimeout: NodeJS.Timeout | undefined;
-	}
 	const storyMap: storyMapIO = { client: undefined, server: undefined, disconnectTimeout: undefined };
 
-	function startUI() {
-		const port = 42069;
+	const startUIWrapper = () => startUI(ctx, storyMap);
+	const stopUIWrapper = () => stopUI(storyMap);
 
-		const hostUrl = `http://localhost:${port}/`
-		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
-
-		const app = express();
-		app.use(express.static(storyMapPath));
-
-		storyMap.server = new Server(app);
-		storyMap.server.listen(port, () => console.log(`Server connected on ${hostUrl}`));
-
-		const io = new socketio.Server(storyMap.server, { cors: { origin: 'http://localhost:8080' } });
-		io.on('connection', (client: socketio.Socket) => {
-			if (storyMap.client) storyMap.client.disconnect(true);
-			if (storyMap.disconnectTimeout) clearTimeout(storyMap.disconnectTimeout);
-
-			storyMap.client = client;
-			console.log('client connected');
-			sendPassageDataToClient(ctx, client);
-
-			client.on('open-passage', jumpToPassage);
-			client.on('update-passages', updatePassages);
-			client.on('disconnect', () => {
-				console.log('client disconnected');
-				storyMap.client = undefined;
-				storyMap.disconnectTimeout = setTimeout(() => {
-					if (!storyMap.client) stopUI();
-				}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
-			});
-		});
-		open(hostUrl);
-		vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
-	}
-
-	function stopUI() {
-		storyMap.client?.disconnect(true);
-		storyMap.server?.close(() => vscode.commands.executeCommand('setContext', 't3lt.storyMap', false));
-	}
-
-	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUI);
-	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUI);
+	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUIWrapper);
+	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUIWrapper);
 
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand,
@@ -206,7 +148,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					vscode.workspace.openTextDocument(file).then(doc => {
 						changeStoryFormat(doc);
 						updateDiagnostics(ctx, doc, collection);
-					})
+					});
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import headsplit from './headsplit';
 import { diagnostics as sc2 } from './sugarcube-2/macros';
-import { storyDataPassageHeaderRegex, storyDataPassageNameRegex } from './tweeProject';
+import { storyDataPassageHeaderRegex, storyDataPassageNameRegex } from './twee-project';
 
 export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 	if (!/^twee3.*/.test(document.languageId)) return;

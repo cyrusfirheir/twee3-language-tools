@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import * as socketio from 'socket.io';
 
-import { OpenPassageParams, Passage } from './tree-view';
+import { OpenPassageParams, Passage } from '../tree-view';
 
 export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
