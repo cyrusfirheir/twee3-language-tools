@@ -87,7 +87,7 @@
             <button class="action" :disabled="!hasMoved" @click="resetPosition()">Reset position</button>
             <button class="action" :disabled="!hasResized" @click="resetSize()">Reset size</button>
             <button class="action" :disabled="!hasChangedTags" @click="resetTags()">Reset tags</button>
-            <button class="action" disabled>Move to file</button>
+            <button class="action" @click="moveToFile()">Move to file</button>
             <button class="action" disabled>Hide</button>
             <button class="action" @click="openInVsCode()">Open in VSCode</button>
         </div>
@@ -97,6 +97,7 @@
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import { LinkedPassage, Vector } from "../types";
+import { showSaveDialog } from '../SaveToFileDialog/save-dialog';
 
 @Component
 export default class Sidebar extends Vue {
@@ -228,6 +229,11 @@ export default class Sidebar extends Vue {
 
     openInVsCode() {
         this.$emit('openInVsCode');
+    }
+
+    async moveToFile() {
+        const result = await showSaveDialog();
+        console.log('moveToFile', { result });
     }
 
     // reset position
