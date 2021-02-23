@@ -2,7 +2,6 @@
 //#region 
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
-import * as glob from 'glob';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
@@ -10,6 +9,8 @@ import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 
 import { sendPassageDataToClient } from "./story-map/socket";
 import { startUI, stopUI, storyMapIO } from "./story-map/index";
+
+import { fileGlob, getWorkspace } from './file-ops';
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
 
@@ -69,20 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	await start();
-
-	function fileGlob() {
-		let include: string[] = vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);
-		if (!include.length) include.push("**");
-		let exclude: string[] = vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("exclude", []);
-		let files: string[] = [];
-		vscode.workspace.workspaceFolders?.forEach(el => {
-			include.forEach(elem => {
-				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude })];
-			})
-		});
-		return files;
-	}
-
+	
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
@@ -91,8 +79,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		})
 	}
-
-	fileGlob().forEach(file => prepare(file));
+	
+	fileGlob().forEach(file => prepare(file));	
 
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
@@ -160,7 +148,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					vscode.workspace.openTextDocument(file).then(doc => {
 						changeStoryFormat(doc);
 						updateDiagnostics(ctx, doc, collection);
-					})
+					});
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {

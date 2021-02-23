@@ -7,6 +7,7 @@ import { Server } from 'http';
 import * as socketio from 'socket.io';
 
 import { updatePassages, sendPassageDataToClient } from "./socket";
+import { getWorkspace } from "../file-ops";
 
 import { jumpToPassage } from '../tree-view';
 
@@ -37,15 +38,20 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 		console.log('client connected');
 		sendPassageDataToClient(ctx, client);
 
-		client.on('open-passage', jumpToPassage);
-		client.on('update-passages', updatePassages);
-		client.on('disconnect', () => {
-			console.log('client disconnected');
-			storyMap.client = undefined;
-			storyMap.disconnectTimeout = setTimeout(() => {
-				if (!storyMap.client) stopUI(storyMap);
-			}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
-		});
+		client
+			.on('open-passage', jumpToPassage)
+			.on('update-passages', updatePassages)
+			.on('disconnect', () => {
+				console.log('client disconnected');
+				storyMap.client = undefined;
+				storyMap.disconnectTimeout = setTimeout(() => {
+					if (!storyMap.client) stopUI(storyMap);
+				}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
+			})
+			.on('get-twee-workspace', async () => {
+				const ws = await getWorkspace();
+				client.emit('twee-workspace', ws);
+			});
 	});
 	open(hostUrl);
 	vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
