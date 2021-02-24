@@ -1,6 +1,6 @@
 <template>
     <transition name="open">
-        <div class="save-to-file-overlay" v-if="isLoading">
+        <div class="save-to-file-overlay" v-if="isOpen">
             <div class="save-to-file-dialog">
                 <div class="dialog-titlebar">
                     <span class="title">Save passages to file</span>
@@ -8,46 +8,50 @@
                 </div>
                 <div class="dialog-body">
                     <template v-if="isLoading">
+                        <div class="loading">Loading</div>
                     </template>
                     <template v-else>
                         <div class="toolbar">
                             <button type="button" data-action="back" @click="historyBack()" :disabled="historyBackDisabled">Back</button>
                             <button type="button" data-action="next" @click="historyNext()" :disabled="historyNextDisabled">Next</button>
-                            <button type="button" data-action="up" @click="gotoFolder(selectPassage.parent)" :disabled="!selectPassage.parent">Up</button>
+                            <button type="button" data-action="up" @click="gotoFolder(selectedFolder.parent)" :disabled="!selectedFolder.parent">Up</button>
                             <div class="breadcrumbs">
                                 <button v-for="breadcrumb in breadcrumbs" type="button" class="breadcrumb" @click="gotoFolder(breadcrumb)" :key="`breadcrumb-${breadcrumb.relativePath}/${breadcrumb.name}`">
                                     {{ breadcrumb.name }}
                                 </button>
                             </div>
-                            <button type="button" data-action="refresh" @click="refreshFolder()">Refresh</button>
                             <input type="search" placeholder="Filter" v-model="filterModel">
                         </div>
                         <div class="folder-content">
                             <div class="folder-tree">
                                 <!-- Todo -->
-                                <FolderTreeLevel :folder="root" :selected="selectedFolder">
+                                <template v-for="rootFolder in rootFolders">
+                                    <WorkspaceTree :root="rootFolder" :selected="selectedFolder" :key="`workspace-tree-${rootFolder.name}`" />
+                                </template>
                             </div>
-                            <div class="folder-content">
+                            <div class="folder-items">
                                 <div class="filter" v-if="filterModel">Items in folder die aan filter '{{ filter }}' voldoen</div>
                                 <!-- folders -->
                                 <div
                                     class="folder-item"
-                                    v-for="folder in selectedFolder.content.folders"
+                                    v-for="folder in contentInSelectedFolder.folders"
                                     :key="`folder-item-${folder.relativePath}/${folder.name}`"
-                                    @click=""
-                                    @dblclick=""
+                                    @click="highlightFolder(folder)"
+                                    @dblclick="gotoFolder(folder)"
                                 >
-                                    {{ folder.name }}
+                                    <img src="/Folder.svg">
+                                    <span class="name">{{ folder.name }}</span>
                                 </div>
                                 <!-- files -->
                                 <div
                                     class="file-item"
-                                    v-for="file in selectedFolder.content.files"
+                                    v-for="file in contentInSelectedFolder.files"
                                     :key="`file-item-${file.parent.relativePath}/${file.name}`"
-                                    @click=""
-                                    @dblclick=""
+                                    @click="highlightFile(file)"
+                                    @dblclick="openFile(file)"
                                 >
-                                    {{ file.name }}
+                                    <img src="/File.svg">
+                                    <span class="name">{{ file.name }}</span>
                                 </div>
                             </div>
                         </div>
@@ -66,11 +70,28 @@
 import { Component, Vue } from "vue-property-decorator";
 import { socket } from "../socket";
 import { TweeWorkspaceFolder, TweeWorkspaceFile, TweeWorkspaceFolderContent } from '../types';
+import WorkspaceTree from './WorkspaceTree.vue';
 
-@Component
+const assignParentage = (item: TweeWorkspaceFolder | TweeWorkspaceFile, parent: TweeWorkspaceFolder | null) => {
+    item.parent = parent;
+    if ('content' in item) {
+        for (const childFolder of item.content.folders) {
+            assignParentage(childFolder, item);
+        }
+        for (const childFile of item.content.files) {
+            assignParentage(childFile, item);
+        }
+    }
+};
+
+@Component({
+    components: {
+        WorkspaceTree,
+    },
+})
 export default class SaveToFile extends Vue {
     isOpen = false;
-    root: TweeWorkspaceFolder = null;
+    rootFolders: TweeWorkspaceFolder[] = [];
     selectedFolder: TweeWorkspaceFolder = null;
     selectedFile: TweeWorkspaceFile = null;
     selectedFolderHistory: TweeWorkspaceFolder[] = [];
@@ -89,7 +110,7 @@ export default class SaveToFile extends Vue {
     }
     
     get isLoading() {
-        return this.root === null;
+        return this.rootFolders.length === 0 || !this.selectedFolder;
     }
 
     get saveDisabled() {
@@ -121,10 +142,15 @@ export default class SaveToFile extends Vue {
     }
 
     created() {
-        socket.once('twee-workspace', (rootFolder: TweeWorkspaceFolder) => {
+        console.log('SaveToFile', this);
+        socket.once('twee-workspace', (rootFolders: TweeWorkspaceFolder[]) => {
             // TODO: Before I do the stuff below, I will have to traverse to set all of the proper parent values
-            this.root = rootFolder;
-            this.selectedFolderHistory = [ rootFolder ];
+            for (const rootFolder of rootFolders) {
+                assignParentage(rootFolder, null);
+            }
+            this.selectedFolder = rootFolders[0];
+            this.rootFolders = rootFolders;
+            this.selectedFolderHistory = [ rootFolders[0] ];
             this.selectedFolderIndex = 1;
         });
         socket.emit('get-twee-workspace');
@@ -158,6 +184,18 @@ export default class SaveToFile extends Vue {
         // TODO: Not sure how to implement this
     }
 
+    highlightFolder(folder: TweeWorkspaceFolder) {
+        
+    }
+
+    highlightFile(file: TweeWorkspaceFile) {
+        
+    }
+
+    openFile(file: TweeWorkspaceFile) {
+
+    }
+
     save() {
         this.$emit('save', this.breadcrumbs.map((breadcrumb) => breadcrumb.name).join('/') + `/${this.saveToFile}`);
     }
@@ -169,5 +207,239 @@ export default class SaveToFile extends Vue {
 </script>
 
 <style lang="scss" scoped>
+%icon-button {
+    position: relative;
+    text-indent: -100vw;
+    overflow: hidden;
+    color: transparent;
+    font-size: 0;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
 
+    &::before, &::after {
+        font-size: 30px;
+        color: #FFF;
+        text-indent: 0;
+        position: absolute;
+        display: flex;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        justify-content: center;
+        align-items: center;
+    }
+
+    &:hover {
+        background-color: rgba(255, 255, 255, .08);
+    }
+}
+
+.save-to-file-overlay {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, .5);
+}
+
+.save-to-file-dialog {
+    display: flex;
+    flex-direction: column;
+    width: 1000px;
+    height: 600px;
+    background-color: rgb(30, 30, 30);
+
+    .dialog-titlebar {
+        display: flex;
+        align-items: center;
+        background-color: rgba(60, 60, 60);
+        color: #CCC;
+
+        .title {
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        .close {
+            @extend %icon-button;
+            width: 40px;
+            height: 40px;
+
+            &::before {
+                content: '\00d7';
+            }
+        }
+    }
+
+    .dialog-body {
+        flex: 1;
+
+        .loading {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+
+            > button {
+                @extend %icon-button;
+                width: 40px;
+                height: 39px;
+                border-right: solid rgba(255, 255, 255, .1) 1px;
+                border-bottom: solid rgba(255, 255, 255, .1) 1px;
+
+                &[data-action="back"] {
+                    &::before {
+                        content: '';
+                        display: block;
+                        border: solid #FFF;
+                        border-width: 0 0 2px 2px;
+                        transform: translate(-50%, -50%) translate(3px, 0) rotate(45deg);
+                        height: 10px;
+                        width: 10px;
+                    }
+                }
+                &[data-action="next"] {
+                    &::before {
+                        content: '';
+                        display: block;
+                        border: solid #FFF;
+                        border-width: 2px 2px 0 0;
+                        transform: translate(-50%, -50%) translate(-3px, 0) rotate(45deg);
+                        height: 10px;
+                        width: 10px;
+                    }
+                }
+                &[data-action="up"] {
+                    &::before {
+                        content: '';
+                        display: block;
+                        border: solid #FFF;
+                        border-width: 2px 0 0 2px;
+                        transform: translate(-50%, -50%) translate(0, 3px) rotate(45deg);
+                        height: 10px;
+                        width: 10px;
+                    }
+                }
+            }
+
+            .breadcrumbs {
+                display: flex;
+                flex: 1;
+                background-color: rgb(40, 40, 40);
+                border: solid rgba(60, 60, 60);
+                border-width: 0 1px 1px;
+
+                button {
+                    display: flex;
+                    align-items: center;
+                    border: 0;
+                    background: transparent;
+                    color: #FFF;
+                    gap: 7px;
+                    height: 38px;
+                    padding: 0 10px 0 5px;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: rgba(255, 255, 255, .2);
+                    }
+
+                    &::before {
+                        display: inline-block;
+                        content: '';
+                        width: 7px;
+                        height: 7px;
+                        border: solid #FFF;
+                        border-width: 2px 2px 0 0;
+                        transform: rotate(45deg);
+                    }
+                }
+            }
+
+            input {
+                border: 0;
+                height: 40px;
+                padding: 0 10px;
+
+                background-color: rgb(75, 75, 75);
+                color: #FFF;
+                outline: 0;
+            }
+        }
+
+        .folder-content {
+            display: flex;
+
+            .folder-tree {
+                width: 250px;
+            }
+
+            .folder-items {
+                display: flex;
+                flex: 1;
+                flex-wrap: wrap;
+
+                .filter {
+                    width: 100%;
+                }
+
+                .folder-item,
+                .file-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    width: 115px;
+                    line-height: 20px;
+                    margin: 10px;
+                    overflow: hidden;
+                    color: #FFF;
+                    cursor: default;
+                    padding: 5px;
+
+                    img {
+                        width: 70px;
+                        height: 70px;
+                    }
+
+                    .name {
+                        text-align: center;
+                        font-family: Verdana, Geneva, Tahoma, sans-serif;
+                        font-size: 11px;
+                        word-break: break-all;
+                    }
+
+                    &:hover {
+                        background-color: rgba(255, 255, 255, .13);
+                    }
+                }
+
+                .folder-item {
+
+                }
+            }
+        }
+    }
+
+    .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+
+        button {
+
+        }
+    }
+}
 </style>

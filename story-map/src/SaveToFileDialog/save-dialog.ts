@@ -9,6 +9,7 @@ export const showSaveDialog = () => {
         const appComponent = app.$children[0] as SaveToFile;
 
         const complete = (result: string | void) => {
+            app.$el.remove();
             app.$destroy();
             resolve(result);
         };

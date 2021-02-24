@@ -95,7 +95,7 @@ export async function getWorkspace() {
 
 	async function getFolderTree(root: vscode.Uri, folder: vscode.Uri) {
 		const tree: TweeWorkspaceFolder = {
-			name: folder.path.split("/").reverse()[1] ?? "",
+			name: folder.path.split("/").filter((str) => str).pop() ?? "",
 			parent: null,
 			relativePath: folder.path.replace(root.path, ""),
 			content: {

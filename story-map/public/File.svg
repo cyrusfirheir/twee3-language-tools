@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="transparent">
+    <style>
+        .text {
+            width: 40px;
+            font-family: Verdana, Tahoma, Arial;
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+    <path fill="#FFF" d="M 38 13 h 35 v 70 h -50 v -55" />
+    <path stroke="#000" stroke-width="2" fill="transparent" d="M 38 13 v 15 h -15" />
+    <path fill="#888" d="M 23 47 h 50 v 22 h -50" />
+    <text x="50" y="65" class="text" fill="#FFF" text-anchor="middle">.tw</text>
+    <path stroke="#666" stroke-width="2" fill="transparent" d="M 45 20 h 20" />
+    <path stroke="#666" stroke-width="2" fill="transparent" d="M 45 25 h 15" />
+    <path stroke="#999" stroke-width="2" fill="transparent" d="M 30 35 h 33" />
+    <path stroke="#999" stroke-width="2" fill="transparent" d="M 30 40 h 30" />
+    <path stroke="#999" stroke-width="2" fill="transparent" d="M 59 76 h 8" />
+    <path stroke="#999" stroke-width="2" fill="transparent" d="M 47 76 h 8" />
+</svg>
