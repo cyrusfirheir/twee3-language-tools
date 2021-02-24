@@ -199,7 +199,7 @@ export default class SaveToFile extends Vue {
     }
 
     save() {
-        this.$emit('save', this.breadcrumbs.map((breadcrumb) => breadcrumb.name).join('/') + `/${this.saveToFile}`);
+        this.$emit('save', this.selectedFolder.absolutePath + `/${this.saveToFile}`);
     }
 
     cancel() {

@@ -98,6 +98,7 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import { LinkedPassage, Vector } from "../types";
 import { showSaveDialog } from '../SaveToFileDialog/save-dialog';
+import { socket } from "../socket";
 
 @Component
 export default class Sidebar extends Vue {
@@ -234,8 +235,7 @@ export default class Sidebar extends Vue {
     async moveToFile() {
         const result = await showSaveDialog();
         if (result) {
-            // TODO: Emit something
-            console.log('moveToFile', { result });
+            this.$emit('moveToFile', result);
         }
     }
 

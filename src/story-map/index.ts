@@ -7,7 +7,7 @@ import { Server } from 'http';
 import * as socketio from 'socket.io';
 
 import { updatePassages, sendPassageDataToClient } from "./socket";
-import { getWorkspace } from "../file-ops";
+import { getWorkspace, MoveData, moveToFile } from "../file-ops";
 
 import { jumpToPassage } from '../tree-view';
 
@@ -47,6 +47,11 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 				storyMap.disconnectTimeout = setTimeout(() => {
 					if (!storyMap.client) stopUI(storyMap);
 				}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
+			})
+			.on('move-to-file', async (moveData: MoveData) => {
+				await moveToFile(moveData);
+				console.log(ctx.workspaceState.get("passages"));
+				sendPassageDataToClient(ctx, client);			
 			})
 			.on('get-twee-workspace', async () => {
 				const ws = await getWorkspace();

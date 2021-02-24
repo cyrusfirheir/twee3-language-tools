@@ -41,3 +41,14 @@ console.log("This is a script passage.");
 .this-is a .stylesheet {
 	position: absolute;
 }
+:: One {"position":"300,100"}
+
+Leads to [[Two<-2]]
+
+Leads to [[tree->Three]]
+
+:: Three {"position":"600,100"}
+
+Leads bacc to [[o|One]].:: Two {"position":"500,300"}
+
+

@@ -23,13 +23,14 @@ export async function moveToFile(moveData: MoveData) {
 	let text: string[] = [];
 
 	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
-	for (const file of files) {
+	const promises = files.map(async file => {
 		const fDoc = await vscode.workspace.openTextDocument(file);
 		await fDoc.save();
 		let edited = fDoc.getText();
 
 		const filePassages = moveData.passages.filter(el => el.origin.full === file);
-		for (const passage of filePassages) {
+
+		const innerPromises = filePassages.map(async passage => {
 			const p = new Passage(passage.origin, new vscode.Range(
 				passage.range.startLine, passage.range.startCharacter, passage.range.endLine, passage.range.endCharacter
 			), passage.name, vscode.TreeItemCollapsibleState.None);
@@ -38,21 +39,25 @@ export async function moveToFile(moveData: MoveData) {
 			text.push(content);
 
 			edited = edited.replace(content, "");
-		}
+		});
+
+		await Promise.all(innerPromises);
 
 		await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(edited, "utf-8"));
-	}
+	});
+	
+	await Promise.all(promises);
 
 	let doc: vscode.TextDocument | undefined = undefined;
 
 	try {
 		doc = await vscode.workspace.openTextDocument(vscode.Uri.file(moveData.toFile));
-		text.unshift(doc.getText());
+		text.unshift(doc.getText() + "\n\n");
 	} catch (ex) {
-		console.warn(`"${moveData.toFile}" does not exist! Creating...`)
+		console.log(`"${moveData.toFile}" does not exist! Creating...`);
 	}
 
-	return vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(text.join("\n\n"), "utf-8"));
+	return await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(text.join(""), "utf-8"));
 }
 
 const includeDirs = (): string[] => vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);
@@ -84,6 +89,7 @@ export interface TweeWorkspaceFolderContent {
 export interface TweeWorkspaceFolder {
 	name: string;
 	parent: TweeWorkspaceFolder | null;
+	absolutePath: string;
 	relativePath: string;
 	content: TweeWorkspaceFolderContent;
 }
@@ -97,6 +103,7 @@ export async function getWorkspace() {
 		const tree: TweeWorkspaceFolder = {
 			name: folder.path.split("/").filter((str) => str).pop() ?? "",
 			parent: null,
+			absolutePath: folder.path,
 			relativePath: folder.path.replace(root.path, ""),
 			content: {
 				files: [],

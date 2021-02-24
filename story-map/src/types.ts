@@ -99,6 +99,7 @@ export interface TweeWorkspaceFolderContent {
 export interface TweeWorkspaceFolder {
     name: string;
     parent: TweeWorkspaceFolder | null;
+	absolutePath: string;
     relativePath: string;
     content: TweeWorkspaceFolderContent;
 }

@@ -24,6 +24,7 @@
         @removeTag="removePassageTag(selectedPassages, $event)"
         @selectPassage="selectPassage($event, null)"
         @openInVsCode="openPassage(selectedPassages)"
+		@moveToFile="moveToFile(selectedPassages, $event)"
       />
     </div>
     <div class="story-area" @click="deselectPassage()" @mousedown="onMapMouseDown($event)">
@@ -589,6 +590,34 @@ export default class AppComponent extends Vue {
 
   removePassageTag(passage: Passage, tag: string) {
     passage.tags = passage.tags.filter((curTag) => curTag !== tag);
+  }
+
+/**
+ * {
+	toFile: string;
+	passages: Array<{
+		name: string;
+		range: {
+			startLine: number;
+			startCharacter: number;
+			endLine: number;
+			endCharacter: number;
+		};
+		origin: PassageOrigin;
+	}>;
+}
+ */
+  moveToFile(passages: Passage[], absolutePath: string) {
+    socket.emit('move-to-file', {
+      toFile: absolutePath,
+      passages: passages.map(p => {
+        return {
+          name: p.name,
+          range: p.range,
+          origin: p.origin
+        }
+      })
+    })
   }
 }
 </script>
