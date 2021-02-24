@@ -34,6 +34,7 @@
                                 <!-- folders -->
                                 <div
                                     class="folder-item"
+                                    :class="{ highlight: highlightedFolder === folder }"
                                     v-for="folder in contentInSelectedFolder.folders"
                                     :key="`folder-item-${folder.relativePath}/${folder.name}`"
                                     @click="highlightFolder(folder)"
@@ -45,6 +46,7 @@
                                 <!-- files -->
                                 <div
                                     class="file-item"
+                                    :class="{ highlight: selectedFile === file }"
                                     v-for="file in contentInSelectedFolder.files"
                                     :key="`file-item-${file.parent.relativePath}/${file.name}`"
                                     @click="selectFile(file)"
@@ -148,7 +150,6 @@ export default class SaveToFile extends Vue {
 
     created() {
         socket.once('twee-workspace', (rootFolders: TweeWorkspaceFolder[]) => {
-            // TODO: Before I do the stuff below, I will have to traverse to set all of the proper parent values
             for (const rootFolder of rootFolders) {
                 assignParentage(rootFolder, null);
             }
@@ -165,6 +166,7 @@ export default class SaveToFile extends Vue {
     }
 
     gotoFolder(folder: TweeWorkspaceFolder) {
+        this.clearHighlight();
         this.selectedFolder = folder;
         this.selectedFolderHistory = [...this.selectedFolderHistory.slice(0, this.selectedFolderHistoryIndex), folder];
         this.selectedFolderHistoryIndex++;
@@ -172,6 +174,7 @@ export default class SaveToFile extends Vue {
 
     historyBack() {
         if (this.selectedFolderHistoryIndex > 1) {
+            this.clearHighlight();
             this.selectedFolderHistoryIndex--;
             this.selectedFolder = this.selectedFolderHistory[this.selectedFolderHistoryIndex - 1];
         }
@@ -179,16 +182,24 @@ export default class SaveToFile extends Vue {
 
     historyNext() {
         if (this.selectedFolderHistoryIndex < this.selectedFolderHistory.length) {
+            this.clearHighlight();
             this.selectedFolderHistoryIndex++;
             this.selectedFolder = this.selectedFolderHistory[this.selectedFolderHistoryIndex - 1];
         }
     }
 
+    clearHighlight() {
+        this.selectedFile = null;
+        this.highlightedFolder = null;
+    }
+
     highlightFolder(folder: TweeWorkspaceFolder) {
-        this.highlightFolder
+        this.clearHighlight();
+        this.highlightedFolder = folder;
     }
 
     selectFile(file: TweeWorkspaceFile) {
+        this.clearHighlight();
         this.selectedFile = file;
         this.saveToFile = file.name;
     }
@@ -468,7 +479,8 @@ export default class SaveToFile extends Vue {
                     word-break: break-all;
                 }
 
-                &:hover {
+                &:hover,
+                &.highlight {
                     background-color: rgba(255, 255, 255, .13);
                 }
             }
