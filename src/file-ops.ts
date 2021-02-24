@@ -7,6 +7,7 @@ import { Passage, PassageOrigin } from "./tree-view";
 
 export interface MoveData {
 	toFile: string;
+	toFileContent?: string;
 	passages: Array<{
 		name: string;
 		range: {
@@ -16,10 +17,12 @@ export interface MoveData {
 			endCharacter: number;
 		};
 		origin: PassageOrigin;
+		content?: string;
 	}>;
 }
 
 export async function moveToFile(moveData: MoveData) {
+	// Make thepassages appear in the order they were
 	const sortedPassages = moveData.passages.slice().sort((a, b) => {
 		const fileCompare = a.origin.full.localeCompare(b.origin.full);
 		if (fileCompare !== 0) return fileCompare;
@@ -27,6 +30,8 @@ export async function moveToFile(moveData: MoveData) {
 		if (a.range.startLine < b.range.startLine) return -1;
 		return 0;
 	});
+
+	// Update files
 	let text: string[] = new Array(sortedPassages.length);
 	
 	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
@@ -44,6 +49,7 @@ export async function moveToFile(moveData: MoveData) {
 			const content = await p.getContent(true);
 
 			text[sortedPassages.indexOf(passage)] = content;
+			passage.content = content;
 
 			edited = edited.replace(content, "");
 		});
@@ -59,14 +65,17 @@ export async function moveToFile(moveData: MoveData) {
 
 	try {
 		doc = await vscode.workspace.openTextDocument(vscode.Uri.file(moveData.toFile));
-		text.unshift(doc.getText() + "\n\n");
+		const docText = doc.getText();
+		if (docText.trim()) text.unshift(docText + "\n\n");
 	} catch (ex) {
 		console.log(`"${moveData.toFile}" does not exist! Creating...`);
 	}
 
-	await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(text.join(""), "utf-8"));
+	moveData.toFileContent = text.join("");
+	await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(moveData.toFileContent, "utf-8"));
 
-	await vscode.commands.executeCommand('t3lt-reparse-files', [ ...new Set([moveData.toFile, ... files ])]);
+	// update passages
+	await vscode.commands.executeCommand('update-passage-origin', moveData);
 }
 
 const includeDirs = (): string[] => vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);

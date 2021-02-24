@@ -10,7 +10,7 @@ import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 import { sendPassageDataToClient } from "./story-map/socket";
 import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
-import { fileGlob, getWorkspace } from './file-ops';
+import { fileGlob, getWorkspace, MoveData } from './file-ops';
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
 
@@ -218,13 +218,35 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 		})
 		,
-		vscode.commands.registerCommand('t3lt-reparse-files', async files => {
-			const promises = files.map(async (file: string) => {
-				const doc = await vscode.workspace.openTextDocument(file);
-				await parseText(ctx, doc);
-			});
-			await Promise.all(promises);
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+		vscode.commands.registerCommand('update-passage-origin', async (moveData: MoveData) => {
+			const passages: Passage[] = ctx.workspaceState.get("passages", []).slice();
+			for (const movedPassageData of moveData.passages) {
+				const movedPassage = passages.find((passage) => passage.name === movedPassageData.name);
+				if (movedPassage) {
+					// Update origin
+					const root = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(moveData.toFile))?.uri.path || "";
+					const path = moveData.toFile.replace(root, "");
+					movedPassage.origin = { full: moveData.toFile, root, path };
+					// Update range
+					if (moveData.toFileContent && movedPassageData.content) {
+						const startIndex = moveData.toFileContent.indexOf(movedPassageData.content);
+						if (startIndex >= 0) {
+							const beforeLines = moveData.toFileContent.substring(0, startIndex).split('\n');
+							const contentLines = movedPassageData.content.split('\n');
+							const startLine = beforeLines.length - 1;
+							const lastContentLine = contentLines.slice().pop() as string;
+							movedPassage.range = new vscode.Range(startLine, 0, startLine + contentLines.length, lastContentLine.length);
+						} else {
+							console.warn('Could not update passage range', movedPassageData);
+						}
+					} else {
+						console.warn('Could not update passage range', movedPassageData);
+					}
+				} else {
+					console.warn('Could not update passage origin and range', movedPassageData);
+				}
+			}
+			ctx.workspaceState.update("passages", passages);
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 		})
 		,

@@ -63,7 +63,7 @@
                 </div>
                 <div class="dialog-actions">
                     <button type="button" class="cancel" @click="cancel()">Cancel</button>
-                    <button type="button" class="save" :disabled="saveDisabled" @click="save()">Save to file</button>
+                    <button type="button" class="save" :disabled="saveDisabled" @click="save()">Move to file</button>
                 </div>
             </div>
         </div>
