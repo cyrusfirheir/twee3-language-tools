@@ -218,6 +218,16 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 		})
 		,
+		vscode.commands.registerCommand('t3lt-reparse-files', async files => {
+			const promises = files.map(async (file: string) => {
+				const doc = await vscode.workspace.openTextDocument(file);
+				await parseText(ctx, doc);
+			});
+			await Promise.all(promises);
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
+		})
+		,
 		vscode.window.registerTreeDataProvider(
 			't3lt-passages-list',
 			passageListProvider

@@ -119,7 +119,7 @@ export default class SaveToFile extends Vue {
     }
 
     get saveDisabled() {
-        return this.selectedFile === null;
+        return !this.saveToFile;
     }
 
     get historyBackDisabled() {

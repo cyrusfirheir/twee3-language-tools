@@ -20,8 +20,15 @@ export interface MoveData {
 }
 
 export async function moveToFile(moveData: MoveData) {
-	let text: string[] = [];
-
+	const sortedPassages = moveData.passages.slice().sort((a, b) => {
+		const fileCompare = a.origin.full.localeCompare(b.origin.full);
+		if (fileCompare !== 0) return fileCompare;
+		if (a.range.startLine > b.range.startLine) return 1;
+		if (a.range.startLine < b.range.startLine) return -1;
+		return 0;
+	});
+	let text: string[] = new Array(sortedPassages.length);
+	
 	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
 	const promises = files.map(async file => {
 		const fDoc = await vscode.workspace.openTextDocument(file);
@@ -36,7 +43,7 @@ export async function moveToFile(moveData: MoveData) {
 			), passage.name, vscode.TreeItemCollapsibleState.None);
 			const content = await p.getContent(true);
 
-			text.push(content);
+			text[sortedPassages.indexOf(passage)] = content;
 
 			edited = edited.replace(content, "");
 		});
@@ -57,7 +64,9 @@ export async function moveToFile(moveData: MoveData) {
 		console.log(`"${moveData.toFile}" does not exist! Creating...`);
 	}
 
-	return await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(text.join(""), "utf-8"));
+	await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(text.join(""), "utf-8"));
+
+	await vscode.commands.executeCommand('t3lt-reparse-files', [ ...new Set([moveData.toFile, ... files ])]);
 }
 
 const includeDirs = (): string[] => vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);
