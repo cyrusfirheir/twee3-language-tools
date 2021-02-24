@@ -3,34 +3,34 @@
         <div class="save-to-file-overlay" v-if="isOpen">
             <div class="save-to-file-dialog">
                 <div class="dialog-titlebar">
-                    <span class="title">Save passages to file</span>
+                    <span class="title">Move passages to file</span>
                     <button class="close" @click="cancel()">Close</button>
+                </div>
+                <div class="dialog-toolbar">
+                    <button type="button" data-action="back" @click="historyBack()" :disabled="historyBackDisabled">Back</button>
+                    <button type="button" data-action="next" @click="historyNext()" :disabled="historyNextDisabled">Next</button>
+                    <button type="button" data-action="up" @click="gotoFolder(selectedFolder.parent)" :disabled="!selectedFolder || !selectedFolder.parent">Up</button>
+                    <div class="breadcrumbs">
+                        <button v-for="breadcrumb in breadcrumbs" type="button" class="breadcrumb" @click="gotoFolder(breadcrumb)" :key="`breadcrumb-${breadcrumb.relativePath}/${breadcrumb.name}`">
+                            {{ breadcrumb.name }}
+                        </button>
+                    </div>
+                    <input type="search" placeholder="Filter" v-model="filterModel">
                 </div>
                 <div class="dialog-body">
                     <template v-if="isLoading">
                         <div class="loading">Loading</div>
                     </template>
                     <template v-else>
-                        <div class="toolbar">
-                            <button type="button" data-action="back" @click="historyBack()" :disabled="historyBackDisabled">Back</button>
-                            <button type="button" data-action="next" @click="historyNext()" :disabled="historyNextDisabled">Next</button>
-                            <button type="button" data-action="up" @click="gotoFolder(selectedFolder.parent)" :disabled="!selectedFolder.parent">Up</button>
-                            <div class="breadcrumbs">
-                                <button v-for="breadcrumb in breadcrumbs" type="button" class="breadcrumb" @click="gotoFolder(breadcrumb)" :key="`breadcrumb-${breadcrumb.relativePath}/${breadcrumb.name}`">
-                                    {{ breadcrumb.name }}
-                                </button>
-                            </div>
-                            <input type="search" placeholder="Filter" v-model="filterModel">
+                        <div class="folder-tree">
+                            <!-- Todo -->
+                            <template v-for="rootFolder in rootFolders">
+                                <WorkspaceTree :root="rootFolder" :selectedFolder="selectedFolder" :key="`workspace-tree-${rootFolder.name}`" @selectFolder="gotoFolder($event)" />
+                            </template>
                         </div>
                         <div class="folder-content">
-                            <div class="folder-tree">
-                                <!-- Todo -->
-                                <template v-for="rootFolder in rootFolders">
-                                    <WorkspaceTree :root="rootFolder" :selected="selectedFolder" :key="`workspace-tree-${rootFolder.name}`" />
-                                </template>
-                            </div>
+                            <div class="filter" v-if="filterModel">Items in folder die aan filter '{{ filter }}' voldoen</div>
                             <div class="folder-items">
-                                <div class="filter" v-if="filterModel">Items in folder die aan filter '{{ filter }}' voldoen</div>
                                 <!-- folders -->
                                 <div
                                     class="folder-item"
@@ -47,12 +47,16 @@
                                     class="file-item"
                                     v-for="file in contentInSelectedFolder.files"
                                     :key="`file-item-${file.parent.relativePath}/${file.name}`"
-                                    @click="highlightFile(file)"
+                                    @click="selectFile(file)"
                                     @dblclick="openFile(file)"
                                 >
                                     <img src="/File.svg">
                                     <span class="name">{{ file.name }}</span>
                                 </div>
+                            </div>
+                            <!-- file-entry -->
+                            <div class="filename-entry">
+                                <input type="text" placeholder="Filename" v-model="saveToFile">
                             </div>
                         </div>
                     </template>
@@ -95,7 +99,8 @@ export default class SaveToFile extends Vue {
     selectedFolder: TweeWorkspaceFolder = null;
     selectedFile: TweeWorkspaceFile = null;
     selectedFolderHistory: TweeWorkspaceFolder[] = [];
-    selectedFolderIndex = 0;
+    selectedFolderHistoryIndex = 0;
+    highlightedFolder: TweeWorkspaceFolder | null = null;
     filterModel = '';
     saveToFile = '';
 
@@ -118,16 +123,16 @@ export default class SaveToFile extends Vue {
     }
 
     get historyBackDisabled() {
-        return this.selectedFolderIndex <= 1;
+        return this.selectedFolderHistoryIndex <= 1;
     }
 
     get historyNextDisabled() {
-        return this.selectedFolderIndex < this.selectedFolderHistory.length;
+        return this.selectedFolderHistoryIndex >= this.selectedFolderHistory.length;
     }
 
     get contentInSelectedFolder(): TweeWorkspaceFolderContent {
         const selectedFolder = this.selectedFolder;
-        const filter = this.filterModel;
+        const filter = this.filterModel.toLowerCase();
         if (!selectedFolder) {
             return {
                 folders: [],
@@ -135,14 +140,13 @@ export default class SaveToFile extends Vue {
             };
         } else {
             return {
-                folders: selectedFolder.content.folders.filter((folder) => !filter || folder.name.includes(filter)),
-                files: selectedFolder.content.files.filter((file) => !filter || file.name.includes(filter)),
+                folders: selectedFolder.content.folders.filter((folder) => !filter || folder.name.toLowerCase().includes(filter)),
+                files: selectedFolder.content.files.filter((file) => !filter || file.name.toLowerCase().includes(filter)),
             };
         }
     }
 
     created() {
-        console.log('SaveToFile', this);
         socket.once('twee-workspace', (rootFolders: TweeWorkspaceFolder[]) => {
             // TODO: Before I do the stuff below, I will have to traverse to set all of the proper parent values
             for (const rootFolder of rootFolders) {
@@ -151,7 +155,7 @@ export default class SaveToFile extends Vue {
             this.selectedFolder = rootFolders[0];
             this.rootFolders = rootFolders;
             this.selectedFolderHistory = [ rootFolders[0] ];
-            this.selectedFolderIndex = 1;
+            this.selectedFolderHistoryIndex = 1;
         });
         socket.emit('get-twee-workspace');
     }
@@ -162,38 +166,36 @@ export default class SaveToFile extends Vue {
 
     gotoFolder(folder: TweeWorkspaceFolder) {
         this.selectedFolder = folder;
-        this.selectedFolderHistory = [...this.selectedFolderHistory.slice(0, this.selectedFolderIndex), folder];
-        this.selectedFolderIndex++;
+        this.selectedFolderHistory = [...this.selectedFolderHistory.slice(0, this.selectedFolderHistoryIndex), folder];
+        this.selectedFolderHistoryIndex++;
     }
 
     historyBack() {
-        if (this.selectedFolderIndex > 1) {
-            this.selectedFolderIndex--;
-            this.selectedFolder = this.selectedFolderHistory[this.selectedFolderIndex];
+        if (this.selectedFolderHistoryIndex > 1) {
+            this.selectedFolderHistoryIndex--;
+            this.selectedFolder = this.selectedFolderHistory[this.selectedFolderHistoryIndex - 1];
         }
     }
 
     historyNext() {
-        if (this.selectedFolderIndex < this.selectedFolderHistory.length) {
-            this.selectedFolderIndex++;
-            this.selectedFolder = this.selectedFolderHistory[this.selectedFolderIndex];
+        if (this.selectedFolderHistoryIndex < this.selectedFolderHistory.length) {
+            this.selectedFolderHistoryIndex++;
+            this.selectedFolder = this.selectedFolderHistory[this.selectedFolderHistoryIndex - 1];
         }
     }
 
-    refreshFolder() {
-        // TODO: Not sure how to implement this
-    }
-
     highlightFolder(folder: TweeWorkspaceFolder) {
-        
+        this.highlightFolder
     }
 
-    highlightFile(file: TweeWorkspaceFile) {
-        
+    selectFile(file: TweeWorkspaceFile) {
+        this.selectedFile = file;
+        this.saveToFile = file.name;
     }
 
     openFile(file: TweeWorkspaceFile) {
-
+        this.selectFile(file);
+        this.save();
     }
 
     save() {
@@ -216,6 +218,7 @@ export default class SaveToFile extends Vue {
     background-color: transparent;
     border: 0;
     cursor: pointer;
+    outline: 0;
 
     &::before, &::after {
         font-size: 30px;
@@ -232,6 +235,27 @@ export default class SaveToFile extends Vue {
 
     &:hover {
         background-color: rgba(255, 255, 255, .08);
+    }
+
+    &[disabled]::before,
+    &[disabled]::after {
+        color: #999;
+    }
+}
+
+%custom-scrollbars {
+    &::-webkit-scrollbar {
+        width: 5px;
+        height: 8px;
+        background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0);
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, .1);
     }
 }
 
@@ -264,6 +288,8 @@ export default class SaveToFile extends Vue {
         .title {
             flex: 1;
             padding: 0 10px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 18px;
         }
 
         .close {
@@ -277,7 +303,109 @@ export default class SaveToFile extends Vue {
         }
     }
 
+    .dialog-toolbar {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        > button {
+            @extend %icon-button;
+            width: 40px;
+            height: 39px;
+            border-right: solid rgba(255, 255, 255, .1) 1px;
+            border-bottom: solid rgba(255, 255, 255, .1) 1px;
+
+            &[data-action="back"] {
+                &::before {
+                    content: '';
+                    display: block;
+                    border: solid #FFF;
+                    border-width: 0 0 2px 2px;
+                    transform: translate(-50%, -50%) translate(3px, 0) rotate(45deg);
+                    height: 10px;
+                    width: 10px;
+                }
+            }
+            &[data-action="next"] {
+                &::before {
+                    content: '';
+                    display: block;
+                    border: solid #FFF;
+                    border-width: 2px 2px 0 0;
+                    transform: translate(-50%, -50%) translate(-3px, 0) rotate(45deg);
+                    height: 10px;
+                    width: 10px;
+                }
+            }
+            &[data-action="up"] {
+                &::before {
+                    content: '';
+                    display: block;
+                    border: solid #FFF;
+                    border-width: 2px 0 0 2px;
+                    transform: translate(-50%, -50%) translate(0, 3px) rotate(45deg);
+                    height: 10px;
+                    width: 10px;
+                }
+            }
+            &[data-action][disabled] {
+                pointer-events: none;
+
+                &::before {
+                    border-color: #444;
+                }
+            }
+        }
+
+        .breadcrumbs {
+            display: flex;
+            flex: 1;
+            background-color: rgb(40, 40, 40);
+            border: solid rgba(60, 60, 60);
+            border-width: 0 1px 1px;
+
+            button {
+                display: flex;
+                align-items: center;
+                border: 0;
+                background: transparent;
+                color: #FFF;
+                gap: 7px;
+                height: 38px;
+                padding: 0 10px 0 5px;
+                cursor: pointer;
+                outline: 0;
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, .2);
+                }
+
+                &::before {
+                    display: inline-block;
+                    content: '';
+                    width: 7px;
+                    height: 7px;
+                    border: solid #FFF;
+                    border-width: 2px 2px 0 0;
+                    transform: rotate(45deg);
+                }
+            }
+        }
+
+        input {
+            border: 0;
+            height: 40px;
+            padding: 0 10px;
+
+            background-color: rgb(75, 75, 75);
+            color: #FFF;
+            outline: 0;
+        }
+    }
+
     .dialog-body {
+        display: flex;
+        height: calc(600px - 120px);
         flex: 1;
 
         .loading {
@@ -288,147 +416,83 @@ export default class SaveToFile extends Vue {
             align-items: center;
         }
 
-        .toolbar {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-
-            > button {
-                @extend %icon-button;
-                width: 40px;
-                height: 39px;
-                border-right: solid rgba(255, 255, 255, .1) 1px;
-                border-bottom: solid rgba(255, 255, 255, .1) 1px;
-
-                &[data-action="back"] {
-                    &::before {
-                        content: '';
-                        display: block;
-                        border: solid #FFF;
-                        border-width: 0 0 2px 2px;
-                        transform: translate(-50%, -50%) translate(3px, 0) rotate(45deg);
-                        height: 10px;
-                        width: 10px;
-                    }
-                }
-                &[data-action="next"] {
-                    &::before {
-                        content: '';
-                        display: block;
-                        border: solid #FFF;
-                        border-width: 2px 2px 0 0;
-                        transform: translate(-50%, -50%) translate(-3px, 0) rotate(45deg);
-                        height: 10px;
-                        width: 10px;
-                    }
-                }
-                &[data-action="up"] {
-                    &::before {
-                        content: '';
-                        display: block;
-                        border: solid #FFF;
-                        border-width: 2px 0 0 2px;
-                        transform: translate(-50%, -50%) translate(0, 3px) rotate(45deg);
-                        height: 10px;
-                        width: 10px;
-                    }
-                }
-            }
-
-            .breadcrumbs {
-                display: flex;
-                flex: 1;
-                background-color: rgb(40, 40, 40);
-                border: solid rgba(60, 60, 60);
-                border-width: 0 1px 1px;
-
-                button {
-                    display: flex;
-                    align-items: center;
-                    border: 0;
-                    background: transparent;
-                    color: #FFF;
-                    gap: 7px;
-                    height: 38px;
-                    padding: 0 10px 0 5px;
-                    cursor: pointer;
-
-                    &:hover {
-                        background-color: rgba(255, 255, 255, .2);
-                    }
-
-                    &::before {
-                        display: inline-block;
-                        content: '';
-                        width: 7px;
-                        height: 7px;
-                        border: solid #FFF;
-                        border-width: 2px 2px 0 0;
-                        transform: rotate(45deg);
-                    }
-                }
-            }
-
-            input {
-                border: 0;
-                height: 40px;
-                padding: 0 10px;
-
-                background-color: rgb(75, 75, 75);
-                color: #FFF;
-                outline: 0;
-            }
+        .folder-tree {
+            @extend %custom-scrollbars;
+            width: 250px;
+            height: calc(600px - 120px);
+            background-color: rgb(37, 37, 37);
+            overflow: auto;
+            overflow: overlay;
         }
 
         .folder-content {
-            display: flex;
+            flex: 1;
+        }
 
-            .folder-tree {
-                width: 250px;
+        .folder-items {
+            display: flex;
+            flex: 1;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: flex-start;
+            align-content: flex-start;
+            height: calc(600px - 160px);
+
+
+            .filter {
+                width: 100%;
             }
 
-            .folder-items {
+            .folder-item,
+            .file-item {
                 display: flex;
-                flex: 1;
-                flex-wrap: wrap;
+                flex-direction: column;
+                align-items: center;
+                width: 115px;
+                line-height: 20px;
+                margin: 10px;
+                overflow: hidden;
+                color: #FFF;
+                cursor: default;
+                padding: 5px;
 
-                .filter {
-                    width: 100%;
+                img {
+                    width: 70px;
+                    height: 70px;
                 }
 
-                .folder-item,
-                .file-item {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    width: 115px;
-                    line-height: 20px;
-                    margin: 10px;
-                    overflow: hidden;
-                    color: #FFF;
-                    cursor: default;
-                    padding: 5px;
-
-                    img {
-                        width: 70px;
-                        height: 70px;
-                    }
-
-                    .name {
-                        text-align: center;
-                        font-family: Verdana, Geneva, Tahoma, sans-serif;
-                        font-size: 11px;
-                        word-break: break-all;
-                    }
-
-                    &:hover {
-                        background-color: rgba(255, 255, 255, .13);
-                    }
+                .name {
+                    text-align: center;
+                    font-family: Verdana, Geneva, Tahoma, sans-serif;
+                    font-size: 11px;
+                    word-break: break-all;
                 }
 
-                .folder-item {
-
+                &:hover {
+                    background-color: rgba(255, 255, 255, .13);
                 }
+            }
+
+            .folder-item {
+
+            }
+        }
+
+        .filename-entry {
+            display: flex;
+            height: 40px;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 5px;
+
+            input {
+                display: block;
+                height: 30px;
+                width: 100%;
+                border: 0;
+                background-color: #444;
+                padding: 0 10px;
+                color: #CCC;
             }
         }
     }
@@ -436,9 +500,27 @@ export default class SaveToFile extends Vue {
     .dialog-actions {
         display: flex;
         justify-content: flex-end;
+        border-top: solid #555 1px;
+        gap: 10px;
 
         button {
+            height: 40px;
+            border: 0;
+            background-color: transparent;
+            color: #FFF;
+            padding: 0 20px;
+            cursor: pointer;
+            font-size: 20px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 
+            &:hover {
+                background-color: #333;
+            }
+
+            &[disabled] {
+                pointer-events: none;
+                color: #444;
+            }
         }
     }
 }

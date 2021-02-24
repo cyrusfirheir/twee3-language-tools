@@ -233,7 +233,10 @@ export default class Sidebar extends Vue {
 
     async moveToFile() {
         const result = await showSaveDialog();
-        console.log('moveToFile', { result });
+        if (result) {
+            // TODO: Emit something
+            console.log('moveToFile', { result });
+        }
     }
 
     // reset position
