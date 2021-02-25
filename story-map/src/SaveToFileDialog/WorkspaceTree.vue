@@ -4,7 +4,7 @@
             <span class="arrow-btn" :class="{ collapsed }"></span>
             {{ root.name }}
         </div>
-        <Collapsible class="workspace-tree-content" :collapsed="collapsed">
+        <Collapsible class="workspace-tree-content" :collapsed="collapsed" :class="{ ['collapsible-collapsed']: collapsed }">
             <template v-for="folder in root.content.folders">
                 <FolderTreeLevel :folder="folder" :selectedFolder="selectedFolder" :key="`FolderTreeLevel-${folder.relativePath}`" @selectFolder="selectFolder($event)" />
             </template>
@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { TweeWorkspaceFolder } from '../types';
 import FolderTreeLevel from './FolderTreeLevel.vue'
 import Collapsible from './Collapsible.vue'
@@ -28,24 +28,6 @@ export default class WorkspaceTwee extends Vue {
     @Prop() root: TweeWorkspaceFolder;
     @Prop() selectedFolder: TweeWorkspaceFolder;
     collapsed = false;
-    treeContentContainerHeight = 'auto';
-    animationTimeout = 0;
-
-    heightWrapper(): HTMLDivElement {
-        return this.$refs.HeightWrapper as HTMLDivElement;
-    }
-
-    treeContent(): HTMLDivElement {
-        return this.$refs.TreeContent as HTMLDivElement;
-    }
-
-    getContentHeight(): string {
-        let height = (this.animationTimeout)
-            ? this.treeContent().getBoundingClientRect().height
-            : this.heightWrapper().getBoundingClientRect().height
-            ?? this.heightWrapper().getBoundingClientRect().height;
-        return `${height}px`;
-    }
 
     async toggleCollapse() {
         // Invert the collapse state

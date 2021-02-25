@@ -1,10 +1,10 @@
 <template>
     <div class="workspace-folder" :class="{ selected: folder === selectedFolder }">
         <div class="workspace-folder-title" @click="toggleCollapse(); selectFolder(folder)">
-            <span class="arrow-btn" :class="{ collapsed, hidden }" @click.stop="toggleCollapse()"></span>
+            <span class="arrow-btn" :class="{ collapsed, hidden: arrowHidden }" @click.stop="toggleCollapse()"></span>
             {{ folder.name }}
         </div>
-        <Collapsible class="workspace-folder-content" :collapsed="collapsed">
+        <Collapsible class="workspace-folder-content" :collapsed="collapsed" :class="{ ['collapsible-collapsed']: collapsed }">
             <template v-for="subfolder in folder.content.folders">
                 <FolderTreeLevel :folder="subfolder" :selectedFolder="selectedFolder" :key="`FolderTreeLevel-${subfolder.relativePath}`" @selectFolder="selectFolder($event)" />
             </template>
@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { TweeWorkspaceFolder } from '../types';
 import Collapsible from './Collapsible.vue'
 
@@ -28,7 +28,7 @@ export default class FolderTreeLevel extends Vue {
     @Prop() selectedFolder: TweeWorkspaceFolder;
     collapsed = true;
 
-    get hidden() {
+    get arrowHidden() {
         return this.folder.content.folders.length === 0;
     }
 
@@ -38,6 +38,23 @@ export default class FolderTreeLevel extends Vue {
 
     toggleCollapse() {
         this.collapsed = !this.collapsed;
+    }
+
+    @Watch('selectedFolder')
+    expandIfSelected() {
+        if (!this.collapsed) return;
+
+        if (this.folder === this.selectedFolder || this.isDescendantSelected(this.folder)) {
+            this.collapsed = false;
+        }
+    }
+
+    isDescendantSelected(folder: TweeWorkspaceFolder): boolean {
+        return folder.content.folders.some((subfolder) => {
+            if (subfolder === this.selectedFolder) return true;
+            if (this.isDescendantSelected(subfolder)) return true;
+            return false;
+        });
     }
 }
 </script>
@@ -74,6 +91,10 @@ export default class FolderTreeLevel extends Vue {
         right: 0;
         background-color: rgba(255, 255, 255, .05);
         line-height: 24px;
+
+        .collapsible-collapsed & {
+            display: none;
+        }
     }
 }
 
