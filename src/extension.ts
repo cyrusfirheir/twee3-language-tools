@@ -10,7 +10,7 @@ import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 import { sendPassageDataToClient } from "./story-map/socket";
 import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
-import { fileGlob, getWorkspace, MoveData } from './file-ops';
+import { fileGlob, MoveData } from './file-ops';
 
 import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
 
@@ -216,6 +216,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.reparseFiles", async (files: string[]) => {
+			for (const file of files) {
+				const doc = await vscode.workspace.openTextDocument(file);
+				await parseText(ctx, doc);
+			}
 		})
 		,
 		vscode.commands.registerCommand('update-passage-origin', async (moveData: MoveData) => {

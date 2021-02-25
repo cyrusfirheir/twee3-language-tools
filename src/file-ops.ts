@@ -35,14 +35,14 @@ export async function moveToFile(moveData: MoveData) {
 	let text: string[] = new Array(sortedPassages.length);
 	
 	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
-	const promises = files.map(async file => {
+	for (const file of files) {
 		const fDoc = await vscode.workspace.openTextDocument(file);
 		await fDoc.save();
 		let edited = fDoc.getText();
 
 		const filePassages = moveData.passages.filter(el => el.origin.full === file);
 
-		const innerPromises = filePassages.map(async passage => {
+		for (const passage of filePassages) {
 			const p = new Passage(passage.origin, new vscode.Range(
 				passage.range.startLine, passage.range.startCharacter, passage.range.endLine, passage.range.endCharacter
 			), passage.name, vscode.TreeItemCollapsibleState.None);
@@ -52,14 +52,10 @@ export async function moveToFile(moveData: MoveData) {
 			passage.content = content;
 
 			edited = edited.replace(content, "");
-		});
-
-		await Promise.all(innerPromises);
+		}
 
 		await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(edited, "utf-8"));
-	});
-	
-	await Promise.all(promises);
+	}
 
 	let doc: vscode.TextDocument | undefined = undefined;
 
@@ -75,7 +71,8 @@ export async function moveToFile(moveData: MoveData) {
 	await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(moveData.toFileContent, "utf-8"));
 
 	// update passages
-	await vscode.commands.executeCommand('update-passage-origin', moveData);
+	// await vscode.commands.executeCommand('update-passage-origin', moveData);
+	return await vscode.commands.executeCommand("twee3LanguageTools.reparseFiles", [moveData.toFile, ...files]);
 }
 
 const includeDirs = (): string[] => vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);

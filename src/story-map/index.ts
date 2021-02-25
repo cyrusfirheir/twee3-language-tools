@@ -50,8 +50,8 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 			})
 			.on('move-to-file', async (moveData: MoveData) => {
 				await moveToFile(moveData);
-				console.log(ctx.workspaceState.get("passages"));
-				// sendPassageDataToClient(ctx, client);			
+				// console.log(ctx.workspaceState.get("passages"));
+				// sendPassageDataToClient(ctx, client);
 			})
 			.on('get-twee-workspace', async () => {
 				const ws = await getWorkspace();
