@@ -564,32 +564,42 @@ export default class AppComponent extends Vue {
     this.selectedPassages = [];
   }
 
-  setPassageSize(passage: Passage, size: Vector) {
-    passage.size = { ...size };
-  }
-
-  resetPassageSize(passage: Passage) {
-    passage.size = { ... passage.originalSize };
-  }
-
-  resetPassagePosition(passage: Passage) {
-    passage.position = { ...passage.originalPosition };
-  }
-
-  resetPassageTags(passage: Passage) {
-    passage.tags = [ ...passage.originalTags ];
-  }
-
-  addPassageTag(passage: Passage, tag: string) {
-    if (passage.tags.some((oldTag) => !oldTag.toLowerCase().localeCompare(tag.trim().toLowerCase()))){
-      console.warn(`tried to add tag to passage already having that tag`, passage, tag.trim());
-      return;
+  setPassageSize(passages: Passage[], size: Vector) {
+    for (const passage of passages) {
+      passage.size = { ...size };
     }
-    passage.tags.push(tag.trim());
   }
 
-  removePassageTag(passage: Passage, tag: string) {
-    passage.tags = passage.tags.filter((curTag) => curTag !== tag);
+  resetPassageSize(passages: Passage[]) {
+    for (const passage of passages) {
+      passage.size = { ... passage.originalSize };
+    }
+  }
+
+  resetPassagePosition(passages: Passage[]) {
+    for (const passage of passages) {
+      passage.position = { ...passage.originalPosition };
+    }
+  }
+
+  resetPassageTags(passages: Passage[]) {
+    for (const passage of passages) {
+      passage.tags = [ ...passage.originalTags ];
+    }
+  }
+
+  addPassageTag(passages: Passage[], tag: string) {
+    for (const passage of passages) {
+      if (!passage.tags.some((oldTag) => !oldTag.toLowerCase().localeCompare(tag.trim().toLowerCase()))){
+        passage.tags.push(tag.trim());
+      }
+    }
+  }
+
+  removePassageTag(passages: Passage[], tag: string) {
+    for (const passage of passages) {
+      passage.tags = passage.tags.filter((curTag) => curTag !== tag);
+    }
   }
 
   moveToFile(passages: Passage[], absolutePath: string) {
@@ -730,7 +740,7 @@ html, body {
 
 .sidebar {
   grid-area: sidebar;
-  background: rgba(0, 0, 0, .3);
+  background: rgb(16, 22, 25);
   border-left: solid rgba(255, 255, 255, .2) 1px;
   box-shadow: 0 10px 20px rgba(var(--shadow-rgb),0.19), 0 6px 6px rgba(var(--shadow-rgb),0.23);
   width: 0;
