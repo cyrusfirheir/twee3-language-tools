@@ -1,5 +1,4 @@
-// Imports
-//#region 
+//#region Imports
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,13 +11,11 @@ import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
 import { fileGlob, MoveData } from './file-ops';
 
-import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
+import { PassageListProvider, Passage, jumpToPassage } from './passage';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 //#endregion
-
-let ctx: vscode.ExtensionContext;
 
 const tokenTypes = new Map<string, number>();
 const legend = (function () {
@@ -30,8 +27,10 @@ const legend = (function () {
 })();
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+	constructor(private context: vscode.ExtensionContext) { }
+
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const allTokens = await parseText(ctx, document);
+		const allTokens = await parseText(this.context, document);
 		const builder = new vscode.SemanticTokensBuilder();
 		allTokens.forEach((_token) => {
 			builder.push(_token.line, _token.startCharacter, _token.length, this._encodeTokenType(_token.tokenType));
@@ -53,11 +52,9 @@ const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
 };
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
 
-	ctx = context;
-	
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
@@ -70,7 +67,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	await start();
-	
+
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			tweeProjectConfig(doc);
@@ -79,8 +76,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		})
 	}
-	
-	fileGlob().forEach(file => prepare(file));	
+
+	fileGlob().forEach(file => prepare(file));
 
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
@@ -98,7 +95,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand,
-		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
+		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(ctx), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
 			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
@@ -128,17 +125,19 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.window.onDidChangeActiveTextEditor(editor => {
-			if (editor) {
+			if (editor && /^twee3.*/.test(editor.document.languageId)) {
 				updateDiagnostics(ctx, editor.document, collection);
 			}
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
+			if (!/^twee3.*/.test(document.languageId)) return;
 			changeStoryFormat(document);
 			updateDiagnostics(ctx, document, collection);
 		})
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
+			if (!/^twee3.*/.test(e.document.languageId)) return;
 			updateDiagnostics(ctx, e.document, collection);
 		})
 		,
@@ -186,7 +185,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
 				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
-				passageListProvider.refresh()
+				passageListProvider.refresh();
 			});
 		})
 		,
@@ -212,48 +211,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidSaveTextDocument(async document => {
+			if (!/^twee3.*/.test(document.languageId)) return;
 			tweeProjectConfig(document);
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
-		})
-		,
-		vscode.commands.registerCommand("twee3LanguageTools.reparseFiles", async (files: string[]) => {
-			for (const file of files) {
-				const doc = await vscode.workspace.openTextDocument(file);
-				await parseText(ctx, doc);
-			}
-		})
-		,
-		vscode.commands.registerCommand('update-passage-origin', async (moveData: MoveData) => {
-			const passages: Passage[] = ctx.workspaceState.get("passages", []).slice();
-			for (const movedPassageData of moveData.passages) {
-				const movedPassage = passages.find((passage) => passage.name === movedPassageData.name);
-				if (movedPassage) {
-					// Update origin
-					const root = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(moveData.toFile))?.uri.path || "";
-					const path = moveData.toFile.replace(root, "");
-					movedPassage.origin = { full: moveData.toFile, root, path };
-					// Update range
-					if (moveData.toFileContent && movedPassageData.content) {
-						const startIndex = moveData.toFileContent.indexOf(movedPassageData.content);
-						if (startIndex >= 0) {
-							const beforeLines = moveData.toFileContent.substring(0, startIndex).split('\n');
-							const contentLines = movedPassageData.content.split('\n');
-							const startLine = beforeLines.length - 1;
-							const lastContentLine = contentLines.slice().pop() as string;
-							movedPassage.range = new vscode.Range(startLine, 0, startLine + contentLines.length, lastContentLine.length);
-						} else {
-							console.warn('Could not update passage range', movedPassageData);
-						}
-					} else {
-						console.warn('Could not update passage range', movedPassageData);
-					}
-				} else {
-					console.warn('Could not update passage origin and range', movedPassageData);
-				}
-			}
-			ctx.workspaceState.update("passages", passages);
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 		})
 		,

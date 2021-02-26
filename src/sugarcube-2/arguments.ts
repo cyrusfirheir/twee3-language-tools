@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Passage } from '../tree-view';
+import { Passage } from '../passage';
 import { macro, macroDef } from "./macros";
 import { evalPassageId, Evaluatable, evaluateTwineScriptString, notSpaceRegex, settingsSetupAccessRegexp, spaceRegex, StateInfo, varTestRegexp, Warning } from './validation';
 

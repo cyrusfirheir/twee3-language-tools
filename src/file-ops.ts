@@ -1,27 +1,38 @@
 import * as vscode from "vscode";
 
-import * as glob from 'glob';
+import { promises as fs } from "fs";
+
+import * as glob from "glob";
 import minimatch from "minimatch";
 
-import { Passage, PassageOrigin } from "./tree-view";
+import { Passage, PassageOrigin, PassageRange, PassageStringRange } from "./passage";
+import { parseRawText } from "./parse-text";
+
+export function removeLeadingSlash(path: string) {
+	return path.startsWith("/") ? path.substring(1) : path;
+}
+
+export function readFile(path: string) {
+	return fs.readFile(removeLeadingSlash(path), "utf-8");
+}
+
+export function writeFile(path: string, content: string) {
+	return fs.writeFile(removeLeadingSlash(path), content, "utf-8");
+}
 
 export interface MoveData {
 	toFile: string;
 	toFileContent?: string;
 	passages: Array<{
 		name: string;
-		range: {
-			startLine: number;
-			startCharacter: number;
-			endLine: number;
-			endCharacter: number;
-		};
+		range: PassageRange
+		stringRange: PassageStringRange;
 		origin: PassageOrigin;
 		content?: string;
 	}>;
 }
 
-export async function moveToFile(moveData: MoveData) {
+export async function moveToFile(context: vscode.ExtensionContext, moveData: MoveData) {
 	// Make thepassages appear in the order they were
 	const sortedPassages = moveData.passages.slice().sort((a, b) => {
 		const fileCompare = a.origin.full.localeCompare(b.origin.full);
@@ -36,16 +47,17 @@ export async function moveToFile(moveData: MoveData) {
 	
 	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
 	for (const file of files) {
-		const fDoc = await vscode.workspace.openTextDocument(file);
-		await fDoc.save();
-		let edited = fDoc.getText();
+		const fDocText = await readFile(file);
+		let edited = fDocText;
 
 		const filePassages = moveData.passages.filter(el => el.origin.full === file);
 
 		for (const passage of filePassages) {
-			const p = new Passage(passage.origin, new vscode.Range(
+			const p = new Passage(passage.name, new vscode.Range(
 				passage.range.startLine, passage.range.startCharacter, passage.range.endLine, passage.range.endCharacter
-			), passage.name, vscode.TreeItemCollapsibleState.None);
+			), { 
+				start: passage.stringRange.start, endHeader: passage.stringRange.endHeader, end: passage.stringRange.end
+			}, passage.origin, vscode.TreeItemCollapsibleState.None);
 			const content = await p.getContent(true);
 
 			text[sortedPassages.indexOf(passage)] = content;
@@ -54,25 +66,30 @@ export async function moveToFile(moveData: MoveData) {
 			edited = edited.replace(content, "");
 		}
 
-		await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(edited, "utf-8"));
+		await writeFile(file, edited);
+		await parseRawText(context, {
+			text: edited,
+			uri: vscode.Uri.file(file),
+			languageId: "twee3"
+		});
 	}
 
-	let doc: vscode.TextDocument | undefined = undefined;
+	let docText: string | undefined = undefined;
 
 	try {
-		doc = await vscode.workspace.openTextDocument(vscode.Uri.file(moveData.toFile));
-		const docText = doc.getText();
-		if (docText.trim()) text.unshift(docText + "\n\n");
+		docText = await readFile(moveData.toFile);
+		if (docText?.trim()) text.unshift(docText + "\n\n");
 	} catch (ex) {
 		console.log(`"${moveData.toFile}" does not exist! Creating...`);
 	}
 
 	moveData.toFileContent = text.join("");
-	await vscode.workspace.fs.writeFile(vscode.Uri.file(moveData.toFile), Buffer.from(moveData.toFileContent, "utf-8"));
-
-	// update passages
-	// await vscode.commands.executeCommand('update-passage-origin', moveData);
-	return await vscode.commands.executeCommand("twee3LanguageTools.reparseFiles", [moveData.toFile, ...files]);
+	await writeFile(moveData.toFile, moveData.toFileContent);
+	await parseRawText(context, {
+		text: moveData.toFileContent,
+		uri: vscode.Uri.file(moveData.toFile),
+		languageId: "twee3"
+	});
 }
 
 const includeDirs = (): string[] => vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);

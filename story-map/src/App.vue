@@ -526,7 +526,7 @@ export default class AppComponent extends Vue {
   }
 
   openPassage(passage: LinkedPassage) {
-    socket.emit('open-passage', { name: passage.name, origin: passage.origin, range: passage.range });
+    socket.emit('open-passage', { name: passage.name, origin: passage.origin, range: passage.range, stringRange: passage.stringRange });
   }
 
   saveChanges() {
@@ -534,6 +534,7 @@ export default class AppComponent extends Vue {
       name: passage.name,
       origin: passage.origin,
       range: passage.range,
+      stringRange: passage.stringRange,
       position: passage.position,
       size: passage.size,
       tags: passage.tags,
@@ -610,6 +611,7 @@ export default class AppComponent extends Vue {
         return {
           name: p.name,
           range: p.range,
+          stringRange: p.stringRange,
           origin: p.origin
         }
       })

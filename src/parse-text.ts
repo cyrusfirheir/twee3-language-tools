@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
-import { Passage, PassageListProvider } from './tree-view';
-import * as sc2m from './sugarcube-2/macros';
+import * as vscode from "vscode";
+import { Passage, PassageListProvider } from "./passage";
+import * as sc2m from "./sugarcube-2/macros";
 
 interface IParsedToken {
 	line: number;
@@ -10,21 +10,37 @@ interface IParsedToken {
 	tokenModifiers: string[];
 }
 
-export const passageHeaderRegex = /(^::\s*)(.*?)(\[.*?\]\s*)?(\{.*?\}\s*)?$/;
+export const passageHeaderRegex = /(^::\s*)(.*?)(\[.*?\]\s*)?(\{.*?\}\s*)?\r?$/;
 
-export const parseText = async function (context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
+export interface RawDocument {
+	text: string;
+	uri: vscode.Uri;
+	languageId: vscode.TextDocument["languageId"];
+}
+
+export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
 	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin.full !== document.uri.path);
 	const newPassages: Passage[] = [];
 
 	const r: IParsedToken[] = [];
 
-	const lines = document.getText().split(/\r?\n/);
-	lines.forEach((line, i) => {
+	const lineIndices: number[] = [];
+	let lastIndex = 0;
+	while (lastIndex !== -1) {
+		const i = lineIndices.length;
+		lineIndices.push(lastIndex);
 
+		const curStart = lastIndex === 0 ? 0 : lastIndex + 1;
+		let curEnd = document.text.indexOf("\n", curStart);
+		lastIndex = curEnd;
+
+		if (curEnd === -1) curEnd = document.text.length;
+		const line = document.text.slice(curStart, curEnd);
+		
 		let escaped = line.replace(/\\./g, "ec"); // escaped characters
-
+		
 		let passageName: string = "", passageTags: string[] = [], passageMeta: any = null;
-
+		
 		const execArr = passageHeaderRegex.exec(escaped);
 		if (execArr) {
 			const reStartToken = execArr[1] || "";
@@ -37,7 +53,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 				passageMeta = JSON.parse(_metaString || "null");
 			} catch {
 				// console.error("Invalid Passage meta JSON!");
-				return;
+				continue;
 			}
 			if (passageMeta) {
 				r.push({
@@ -55,7 +71,7 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 				let _tags = _tagString.substring(1, _tagString.length - 1).trim();
 				if (/[\[\]\{\}]/.test(_tags.replace(/\\./g, "ec"))) {
 					// console.error("Unescaped meta character in tags!");
-					return;
+					continue;
 				} else {
 					passageTags = _tags.split(/\s+/);
 				}
@@ -77,10 +93,10 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 			passageName = line.substring(reStartToken.length, reName.length).trim();
 			if (!passageName) {
 				// console.error("No Passage name!");
-				return;
+				continue;
 			} else if (/[\[\]\{\}]/.test(passageName.replace(/\\./g, "ec"))) {
 				// console.error("Unescaped meta character in Passage name!");
-				return;
+				continue;
 			}
 			const specialName = [ "StoryTitle", "StoryData", "Start" ].includes(passageName);
 			r.push({
@@ -95,15 +111,17 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 			const path = document.uri.path.replace(root, "");
 
 			let passage = new Passage(
-				{ root, path, full: document.uri.path },
-				new vscode.Range(i, 0, i + 1, 0),
 				passageName,
+				new vscode.Range(i, 0, i + 1, 0),
+				{ start: curStart, endHeader: curEnd, end: curEnd },
+				{ root, path, full: document.uri.path },
 				vscode.TreeItemCollapsibleState.None
 			);
 
 			let previous = newPassages.pop();
 			if (previous) {
 				previous.range = new vscode.Range(previous.range.start, new vscode.Position(i, 0));
+				previous.stringRange.end = curStart - 1;
 				newPassages.push(previous);
 			}
 
@@ -131,11 +149,12 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 	
 			newPassages.push(passage);
 		}
-	});
-
+	}
+	
 	let lastPassage = newPassages.pop();
 	if (lastPassage) {
-		lastPassage.range = new vscode.Range(lastPassage.range.start, new vscode.Position(lines.length, 0));
+		lastPassage.range = new vscode.Range(lastPassage.range.start, new vscode.Position(lineIndices.length, 0));
+		lastPassage.stringRange.end = document.text.length - 1;
 		newPassages.push(lastPassage);
 	}
 
@@ -144,4 +163,12 @@ export const parseText = async function (context: vscode.ExtensionContext, docum
 	if (document.languageId === "twee3-sugarcube-2") sc2m.argumentCache.clearMacrosUsingPassage();
 
 	return Promise.resolve(r);
+}
+
+export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
+	return parseRawText(context, {
+		text: document.getText(),
+		uri: document.uri,
+		languageId: document.languageId
+	}, provider);
 }

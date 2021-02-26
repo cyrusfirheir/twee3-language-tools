@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Passage } from '../tree-view';
+import { Passage } from '../passage';
 import { Arg, ArgType, ExpressionArgument, ParsedArguments, SettingsSetupAccessArgument, VariableArgument } from './arguments';
 import { StateInfo, Warning } from './validation';
 

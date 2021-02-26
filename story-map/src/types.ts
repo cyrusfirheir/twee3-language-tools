@@ -3,18 +3,29 @@ export interface Vector {
     y: number;
 }
 
+export interface PassageOrigin {
+    root: string;
+    path: string;
+    full: string;
+}
+
+export interface PassageStringRange {
+    start: number;
+    endHeader: number;
+    end: number;
+}
+
+export interface PassageRange {
+    startLine: number;
+    startCharacter: number;
+    endLine: number;
+    endCharacter: number;
+}
+
 export interface Passage {
-    origin: {
-        full: string;
-        path: string;
-        root: string;
-    };
-    range: {
-        startLine: number;
-        startCharacter: number;
-        endLine: number;
-        endCharacter: number;
-    };
+    origin: PassageOrigin;
+    range: PassageRange;
+    stringRange: PassageStringRange;
     filename: string;
     path: string;
     name: string;
@@ -51,17 +62,9 @@ export interface PassageData {
 }
 
 export interface RawPassage {
-    origin: {
-        full: string;
-        path: string;
-        root: string;
-    };
-    range: {
-        startLine: number;
-        startCharacter: number;
-        endLine: number;
-        endCharacter: number;
-    };
+    origin: PassageOrigin;
+    range: PassageRange;
+    stringRange: PassageStringRange;
     name: string;
     tags: string[];
     meta: any;
@@ -99,7 +102,7 @@ export interface TweeWorkspaceFolderContent {
 export interface TweeWorkspaceFolder {
     name: string;
     parent: TweeWorkspaceFolder | null;
-	absolutePath: string;
+    absolutePath: string;
     relativePath: string;
     content: TweeWorkspaceFolderContent;
 }

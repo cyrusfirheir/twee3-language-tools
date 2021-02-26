@@ -3,7 +3,7 @@ import * as yaml from 'yaml';
 import { Arg, ArgType, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
 import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
-import { Passage } from '../tree-view';
+import { Passage } from '../passage';
 import { isArrayEqual } from './validation';
 
 export type MacroName = string;

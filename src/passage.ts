@@ -1,4 +1,6 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+
+import { readFile } from "./file-ops";
 
 export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 	private _onDidChangeTreeData: vscode.EventEmitter<Passage | undefined | void> = new vscode.EventEmitter<Passage | undefined | void>();
@@ -27,7 +29,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				passages.forEach(el => {
 					if (!origins.includes(el.origin.full)) {
 						origins.push(el.origin.full);
-						let p = new Passage(el.origin, el.range, el.origin.path.split("/").pop() || "", vscode.TreeItemCollapsibleState.Expanded);
+						let p = new Passage(el.origin.path.split("/").pop() || "", el.range, el.stringRange, el.origin, vscode.TreeItemCollapsibleState.Expanded);
 						p.tooltip = el.origin.path.substring(1);
 						files.push(p);
 					}
@@ -53,7 +55,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					};
 					if (!origins.includes(_origin.full)) {
 						origins.push(_origin.full);
-						let p = new Passage(_origin, el.range, _origin.path, vscode.TreeItemCollapsibleState.Expanded);
+						let p = new Passage(_origin.path, el.range, el.stringRange, _origin, vscode.TreeItemCollapsibleState.Expanded);
 						p.tooltip = _origin.path;
 						folders.push(p);
 					}
@@ -74,12 +76,12 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 					el.tags?.forEach(elem => {
 						if (!tags.includes(elem)) {
 							tags.push(elem);
-							let p = new Passage(el.origin, el.range, elem, vscode.TreeItemCollapsibleState.Expanded);
+							let p = new Passage(elem, el.range, el.stringRange, el.origin, vscode.TreeItemCollapsibleState.Expanded);
 							groups.push(p);
 						}
 					});
 				});
-				let ungrouped = new Passage({ root: "", path: "", full: "" }, new vscode.Range(0,0,0,0), "", vscode.TreeItemCollapsibleState.Expanded);
+				let ungrouped = new Passage("", new vscode.Range(0,0,0,0), { start: 0, endHeader: 0, end: 0 }, { root: "", path: "", full: "" }, vscode.TreeItemCollapsibleState.Expanded);
 				ungrouped.description = "Untagged";
 				groups.sort((a, b) => a.name.localeCompare(b.name)).push(ungrouped);
 
@@ -112,22 +114,31 @@ export interface PassageOrigin {
 	full: string;
 }
 
+export interface PassageStringRange {
+	start: number;
+	endHeader: number;
+	end: number;
+}
+
+export interface PassageRange {
+	startLine: number;
+	startCharacter: number;
+	endLine: number;
+	endCharacter: number;
+}
+
 export interface OpenPassageParams {
 	name: string;
 	origin: PassageOrigin;
-	range: {
-		startLine: number;
-		startCharacter: number;
-		endLine: number;
-		endCharacter: number;
-	};
+	range: PassageRange;
 }
 
 export class Passage extends vscode.TreeItem {
 	constructor(
-		public origin: PassageOrigin,
-		public range: vscode.Range,
 		public name: string,
+		public range: vscode.Range,
+		public stringRange: PassageStringRange,
+		public origin: PassageOrigin,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public tags?: string[],
 		public meta?: any,
@@ -136,13 +147,13 @@ export class Passage extends vscode.TreeItem {
 	}
 
 	async getHeader() {
-		const doc = await vscode.workspace.openTextDocument(this.origin.root + this.origin.path);
-		return doc.lineAt(this.range.start).text;
+		const docText = await readFile(this.origin.full);
+		return docText.slice(this.stringRange.start, this.stringRange.endHeader + 1);
 	}
 
-	async getContent(header=false) {
-		const doc = await vscode.workspace.openTextDocument(this.origin.root + this.origin.path);
-		return doc.getText(new vscode.Range(this.range.start.translate(header ? 0 : 1), this.range.end));
+	async getContent(includeHeader=false) {
+		const docText = await readFile(this.origin.full);
+		return docText.slice(includeHeader ? this.stringRange.start : this.stringRange.endHeader + 1, this.stringRange.end + 1);
 	}
 }
 
