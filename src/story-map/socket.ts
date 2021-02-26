@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import * as socketio from "socket.io";
 
 import { Passage, PassageRange, PassageStringRange } from "../passage";
+import { writeFile } from "../file-ops";
 
 export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
@@ -88,6 +89,6 @@ export async function updatePassages(passages: UpdatePassage[]) {
 			);
 		}
 
-		await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
+		await writeFile(doc.uri.path, edited);
 	}
 }

@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
 
-import { promises as fs } from "fs";
-
 import * as glob from "glob";
 import minimatch from "minimatch";
 
@@ -12,12 +10,12 @@ export function removeLeadingSlash(path: string) {
 	return path.startsWith("/") ? path.substring(1) : path;
 }
 
-export function readFile(path: string) {
-	return fs.readFile(removeLeadingSlash(path), "utf-8");
+export async function readFile(path: string) {
+	return Buffer.from(await vscode.workspace.fs.readFile(vscode.Uri.file(path))).toString("utf-8");
 }
 
 export function writeFile(path: string, content: string) {
-	return fs.writeFile(removeLeadingSlash(path), content, "utf-8");
+	return vscode.workspace.fs.writeFile(vscode.Uri.file(path), Buffer.from(content, "utf-8"));
 }
 
 export interface MoveData {
