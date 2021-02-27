@@ -149,7 +149,7 @@ export class Passage extends vscode.TreeItem {
 
 	async getHeader() {
 		const docText = await readFile(this.origin.full);
-		return docText.slice(this.stringRange.start, this.stringRange.endHeader + 1);
+		return docText.slice(this.stringRange.start, this.stringRange.endHeader);
 	}
 
 	async getContent(includeHeader=false) {

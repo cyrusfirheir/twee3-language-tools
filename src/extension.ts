@@ -9,7 +9,7 @@ import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 import { sendPassageDataToClient } from "./story-map/socket";
 import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
-import { fileGlob, MoveData } from './file-ops';
+import { fileGlob } from './file-ops';
 
 import { PassageListProvider, Passage, jumpToPassage } from './passage';
 
