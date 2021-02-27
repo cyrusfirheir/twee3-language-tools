@@ -235,11 +235,13 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 		let selfCloseMacro = undefined;
 
 		if (ex[1] === "end") {
-			if (list[ex[2]]) {
-				endVariant = true;
-				open = false;
+			const defInList = list[ex[2]];
+			const endAddedName = ex[1] + ex[2];
+			if (defInList) {
+				if (defInList.container) endVariant = true;
+				else if (!list[endAddedName]) name = endAddedName;
 			} else {
-				name = ex[1] + ex[2];
+				name = endAddedName;
 			}
 		}
 
