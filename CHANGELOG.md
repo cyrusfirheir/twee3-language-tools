@@ -2,31 +2,55 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.11.0
+
+Adds:
+
+- Story Map:
+	- Passage multi-select and the ability to mass edit position, size, and tags.
+	- Move to file feature in story map.
+
+	![move-to-file](https://imgur.com/0JRVDA7.png)
+
+---
+
 ## v0.10.1
 
-Fixes: Broken StoryMap-to-file updates when passage headers start with identical strings, i.e. modifying tags/metadata of `:: Passage Something` and `:: Passage Somethng Else` would end up affecting the header which comes first in the file.
+Fixes:
 
-Adds: Icon for `Jump-to-Passage` in the passage list.
+- Broken StoryMap-to-file updates when passage headers start with identical strings, i.e. modifying tags/metadata of `:: Passage Something` and `:: Passage Somethng Else` would end up affecting the header which comes first in the file.
+
+Adds:
+
+- Icon for `Jump-to-Passage` in the passage list.
 
 ---
 
 ## v0.10.0
 
-Story Map: Adds an icon indicating the start passage.
+Adds:
+
+- An icon indicating the start passage in the Story Map.
 
 ---
 
 ## v0.9.2
 
-Removes custom style markup highlighting which overwrote syntax highlighting for higher priority elements.
+Removes:
+
+- Custom style markup highlighting which overwrote syntax highlighting for higher priority elements.
 
 ---
 
 ## v0.9.0
 
-- Fixes numerous bugs with argument parsing and validtion.
+Fixes:
 
-- Adds a sidebar to the storymap.
+- Numerous bugs with argument parsing and validtion.
+
+Adds:
+
+- A sidebar to the storymap.
 	
 	![Sidebar](https://imgur.com/8XkfJVs.png)
 
@@ -34,7 +58,9 @@ Removes custom style markup highlighting which overwrote syntax highlighting for
 
 ## v0.8.1
 
-Improves performance for large files (thanks to @Goctionni and @MinusGix).
+Adds:
+
+- Caching functions to improve performance for large files (thanks to @Goctionni and @MinusGix).
 
 ---
 

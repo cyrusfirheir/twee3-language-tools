@@ -40,13 +40,14 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
     ![Passage List](https://imgur.com/3WObntl.png)  
 
 - A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
+
 	- Currently implemented features:  
 		- Snap to grid (button on top-left.)  
 		- Arrows to linked passages.  
-		- Passage tags, position, and size editing via a sidebar. Changes can be saved to file.  
-		- Multi-select, and thereby mass editing of tags, position, and size.  
+		- Passage position, size, and tags can be edited via a sidebar. Changes are *not* currently autosaved, and a manual save button is present.  
+		- Multi-select, and thereby mass editing of position, size, and tags.  
 		- Ability to move passages across files.
-		
+
 	- Usage:
 		- Use the middle-mouse button, or hold down <kbd>Shift</kbd> while dragging the mouse to pan the map grid.
 		- Scroll the mousewheel or stretch/pinch on trackpad to zoom in/out.
