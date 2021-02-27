@@ -109,7 +109,7 @@
 			]
 		},
 		"sc-js-macro": {
-			"begin": "(<<)(\\=|\\-|print|run|set|if|elseif)",
+			"begin": "(<<)(\\=|\\-|print|run|set|if|elseif)\\b",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
