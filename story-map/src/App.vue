@@ -23,7 +23,7 @@
         @addTag="addPassageTag(selectedPassages, $event)"
         @removeTag="removePassageTag(selectedPassages, $event)"
         @selectPassage="selectPassage($event, null)"
-        @openInVsCode="openPassage(selectedPassages)"
+        @openInVsCode="openPassage(selectedPassages[0])"
         @moveToFile="moveToFile(selectedPassages, $event)"
       />
     </div>
@@ -402,9 +402,12 @@ export default class AppComponent extends Vue {
     // Middle mouse is drag map
     if (event.button === 1) {
       return this.onMapMouseDown(event);
-    } else if (event.shiftKey) {
-      return this.onDragSelectStart(event);
     }
+
+    if (!this.selectedPassages.some(p => p.name === passage.name)) {
+      this.selectedPassages = [passage];
+    }
+    
     this.highestZIndex++;
     passage.zIndex = this.highestZIndex;
     this.draggedPassage = passage;
@@ -414,12 +417,11 @@ export default class AppComponent extends Vue {
   }
 
   onMapMouseDown(event: MouseEvent) {
-    if (event.shiftKey) {
-      return this.onDragSelectStart(event);
-    }
-    this.initialDragMapPosition = { ...this.translate };
-    this.initialDragPosition = { x: event.clientX, y: event.clientY };
-    this.mouseDownTimestamp = Date.now();
+    if (event.shiftKey || event.button === 1) {
+      this.initialDragMapPosition = { ...this.translate };
+      this.initialDragPosition = { x: event.clientX, y: event.clientY };
+      this.mouseDownTimestamp = Date.now();
+    } else return this.onDragSelectStart(event);
   }
 
   onDragSelectStart(event: MouseEvent) {
@@ -472,8 +474,11 @@ export default class AppComponent extends Vue {
       if (event.ctrlKey) {
         // If the control key is pressed, add to selection
         for (const item of selected) {
-          if (!this.selectedPassages.includes(item)) {
+          const itemSelected = this.selectedPassages.findIndex(p => p.name === item.name);
+          if (itemSelected === -1) {
             this.selectedPassages.push(item);
+          } else {
+            this.selectedPassages.splice(itemSelected, 1);
           }
         }
       } else {
@@ -550,10 +555,14 @@ export default class AppComponent extends Vue {
   selectPassage(passage: Passage, event: MouseEvent) {
     // If there is an event, there is a click. If there's a click
     // The click should not be too long
+    if (passage === null) return this.selectedPassages = [];
     if (event && Date.now() - this.mouseDownTimestamp > 200) return;
     if (event?.ctrlKey) {
-      if (!this.selectedPassages.includes(passage)) {
+      const itemSelected = this.selectedPassages.findIndex(p => p.name === passage.name);
+      if (itemSelected === -1) {
         this.selectedPassages.push(passage);
+      } else {
+        this.selectedPassages.splice(itemSelected, 1);
       }
     } else {
       this.selectedPassages = [passage];

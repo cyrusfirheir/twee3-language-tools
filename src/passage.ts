@@ -131,6 +131,7 @@ export interface OpenPassageParams {
 	name: string;
 	origin: PassageOrigin;
 	range: PassageRange;
+	stringRange: PassageStringRange;
 }
 
 export class Passage extends vscode.TreeItem {

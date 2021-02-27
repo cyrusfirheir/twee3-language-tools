@@ -29,7 +29,6 @@
                             </template>
                         </div>
                         <div class="folder-content">
-                            <div class="filter" v-if="filterModel">Items in folder die aan filter '{{ filter }}' voldoen</div>
                             <div class="folder-items">
                                 <!-- folders -->
                                 <div
@@ -255,6 +254,9 @@ export default class SaveToFile extends Vue {
 }
 
 %custom-scrollbars {
+    scrollbar-color: rgba(255, 255, 255, .1) transparent;
+    scrollbar-width: thin;
+
     &::-webkit-scrollbar {
         width: 5px;
         height: 8px;
@@ -437,6 +439,7 @@ export default class SaveToFile extends Vue {
         }
 
         .folder-content {
+            position: relative;
             flex: 1;
         }
 
@@ -448,11 +451,6 @@ export default class SaveToFile extends Vue {
             justify-content: flex-start;
             align-content: flex-start;
             height: calc(600px - 160px);
-
-
-            .filter {
-                width: 100%;
-            }
 
             .folder-item,
             .file-item {
@@ -483,10 +481,6 @@ export default class SaveToFile extends Vue {
                 &.highlight {
                     background-color: rgba(255, 255, 255, .13);
                 }
-            }
-
-            .folder-item {
-
             }
         }
 

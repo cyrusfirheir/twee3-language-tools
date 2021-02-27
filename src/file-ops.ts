@@ -6,10 +6,6 @@ import minimatch from "minimatch";
 import { Passage, PassageOrigin, PassageRange, PassageStringRange } from "./passage";
 import { parseRawText } from "./parse-text";
 
-export function removeLeadingSlash(path: string) {
-	return path.startsWith("/") ? path.substring(1) : path;
-}
-
 export async function readFile(path: string) {
 	return Buffer.from(await vscode.workspace.fs.readFile(vscode.Uri.file(path))).toString("utf-8");
 }
@@ -82,10 +78,11 @@ export async function moveToFile(context: vscode.ExtensionContext, moveData: Mov
 	}
 
 	moveData.toFileContent = text.join("");
-	await writeFile(moveData.toFile, moveData.toFileContent);
+	const fName = moveData.toFile + (minimatch(moveData.toFile, "**/*.{tw,twee}") ? "" : ".tw");
+	await writeFile(fName, moveData.toFileContent);
 	await parseRawText(context, {
 		text: moveData.toFileContent,
-		uri: vscode.Uri.file(moveData.toFile),
+		uri: vscode.Uri.file(fName),
 		languageId: "twee3"
 	});
 }
