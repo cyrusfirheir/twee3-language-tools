@@ -1,45 +1,54 @@
 <template>
-    <div class="sidebar-outer" v-if="passage">
+    <div class="sidebar-outer" v-if="passages.length">
         <header class="titlebar">
-            <h3>{{ passage.name }}</h3>
+            <div class="passages">
+                <template v-if="passages.length <= 3">
+                    <div class="passage-head" v-for="passage in passages" :key="`passage-head-${passage.key}`">
+                        <h3>{{ passage.name }}</h3>
+                        <code class="block">{{ passage.origin.path }}</code>
+                    </div>
+                </template>
+                <template v-else>
+                    <div class="passage-head">
+                        <h3>{{ passages.length }} Passages</h3>
+                    </div>
+                </template>
+            </div>
             <button class="close" @click="selectPassage(null)">Close</button>
         </header>
         
-        <h4>Path</h4>
-        <code class="block">
-            {{ passage.origin.path }}
-        </code>
-
         <h4>Links</h4>
-        <table class="linksTable" v-if="passage.linkedFrom.length || passage.linksTo.length">
-            <thead>
-                <tr>
-                    <th>Linked from</th>
-                    <th>Links to</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(x, n) in Math.max(passage.linkedFrom.length, passage.linksTo.length)" :key="`linksTable-row-${n}`">
-                    <td>
-                        <a v-if="passage.linkedFrom.length > n" href="#" @click.prevent="selectPassage(passage.linkedFrom[n])">
-                            {{ passage.linkedFrom[n].name }}
-                        </a>
-                    </td>
-                    <td>
-                        <a v-if="passage.linksTo.length > n" href="#" @click.prevent="selectPassage(passage.linksTo[n])">
-                            {{ passage.linksTo[n].name }}
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <span v-if="!passage.linksTo.length && !passage.linkedFrom.length">No links</span>
+        <div class="linksTableContainer" v-if="passage.linkedFrom.length || passage.linksTo.length" :style="{ maxHeight: linksContainerHeight }">
+            <table class="linksTable" ref="linksTable">
+                <thead>
+                    <tr>
+                        <th>Linked from</th>
+                        <th>Links to</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(x, n) in Math.max(linkedFrom.length, linksTo.length)" :key="`linksTable-row-${n}`">
+                        <td>
+                            <a v-if="linkedFrom.length > n" href="#" @click.prevent="selectPassage(linkedFrom[n].passage)">
+                                {{ linkedFrom[n].passage.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <a v-if="linksTo.length > n" href="#" @click.prevent="selectPassage(linksTo[n].passage)">
+                                {{ linksTo[n].passage.name }}
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <span v-else>No links</span>
 
         <h4>Tags</h4>
         <div class="passage-tags">
-            <div v-for="tag in passage.tags" :key="`passage-tag-${tag}`" class="passage-tag">
-                <span class="tag-color" v-if="tagColors[tag]" :style="{ backgroundColor: tagColors[tag] }"></span>
-                {{ tag }} <button class="remove-tag" @click="removeTag(tag)">Remove</button>
+            <div v-for="tag in tags" :key="`passage-tag-${tag.name}`" class="passage-tag" :class="[ tag.partial ? 'tag-all' : 'tag-some' ]">
+                <span class="tag-color" v-if="tagColors[tag.name]" :style="{ backgroundColor: tagColors[tag.name] }"></span>
+                {{ tag.name }} <button class="remove-tag" @click="removeTag(tag.name)">Remove</button>
             </div>
             <div class="add-tag-wrapper">
                 <input
@@ -73,12 +82,12 @@
         <div class="size-options">
             <button
                 v-for="sizeOption in sizeOptions"
-                :key="`size-option-${sizeOption.x}x${sizeOption.y}`"
+                :key="`size-option-${sizeOption.size.x}x${sizeOption.size.y}`"
                 class="size-btn"
-                :class="{ active: isSize(sizeOption) }"
-                @click="setSize(sizeOption)"
+                :class="sizeOption.class"
+                @click="setSize(sizeOption.size)"
             >
-                {{ sizeOption.x }} &times; {{ sizeOption.y }}
+                {{ sizeOption.size.x }} &times; {{ sizeOption.size.y }}
             </button>
         </div>
 
@@ -87,7 +96,7 @@
             <button class="action" :disabled="!hasMoved" @click="resetPosition()">Reset position</button>
             <button class="action" :disabled="!hasResized" @click="resetSize()">Reset size</button>
             <button class="action" :disabled="!hasChangedTags" @click="resetTags()">Reset tags</button>
-            <button class="action" disabled>Move to file</button>
+            <button class="action" @click="moveToFile()">Move to file</button>
             <button class="action" disabled>Hide</button>
             <button class="action" @click="openInVsCode()">Open in VSCode</button>
         </div>
@@ -96,38 +105,158 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
-import { LinkedPassage, Vector } from "../types";
+import { LinkedPassage, Passage, Vector } from "../types";
+import { showSaveDialog } from '../SaveToFileDialog/save-dialog';
+
+interface TagInfo {
+    name: string;
+    partial: boolean;
+    count: number;
+}
+
+interface LinkInfo {
+    passage: Passage;
+    count: number;
+}
+
+interface SizeOption {
+    size: Vector;
+    class: string;
+}
 
 @Component
 export default class Sidebar extends Vue {
-    @Prop() passage!: LinkedPassage;
+    @Prop({ default: () => []}) passages!: LinkedPassage[];
     @Prop({ default: () => []}) allTags!: string[];
     @Prop({ default: () => ({})}) tagColors!: { [tag: string]: string };
 
-    props = ['filename', 'key', 'linksToNames', 'name', 'origin', 'position', 'size', 'tags', 'path'];
+    linksContainerHeight = 'autp';
     tagSuggestions: string[] | null = null;
     activeTagSuggestion = '';
     addTagModel = '';
-    sizeOptions: Vector[] = [
-        { x: 100, y: 100 },
-        { x: 200, y: 100 },
-        { x: 100, y: 200 },
-        { x: 200, y: 200 },
-    ];
+
+    get passage(): LinkedPassage {
+        return this.passages[0];
+    }
+
+    get tags(): TagInfo[] {
+        // Count all the tags from all selected passages
+        const tagCount: { [tag: string]: number } = {};
+        for (const passage of this.passages) {
+            for (const tag of passage.tags) {
+                if (!tagCount[tag]) tagCount[tag] = 0;
+                tagCount[tag]++;
+            }
+        }
+        // Sort tags by count and alphabet
+        const sortedTags = Object.keys(tagCount).sort((tagA, tagB) => {
+            const diff = tagCount[tagB] - tagCount[tagA];
+            return (diff === 0) ? tagA.toLowerCase().localeCompare(tagB.toLowerCase()) : diff;
+        });
+        // Compile it all
+        return sortedTags.map((tag): TagInfo => ({
+            name: tag,
+            partial: tagCount[tag] === this.passages.length,
+            count: tagCount[tag],
+        }));
+    }
+
+    get linkedFrom(): LinkInfo[] {
+        // Count all the linkedFrom from all selected passages
+        const linkCount: { [passageName: string]: { count: number, passage: Passage} } = {};
+        for (const passage of this.passages) {
+            for (const linkedPassage of passage.linkedFrom) {
+                if (!linkCount[linkedPassage.name]) linkCount[linkedPassage.name] = { count: 0, passage: linkedPassage };
+                linkCount[linkedPassage.name].count++;
+            }
+        }
+        // Sort passages by count and alphabet
+        const sortedPassageNames = Object.keys(linkCount).sort((passageA, passageB) => {
+            const diff = linkCount[passageB].count - linkCount[passageA].count;
+            return (diff === 0) ? linkCount[passageA].passage.name.toLowerCase().localeCompare(linkCount[passageB].passage.name.toLowerCase()) : diff;
+        });
+        // Compile it all
+        return sortedPassageNames.map((passageName): LinkInfo => ({
+            passage: linkCount[passageName].passage,
+            count: linkCount[passageName].count,
+        }));
+    }
+
+    get linksTo(): LinkInfo[] {
+        // Count all the linksTo from all selected passages
+        const linkCount: { [passageName: string]: { count: number, passage: Passage} } = {};
+        for (const passage of this.passages) {
+            for (const linkedPassage of passage.linksTo) {
+                if (!linkCount[linkedPassage.name]) linkCount[linkedPassage.name] = { count: 0, passage: linkedPassage };
+                linkCount[linkedPassage.name].count++;
+            }
+        }
+        // Sort passages by count and alphabet
+        const sortedPassageNames = Object.keys(linkCount).sort((passageA, passageB) => {
+            const diff = linkCount[passageB].count - linkCount[passageA].count;
+            return (diff === 0) ? linkCount[passageA].passage.name.toLowerCase().localeCompare(linkCount[passageB].passage.name.toLowerCase()) : diff;
+        });
+        // Compile it all
+        return sortedPassageNames.map((passageName): LinkInfo => ({
+            passage: linkCount[passageName].passage,
+            count: linkCount[passageName].count,
+        }));
+    }
+
+    get sizeOptions(): SizeOption[] {
+        const passages = this.passages || [];
+        const sizes = [
+            { x: 100, y: 100 },
+            { x: 200, y: 100 },
+            { x: 100, y: 200 },
+            { x: 200, y: 200 },
+        ];
+
+        return sizes.map((size): SizeOption => ({
+            size,
+            class:
+                passages.every((passage) => this.isSize(passage, size)) ? 'size-every' :
+                passages.some((passage) => this.isSize(passage, size)) ? 'size-some' : '',
+        }));
+    }
 
     get hasMoved() {
-        return this.passage.position.x !== this.passage.originalPosition.x || this.passage.position.y !== this.passage.originalPosition.y;
+        return this.passages.some((passage) => {
+            return passage.position.x !== passage.originalPosition.x || passage.position.y !== passage.originalPosition.y;
+        });
     }
 
     get hasResized() {
-        return this.passage.size.x !== this.passage.originalSize.x || this.passage.size.y !== this.passage.originalSize.y;
+        return this.passages.some((passage) => {
+            return passage.size.x !== passage.originalSize.x || passage.size.y !== passage.originalSize.y;
+        });
     }
 
     get hasChangedTags() {
-        if (!this.passage) return false;
-        if (this.passage.tags.length !== this.passage.originalTags.length) return true;
-        if (this.passage.tags.some((tag, index) => tag !== this.passage.originalTags[index])) return true;
-        return false;
+        return this.passages.some((passage) => {
+            if (passage.tags.length !== passage.originalTags.length) return true;
+            if (passage.tags.some((tag, index) => tag !== passage.originalTags[index])) return true;
+            return false;
+        });
+    }
+
+    mounted() {
+        this.updatePassageContainerHeight();
+    }
+
+    @Watch('passages')
+    async updatePassageContainerHeight() {
+        await this.$nextTick();
+        const table = this.getLinksTable();
+        if (!table) {
+            this.linksContainerHeight = 'auto';
+        } else {
+            this.linksContainerHeight = (table.getBoundingClientRect().height + 15) + 'px';
+        }
+    }
+
+    getLinksTable(): HTMLTableElement {
+        return this.$refs.linksTable as HTMLTableElement;
     }
 
     selectPassage(name: string) {
@@ -206,8 +335,8 @@ export default class Sidebar extends Vue {
         this.$emit('setSize', size);
     }
 
-    isSize(size: Vector) {
-        return this.passage && this.passage.size.x === size.x && this.passage.size.y === size.y;
+    isSize(passage: Passage, size: Vector) {
+        return passage.size.x === size.x && passage.size.y === size.y;
     }
 
     resetPosition() {
@@ -226,10 +355,12 @@ export default class Sidebar extends Vue {
         this.$emit('openInVsCode');
     }
 
-    // reset position
-    // change tags
-    // open in vscode
-    // size
+    async moveToFile() {
+        const result = await showSaveDialog();
+        if (result) {
+            this.$emit('moveToFile', result);
+        }
+    }
 }
 
 </script>
@@ -238,20 +369,44 @@ export default class Sidebar extends Vue {
     .sidebar-outer {
         height: 100%;
         width: 450px;
-        overflow: auto;
-        overflow-x: hidden;
+        overflow: overlay;
         color: #FFF;
         padding: 20px;
         position: relative;
+
+        &::-webkit-scrollbar {
+            width: 5px;
+            height: 8px;
+            background-color: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0);
+        }
+
+        &:hover::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .2);
+        }        
     }
 
     .titlebar {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         
         h3 {
             flex: 1;
             margin: 0;
+        }
+
+        .passages {
+            flex: 1;
+            padding-top: 4px;
+        }
+
+        code {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
         }
     }
 
@@ -320,6 +475,36 @@ export default class Sidebar extends Vue {
             &:hover {
                 color: #FFF;
                 text-decoration: underline;
+            }
+        }
+    }
+
+    .linksTableContainer {
+        position: relative;
+        padding-bottom: 15px;
+        overflow: hidden;
+        transition: max-height .2s ease-in-out;
+
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(transparent, rgb(16, 22, 25));
+            transition: opacity .2s ease-in-out;
+        }
+
+        &:not(:hover) {
+            max-height: 10em !important;
+        }
+        &:hover {
+            max-height: none;
+
+            &::before {
+                opacity: 0;
             }
         }
     }
@@ -482,7 +667,12 @@ export default class Sidebar extends Vue {
         background-color: transparent;
         color: #FFF;
 
-        &.active,
+        &.size-some {
+            background-color: rgba(255, 255, 255, .5);
+            color: #000;
+        }
+
+        &.size-every,
         &:hover {
             background-color: #FFF;
             color: #000;

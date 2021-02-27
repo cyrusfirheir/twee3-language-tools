@@ -13,6 +13,7 @@ export const parseRaw = (passageIn: RawPassage): Passage => {
   return {
     origin: passageIn.origin,
     range: passageIn.range,
+	stringRange: passageIn.stringRange,
     filename: passageIn.origin.path.substring(lastIndex + 1),
     path: passageIn.origin.path.substring(0, lastIndex),
     name: passageIn.name,
@@ -20,6 +21,7 @@ export const parseRaw = (passageIn: RawPassage): Passage => {
     linksToNames: passageIn.linksToNames,
     position: position,
     size: size,
+    drawPosition: null,
     originalPosition: { ...position },
     originalSize: { ...size },
     originalTags: [...passageIn.tags],

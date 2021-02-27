@@ -21,8 +21,8 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 :: StoryData
 {
 	"ifid": "<ifid here>",
-	"format": "<story format>",
-	"format-version": "<story format version>"
+	"format": "<story format here, i.e. 'SugarCube'>",
+	"format-version": "<story format version here, i.e. '2.34.1'>"
 }
 ```
 
@@ -33,19 +33,27 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 ### Twee
 - Syntax highlighting.  
 
-- Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default) and search for "IFID".  
+- Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> or <kbd>F1</kbd> by default) and search for "IFID".  
 
 - A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  
 
     ![Passage List](https://imgur.com/3WObntl.png)  
 
-- A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar. Currently implemented features:  
-	- Snap to grid (button on top-left.)  
-	- Arrows to linked passages.  
-	- Passage tags, position, and size editing via a sidebar. Changes can be saved to file.  
-
+- A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
+	- Currently implemented features:  
+		- Snap to grid (button on top-left.)  
+		- Arrows to linked passages.  
+		- Passage tags, position, and size editing via a sidebar. Changes can be saved to file.  
+		- Multi-select, and thereby mass editing of tags, position, and size.  
+		- Ability to move passages across files.
+		
+	- Usage:
+		- Use the middle-mouse button, or hold down <kbd>Shift</kbd> while dragging the mouse to pan the map grid.
+		- Scroll the mousewheel or stretch/pinch on trackpad to zoom in/out.
+		- Hold <kbd>Ctrl/Cmd</kbd> while selecting to add new passages to selection, or remove already added passages from it.
 
 	![Story Map](https://imgur.com/pjtlOrC.png)
+
 
 ### Chapbook
 *(id: `chapbook-1`)*

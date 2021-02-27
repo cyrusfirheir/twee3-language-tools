@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 
-import * as socketio from 'socket.io';
+import * as socketio from "socket.io";
 
-import { OpenPassageParams, Passage } from './tree-view';
+import { Passage, PassageRange, PassageStringRange } from "../passage";
+import { writeFile } from "../file-ops";
 
 export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
@@ -14,9 +15,9 @@ export function getLinkedPassageNames(passageContent: string): string[] {
 	});
 };
 
-export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, client: socketio.Socket) {
+export async function sendPassageDataToClient(context: vscode.ExtensionContext, client: socketio.Socket) {
 	let storyData = {};
-	const rawPassages = ctx.workspaceState.get("passages", []) as Passage[];
+	const rawPassages = context.workspaceState.get("passages", []) as Passage[];
 	const passagePromises = rawPassages.map(async (passage) => {
 		const passageContent = await passage.getContent();
 		let linksToNames: string[] = [];
@@ -35,6 +36,11 @@ export async function sendPassageDataToClient(ctx: vscode.ExtensionContext, clie
 				endLine: passage.range.end.line,
 				endCharacter: passage.range.end.character,
 			},
+			stringRange: {
+				start: passage.stringRange.start,
+				endHeader: passage.stringRange.endHeader,
+				end: passage.stringRange.end
+			},
 			name: passage.name,
 			tags: passage.tags,
 			meta: passage.meta,
@@ -50,7 +56,8 @@ export type Vector = { x: number; y: number; };
 export type UpdatePassage = {
 	name: string;
 	origin: { full: string; path: string; root: string; };
-	range: OpenPassageParams["range"];
+	range: PassageRange;
+	stringRange: PassageStringRange;
 	position: Vector;
 	size: Vector;
 	tags?: string[]
@@ -65,9 +72,11 @@ export async function updatePassages(passages: UpdatePassage[]) {
 
 		const filePassages = passages.filter(el => el.origin.full === file);
 		for (const passage of filePassages) {
-			const p = new Passage(passage.origin, new vscode.Range(
+			const p = new Passage(passage.name, new vscode.Range(
 				passage.range.startLine, passage.range.startCharacter, passage.range.endLine, passage.range.endCharacter
-			), passage.name, vscode.TreeItemCollapsibleState.None);
+			), {
+				start: passage.stringRange.start, endHeader: passage.stringRange.endHeader, end: passage.stringRange.end
+			}, passage.origin, vscode.TreeItemCollapsibleState.None);
 			
 			const header = await p.getHeader();
 			
@@ -80,6 +89,6 @@ export async function updatePassages(passages: UpdatePassage[]) {
 			);
 		}
 
-		await vscode.workspace.fs.writeFile(doc.uri, Buffer.from(edited));
+		await writeFile(doc.uri.path, edited);
 	}
 }

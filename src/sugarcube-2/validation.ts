@@ -3,7 +3,7 @@
         Such as: Arguments, Parameters, Passages, and so on.
 */
 
-import { Passage } from "../tree-view";
+import { Passage } from "../passage";
 
 // SugarCube has more complex checks for these, but we're only supporting VSCode and assume its
 // whitespace handling is sane.

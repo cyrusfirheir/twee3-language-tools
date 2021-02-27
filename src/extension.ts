@@ -1,27 +1,21 @@
-// Imports
-//#region 
+//#region Imports
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
-import * as glob from 'glob';
-
-import express from 'express';
-import path from 'path';
-import open from 'open';
-import { Server } from 'http';
-import * as socketio from 'socket.io';
 
 import { parseText } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
-import { tweeProjectConfig, changeStoryFormat } from './tweeProject';
-import { updatePassages, sendPassageDataToClient } from "./socket";
+import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 
-import { PassageListProvider, Passage, jumpToPassage } from './tree-view';
+import { sendPassageDataToClient } from "./story-map/socket";
+import { startUI, stopUI, storyMapIO } from "./story-map/index";
+
+import { fileGlob, MoveData } from './file-ops';
+
+import { PassageListProvider, Passage, jumpToPassage } from './passage';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 //#endregion
-
-let ctx: vscode.ExtensionContext;
 
 const tokenTypes = new Map<string, number>();
 const legend = (function () {
@@ -33,8 +27,10 @@ const legend = (function () {
 })();
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+	constructor(private context: vscode.ExtensionContext) { }
+
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const allTokens = await parseText(ctx, document);
+		const allTokens = await parseText(this.context, document);
 		const builder = new vscode.SemanticTokensBuilder();
 		allTokens.forEach((_token) => {
 			builder.push(_token.line, _token.startCharacter, _token.length, this._encodeTokenType(_token.tokenType));
@@ -56,11 +52,9 @@ const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
 };
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
 
-	ctx = context;
-	
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 
@@ -73,19 +67,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	await start();
-
-	function fileGlob() {
-		let include: string[] = vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("include", []);
-		if (!include.length) include.push("**");
-		let exclude: string[] = vscode.workspace.getConfiguration("twee3LanguageTools.directories").get("exclude", []);
-		let files: string[] = [];
-		vscode.workspace.workspaceFolders?.forEach(el => {
-			include.forEach(elem => {
-				files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude })];
-			})
-		});
-		return files;
-	}
 
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
@@ -104,59 +85,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, true);
 	}
 
-	interface storyMapIO {
-		client: socketio.Socket | undefined;
-		server: Server | undefined;
-		disconnectTimeout: NodeJS.Timeout | undefined;
-	}
 	const storyMap: storyMapIO = { client: undefined, server: undefined, disconnectTimeout: undefined };
 
-	function startUI() {
-		const port = 42069;
+	const startUIWrapper = () => startUI(ctx, storyMap);
+	const stopUIWrapper = () => stopUI(storyMap);
 
-		const hostUrl = `http://localhost:${port}/`
-		const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
-
-		const app = express();
-		app.use(express.static(storyMapPath));
-
-		storyMap.server = new Server(app);
-		storyMap.server.listen(port, () => console.log(`Server connected on ${hostUrl}`));
-
-		const io = new socketio.Server(storyMap.server, { cors: { origin: 'http://localhost:8080' } });
-		io.on('connection', (client: socketio.Socket) => {
-			if (storyMap.client) storyMap.client.disconnect(true);
-			if (storyMap.disconnectTimeout) clearTimeout(storyMap.disconnectTimeout);
-
-			storyMap.client = client;
-			console.log('client connected');
-			sendPassageDataToClient(ctx, client);
-
-			client.on('open-passage', jumpToPassage);
-			client.on('update-passages', updatePassages);
-			client.on('disconnect', () => {
-				console.log('client disconnected');
-				storyMap.client = undefined;
-				storyMap.disconnectTimeout = setTimeout(() => {
-					if (!storyMap.client) stopUI();
-				}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
-			});
-		});
-		open(hostUrl);
-		vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
-	}
-
-	function stopUI() {
-		storyMap.client?.disconnect(true);
-		storyMap.server?.close(() => vscode.commands.executeCommand('setContext', 't3lt.storyMap', false));
-	}
-
-	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUI);
-	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUI);
+	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUIWrapper);
+	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUIWrapper);
 
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand,
-		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(), legend)
+		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(ctx), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
 			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
@@ -186,17 +125,19 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.window.onDidChangeActiveTextEditor(editor => {
-			if (editor) {
+			if (editor && /^twee3.*/.test(editor.document.languageId)) {
 				updateDiagnostics(ctx, editor.document, collection);
 			}
 		})
 		,
 		vscode.workspace.onDidOpenTextDocument(document => {
+			if (!/^twee3.*/.test(document.languageId)) return;
 			changeStoryFormat(document);
 			updateDiagnostics(ctx, document, collection);
 		})
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
+			if (!/^twee3.*/.test(e.document.languageId)) return;
 			updateDiagnostics(ctx, e.document, collection);
 		})
 		,
@@ -206,7 +147,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					vscode.workspace.openTextDocument(file).then(doc => {
 						changeStoryFormat(doc);
 						updateDiagnostics(ctx, doc, collection);
-					})
+					});
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
@@ -244,7 +185,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
 				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
-				passageListProvider.refresh()
+				passageListProvider.refresh();
 			});
 		})
 		,
@@ -270,6 +211,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidSaveTextDocument(async document => {
+			if (!/^twee3.*/.test(document.languageId)) return;
 			tweeProjectConfig(document);
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();

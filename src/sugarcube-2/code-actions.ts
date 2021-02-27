@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
+import { writeFile } from '../file-ops';
 import { macroRegex, macroDef, macro, collectCache } from './macros';
 
 export class EndMacro implements vscode.CodeActionProvider {
@@ -72,7 +73,7 @@ export const unrecognizedMacroFixCommand = async (name: string, def: macroDef) =
 			const yml = yaml.parse(doc.getText());
 			yml["sugarcube-2"].macros = Object.assign(yml["sugarcube-2"].macros, macros);
 			const ymlString = yaml.stringify(yml);
-			await vscode.workspace.fs.writeFile(files[0], Buffer.from(ymlString, "utf-8"));
+			await writeFile(files[0].path, ymlString);
 		} catch (ex) {
 			vscode.window.showErrorMessage(`\nCouldn't parse '${files[0]}'!\n\n${ex}\n\n`);
 		}
@@ -82,6 +83,6 @@ export const unrecognizedMacroFixCommand = async (name: string, def: macroDef) =
 				macros
 			}
 		});
-		await vscode.workspace.fs.writeFile(vscode.Uri.file(fsPath + "/t3lt.twee-config.yml"), Buffer.from(ymlString, "utf-8"));
+		await writeFile(fsPath + "/t3lt.twee-config.yml", ymlString);
 	}
 };
