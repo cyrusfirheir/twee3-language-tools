@@ -498,7 +498,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 
 	collected.macros.forEach(el => {
 		let cur: macroDef;
-		if (el.name.startsWith("end") && macroDefinitions[el.name.substring(3)]) {
+		if (el.name.startsWith("end") && macroDefinitions[el.name.substring(3)]?.container) {
 			cur = macroDefinitions[el.name.substring(3)];
 			el.open = false;
 		} else {
