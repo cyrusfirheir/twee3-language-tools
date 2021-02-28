@@ -2,6 +2,16 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.11.2
+
+Fixes:
+
+- Broken `Add to definitions` quickfix for `end...` *named* macros.
+
+- Broken Passage header updates when saving position/size/tags from Story map to file.
+
+---
+
 ## v0.11.0
 
 Adds:
@@ -70,7 +80,7 @@ Adds:
 
 - A story map UI which opens in the browser (thanks to @Goctionni). Still in early stages, so feedback is welcome.
 
-- SugarCube:
+- SugarCube 2:
 	- Macro argument validation (thanks to @MinusGix).
 
 ---
@@ -79,7 +89,7 @@ Adds:
 
 Adds:
 
-- SugarCube: (both thanks to @MinusGix)
+- SugarCube 2: (both thanks to @MinusGix)
 	- Macro documentation on hover.  
 	- Diagnostics for invalid argument syntax in macros.
 
@@ -159,7 +169,7 @@ Fixes:
 
 Adds:
 
-- SugarCube:
+- SugarCube 2:
 	- The following diagnostics:
 		- *`Error`* Container macros with opening tags but no closes (and vice-versa) for the core SugarCube library,
 		- *`Warning`* Deprecated macros from the core SugarCube library,
@@ -172,7 +182,7 @@ Adds:
 
 Adds:
 
-- SugarCube:
+- SugarCube 2:
     - JS syntax highlighting inside the `<<run>>` and `<<print>>` macros.
 	- Container macros now have decorators for their closing tag. See [Readme](README.md#sugarcube) for more details.
 

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { writeFile } from '../file-ops';
+import { readFile, writeFile } from '../file-ops';
 import { macroRegex, macroDef, macro, collectCache } from './macros';
 
 export class EndMacro implements vscode.CodeActionProvider {
@@ -35,10 +35,15 @@ export class Unrecognized implements vscode.CodeActionProvider {
 		context.diagnostics
 			.filter(el => el.code === 100)
 			.forEach(el => {
-				const macroName = document.getText(el.range).replace(macroRegex, "$2");
-				if (!newMacros.has(macroName)) newMacros.set(macroName, {
-					name: macroName
-				});
+				const execArr = macroRegex.exec(document.getText(el.range));
+				if (execArr) {
+					const macroName = (execArr[1] === "end" ? "end" : "") + execArr[2];
+
+					if (!newMacros.has(macroName)) newMacros.set(macroName, {
+						name: macroName
+					});
+				}
+				
 			});
 
 		return Array.from(newMacros).map(el => this.createCommandCodeAction(el[1], collected));
@@ -68,9 +73,8 @@ export const unrecognizedMacroFixCommand = async (name: string, def: macroDef) =
 
 	const files = await vscode.workspace.findFiles("t3lt.twee-config.yml", "**/node_modules/**");
 	if (files.length) {
-		const doc = await vscode.workspace.openTextDocument(files[0]);
 		try {
-			const yml = yaml.parse(doc.getText());
+			const yml = yaml.parse(await readFile(files[0].fsPath));
 			yml["sugarcube-2"].macros = Object.assign(yml["sugarcube-2"].macros, macros);
 			const ymlString = yaml.stringify(yml);
 			await writeFile(files[0].path, ymlString);

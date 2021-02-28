@@ -6,7 +6,7 @@ import open from 'open';
 import { Server } from 'http';
 import * as socketio from 'socket.io';
 
-import { updatePassages, sendPassageDataToClient } from "./socket";
+import { updatePassages, sendPassageDataToClient, UpdatePassage } from "./socket";
 import { getWorkspace, MoveData, moveToFile } from "../file-ops";
 
 import { jumpToPassage } from '../passage';
@@ -40,7 +40,10 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 
 		client
 			.on('open-passage', jumpToPassage)
-			.on('update-passages', updatePassages)
+			.on('update-passages', async (passages: UpdatePassage[]) => {
+				await updatePassages(ctx, passages);
+				sendPassageDataToClient(ctx, client);
+			})
 			.on('disconnect', () => {
 				console.log('client disconnected');
 				storyMap.client = undefined;

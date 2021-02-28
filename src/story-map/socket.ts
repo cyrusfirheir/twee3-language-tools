@@ -3,7 +3,8 @@ import * as vscode from "vscode";
 import * as socketio from "socket.io";
 
 import { Passage, PassageRange, PassageStringRange } from "../passage";
-import { writeFile } from "../file-ops";
+import { readFile, writeFile } from "../file-ops";
+import { parseRawText } from "../parse-text";
 
 export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
@@ -63,12 +64,10 @@ export type UpdatePassage = {
 	tags?: string[]
 };
 
-export async function updatePassages(passages: UpdatePassage[]) {
+export async function updatePassages(ctx: vscode.ExtensionContext, passages: UpdatePassage[]) {
 	const files = [... new Set(passages.map(passage => passage.origin.full))];
 	for (const file of files) {
-		const doc = await vscode.workspace.openTextDocument(file);
-		await doc.save();
-		let edited = doc.getText();
+		let edited = await readFile(file);
 
 		const filePassages = passages.filter(el => el.origin.full === file);
 		for (const passage of filePassages) {
@@ -89,6 +88,11 @@ export async function updatePassages(passages: UpdatePassage[]) {
 			);
 		}
 
-		await writeFile(doc.uri.path, edited);
+		await writeFile(file, edited);
+		await parseRawText(ctx, {
+			text: edited,
+			uri: vscode.Uri.file(file),
+			languageId: "twee3"
+		});
 	}
 }
