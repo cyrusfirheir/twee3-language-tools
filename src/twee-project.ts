@@ -12,8 +12,10 @@ export function tweeProjectConfig(document: vscode.TextDocument) {
 	let formatInfo: any = undefined;
 	try {
 		formatInfo = JSON.parse(storydata.content);
-	} catch {
-		vscode.window.showErrorMessage("Malformed StoryData JSON!");
+		if (!formatInfo.format) throw new Error("Format name not found!");
+		if (!formatInfo["format-version"]) throw new Error("Format version not found!");
+	} catch (ex) {
+		vscode.window.showErrorMessage("Malformed StoryData JSON! - " + ex);
 		return;
 	}
 	let format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
@@ -22,10 +24,13 @@ export function tweeProjectConfig(document: vscode.TextDocument) {
 	if (format === "sugarcube-3") format = "sugarcube-2";
 	/* will be removed when v2 doesn't work for v3 anymore (>_<) */
 
-	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
-	if (config.get("current") !== format) {
-		config.update("current", format)
-			.then(() => vscode.window.showInformationMessage("Storyformat set to " + format));
+	if (vscode.workspace.asRelativePath(document.uri) !== document.uri.fsPath) {
+		/* file is inside the workspace */
+		const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
+		if (config.get("current") !== format) {
+			config.update("current", format)
+				.then(() => vscode.window.showInformationMessage("Storyformat set to " + format));
+		}
 	}
 };
 
