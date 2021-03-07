@@ -60,16 +60,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	function start() {
 		collection.clear();
-		return Promise.all([
-			ctx.workspaceState.update("passages", undefined),
-			vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").update("current", "")
-		]);
+		return ctx.workspaceState.update("passages", undefined);
 	}
 
 	await start();
-
+	
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
+			await changeStoryFormat(doc);
 			tweeProjectConfig(doc);
 			updateDiagnostics(ctx, doc, collection);
 			await parseText(ctx, doc);
