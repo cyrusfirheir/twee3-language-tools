@@ -512,7 +512,7 @@ export default class SaveToFile extends Vue {
         button {
             height: 40px;
             border: 0;
-            background-color: transparent;
+            background-color: rgba(255, 255, 255, .05);
             color: #FFF;
             padding: 0 20px;
             cursor: pointer;
@@ -520,12 +520,12 @@ export default class SaveToFile extends Vue {
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 
             &:hover {
-                background-color: #333;
+                background-color: rgba(255, 255, 255, .1);
             }
 
             &[disabled] {
                 pointer-events: none;
-                color: #444;
+                color: rgba(255, 255, 255, .3);
             }
         }
     }
