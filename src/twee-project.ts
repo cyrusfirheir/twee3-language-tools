@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { validate } from "uuid";
 import headsplit from "./headsplit";
 
 export const storyDataPassageHeaderRegex = /^::\s*StoryData\b/gm;
@@ -12,10 +13,21 @@ export function tweeProjectConfig(document: vscode.TextDocument) {
 	let formatInfo: any = undefined;
 	try {
 		formatInfo = JSON.parse(storydata.content);
-		if (!formatInfo.format) throw new Error("Format name not found!");
-		if (!formatInfo["format-version"]) throw new Error("Format version not found!");
-	} catch (ex) {
-		vscode.window.showErrorMessage("Malformed StoryData JSON! - " + ex);
+		
+		const errors: string[] = [];
+
+		if (!formatInfo.ifid) errors.push("IFID not found!");
+		else if (!validate(formatInfo.ifid)) errors.push("Invalid IFID!");
+
+		const storyDataErrorConfig = vscode.workspace.getConfiguration("twee3LanguageTools.twee-3.error.storyData");
+
+		if (!formatInfo.format && storyDataErrorConfig.get("format")) errors.push("Story Format name not found!");
+		if (!formatInfo["format-version"] && storyDataErrorConfig.get("formatVersion")) errors.push("Story Format version not found!");
+
+		if (errors.length) throw errors;
+	} catch (errors) {
+		if (errors instanceof Array) errors.forEach((err: string) => vscode.window.showErrorMessage("Malformed StoryData: " + err));
+		else vscode.window.showErrorMessage("Malformed StoryData JSON: " + errors.message);
 		return;
 	}
 	let format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
