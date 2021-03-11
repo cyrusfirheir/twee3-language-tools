@@ -42,8 +42,7 @@
 		"name": "include",
 		"description": "Outputs the contents of the passage with the given name, optionally wrapping it within an HTML element. May be called either with the passage name or with a link markup.\n\nUsage:\n\n```\n<<include passageName [elementName]>>\n<<include linkMarkup [elementName]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-include)",
 		"parameters": [
-			"passage |+ text",
-			"linkNoSetter |+ text"
+			"passage|linkNoSetter |+ text"
 		]
 	},
 	"nobr": {
@@ -245,7 +244,7 @@
 		"description": "Creates a number input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<numberbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-numberbox)",
 		"parameters": [
 			"text &+ number |+ 'autofocus'",
-			"text &+ number |+ passage |+ 'autofocus'"
+			"text &+ number |+ passage|linkNoSetter |+ 'autofocus'"
 		]
 	},
 	"radiobutton": {
@@ -267,7 +266,7 @@
 		"description": "Creates a text input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<textbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-textbox)",
 		"parameters": [
 			"text &+ text |+ 'autofocus'",
-			"text &+ text |+ passage |+ 'autofocus'"
+			"text &+ text |+ passage|linkNoSetter |+ 'autofocus'"
 		]
 	},
 	
@@ -442,8 +441,7 @@
 		"name": "goto",
 		"description": "Immediately forwards the player to the passage with the given name. May be called either with the passage name or with a link markup.\n\nUsage:\n\n```\n<<goto passageName>>\n<<goto linkMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-goto)",
 		"parameters": [
-			"passage",
-			"linkNoSetter"
+			"passage|linkNoSetter"
 		]
 	},
 	"repeat": {
@@ -515,8 +513,7 @@
 			"macro: <<include>>"
 		],
 		"parameters": [
-			"passage |+ text",
-			"linkNoSetter |+ text"
+			"passage|linkNoSetter |+ text"
 		]
 	},
 	"forget": {
