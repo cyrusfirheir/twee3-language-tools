@@ -5,32 +5,34 @@ import headsplit from "./headsplit";
 export const storyDataPassageHeaderRegex = /^::\s*StoryData\b/gm;
 export const storyDataPassageNameRegex = /StoryData\b.*/;
 
-export function tweeProjectConfig(document: vscode.TextDocument) {
+export function tweeProjectConfig(ctx: vscode.ExtensionContext, document: vscode.TextDocument) {
 	const raw = document.getText();
 	if (!storyDataPassageHeaderRegex.test(raw)) return;
-	const storydata = headsplit(raw, /^::(.*)/).find(el => storyDataPassageNameRegex.test(el.header));
-	if (!storydata?.content) return;
-	let formatInfo: any = undefined;
+	const storydataPassage = headsplit(raw, /^::(.*)/).find(el => storyDataPassageNameRegex.test(el.header));
+	if (!storydataPassage?.content) return;
+	let storydata: any = undefined;
 	try {
-		formatInfo = JSON.parse(storydata.content);
+		storydata = JSON.parse(storydataPassage.content);
 		
 		const errors: string[] = [];
 
-		if (!formatInfo.ifid) errors.push("IFID not found!");
-		else if (!validate(formatInfo.ifid)) errors.push("Invalid IFID!");
+		if (!storydata.ifid) errors.push("IFID not found!");
+		else if (!validate(storydata.ifid)) errors.push("Invalid IFID!");
 
 		const storyDataErrorConfig = vscode.workspace.getConfiguration("twee3LanguageTools.twee-3.error.storyData");
 
-		if (!formatInfo.format && storyDataErrorConfig.get("format")) errors.push("Story Format name not found!");
-		if (!formatInfo["format-version"] && storyDataErrorConfig.get("formatVersion")) errors.push("Story Format version not found!");
+		if (!storydata.format && storyDataErrorConfig.get("format")) errors.push("Story Format name not found!");
+		if (!storydata["format-version"] && storyDataErrorConfig.get("formatVersion")) errors.push("Story Format version not found!");
 
 		if (errors.length) throw errors;
+
+		ctx.workspaceState.update("StoryData", storydata);
 	} catch (errors) {
 		if (errors instanceof Array) errors.forEach((err: string) => vscode.window.showErrorMessage("Malformed StoryData: " + err));
 		else vscode.window.showErrorMessage("Malformed StoryData JSON: " + errors.message);
 		return;
 	}
-	let format = formatInfo.format.toLowerCase() + "-" + formatInfo["format-version"].split(".")[0];
+	let format = storydata.format.toLowerCase() + "-" + storydata["format-version"].split(".")[0];
 
 	/* SC v3 - v2 alias hook */
 	if (format === "sugarcube-3") format = "sugarcube-2";

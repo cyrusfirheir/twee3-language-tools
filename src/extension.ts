@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 
-import { parseText } from './parse-text';
+import { parseText, DocumentSemanticTokensProvider, legend } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
 import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 
@@ -17,37 +17,6 @@ import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 //#endregion
 
-const tokenTypes = new Map<string, number>();
-const legend = (function () {
-	const tokenTypesLegend: string[] = [
-		"startToken", "passageName", "passageTags", "passageMeta", "special", "comment"
-	];
-	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
-	return new vscode.SemanticTokensLegend(tokenTypesLegend);
-})();
-
-class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
-	constructor(private context: vscode.ExtensionContext) { }
-
-	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const allTokens = await parseText(this.context, document);
-		const builder = new vscode.SemanticTokensBuilder();
-		allTokens.forEach((_token) => {
-			builder.push(_token.line, _token.startCharacter, _token.length, this._encodeTokenType(_token.tokenType));
-		});
-		return builder.build();
-	}
-
-	private _encodeTokenType(tokenType: string): number {
-		if (tokenTypes.has(tokenType)) {
-			return tokenTypes.get(tokenType)!;
-		} else if (tokenType === 'notInLegend') {
-			return tokenTypes.size + 2;
-		}
-		return 0;
-	}
-}
-
 const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
 };
@@ -57,6 +26,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
+
+	if (!ctx.workspaceState.get("StoryData")) {
+		await ctx.workspaceState.update("StoryData", {});
+	}
 
 	function start() {
 		collection.clear();
@@ -68,7 +41,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			await changeStoryFormat(doc);
-			tweeProjectConfig(doc);
+			tweeProjectConfig(ctx, doc);
 			updateDiagnostics(ctx, doc, collection);
 			await parseText(ctx, doc);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
@@ -210,7 +183,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidSaveTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
-			tweeProjectConfig(document);
+			tweeProjectConfig(ctx, document);
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);

@@ -19,6 +19,7 @@ export interface RawDocument {
 }
 
 export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
+	const StoryData: any = context.workspaceState.get("StoryData", {});
 	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin.full !== document.uri.path);
 	const newPassages: Passage[] = [];
 
@@ -131,11 +132,15 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 			passage.meta = passageMeta;
 
 			let icon = "", color = "";
-	
-			switch (passageName) {
-				case "Start": icon = "rocket"; color = "charts.yellow"; break;
-				case "StoryTitle": icon = "mention"; color = "charts.orange"; break;
-				case "StoryData": icon = "json"; color = "charts.purple"; break;
+
+			if (!StoryData?.start && passageName === "Start" || passageName === StoryData?.start) {
+				icon = "rocket";
+				color = "charts.yellow";
+			} else {
+				switch (passageName) {
+					case "StoryTitle": icon = "mention"; color = "charts.orange"; break;
+					case "StoryData": icon = "json"; color = "charts.purple"; break;
+				}
 			}
 			if (passage.tags.includes("script")) {
 				icon = "code";
@@ -171,4 +176,35 @@ export async function parseText(context: vscode.ExtensionContext, document: vsco
 		uri: document.uri,
 		languageId: document.languageId
 	}, provider);
+}
+
+const tokenTypes = new Map<string, number>();
+export const legend = (function () {
+	const tokenTypesLegend: string[] = [
+		"startToken", "passageName", "passageTags", "passageMeta", "special", "comment"
+	];
+	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
+	return new vscode.SemanticTokensLegend(tokenTypesLegend);
+})();
+
+export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+	constructor(private context: vscode.ExtensionContext) { }
+
+	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+		const allTokens = await parseText(this.context, document);
+		const builder = new vscode.SemanticTokensBuilder();
+		allTokens.forEach((_token) => {
+			builder.push(_token.line, _token.startCharacter, _token.length, this._encodeTokenType(_token.tokenType));
+		});
+		return builder.build();
+	}
+
+	private _encodeTokenType(tokenType: string): number {
+		if (tokenTypes.has(tokenType)) {
+			return tokenTypes.get(tokenType)!;
+		} else if (tokenType === 'notInLegend') {
+			return tokenTypes.size + 2;
+		}
+		return 0;
+	}
 }
