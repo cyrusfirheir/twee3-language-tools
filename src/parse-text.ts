@@ -25,23 +25,34 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 
 	const r: IParsedToken[] = [];
 
-	const lineIndices: number[] = [];
-	let lastIndex = 0;
+	const lineIndices: number[] = [0];
+	let lastIndex = document.text.indexOf("\n");
+
+	let firstCharNotNewline = lastIndex > 0;
+
 	while (lastIndex !== -1) {
+		if (firstCharNotNewline) {
+			lastIndex = -1;
+			lineIndices.pop();
+			firstCharNotNewline = false;
+		}
+
 		const i = lineIndices.length;
 		lineIndices.push(lastIndex);
 
-		const curStart = lastIndex === 0 ? 0 : lastIndex + 1;
+		const curStart = lastIndex + 1;
 		let curEnd = document.text.indexOf("\n", curStart);
+
 		lastIndex = curEnd;
 
 		if (curEnd === -1) curEnd = document.text.length;
+
 		const line = document.text.slice(curStart, curEnd);
-		
+
 		let escaped = line.replace(/\\./g, "ec"); // escaped characters
-		
+
 		let passageName: string = "", passageTags: string[] = [], passageMeta: any = null;
-		
+
 		const execArr = passageHeaderRegex.exec(escaped);
 		if (execArr) {
 			const reStartToken = execArr[1] || "";
@@ -66,7 +77,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 					line: i, startCharacter: (reTags + _metaString).length - 1, length: 1, tokenType: "comment", tokenModifiers: []
 				});
 			}
-			
+
 			let _tagString = line.substring(reName.length, reTags.length).trim();
 			if (_tagString) {
 				let _tags = _tagString.substring(1, _tagString.length - 1).trim();
@@ -90,7 +101,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 					line: i, startCharacter: (reName + _tagString).length - 1, length: 1, tokenType: "comment", tokenModifiers: []
 				});
 			}
-			
+
 			passageName = line.substring(reStartToken.length, reName.length).trim();
 			if (!passageName) {
 				// console.error("No Passage name!");
@@ -99,7 +110,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				// console.error("Unescaped meta character in Passage name!");
 				continue;
 			}
-			const specialName = [ "StoryTitle", "StoryData", "Start" ].includes(passageName);
+			const specialName = ["StoryTitle", "StoryData", "Start"].includes(passageName);
 			r.push({
 				line: i, startCharacter: 0, length: 2, tokenType: "startToken", tokenModifiers: []
 			}, {
@@ -128,7 +139,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 
 			passage.tags = passageTags;
 			passage.description = passage.tags.join(", ");
-	
+
 			passage.meta = passageMeta;
 
 			let icon = "", color = "";
@@ -149,13 +160,13 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				icon = "paintcan";
 				color = "charts.green";
 			}
-	
+
 			passage.iconPath = icon ? new vscode.ThemeIcon(icon, color ? new vscode.ThemeColor(color) : undefined) : "";
-	
+
 			newPassages.push(passage);
 		}
 	}
-	
+
 	let lastPassage = newPassages.pop();
 	if (lastPassage) {
 		lastPassage.range = new vscode.Range(lastPassage.range.start, new vscode.Position(lineIndices.length, 0));
