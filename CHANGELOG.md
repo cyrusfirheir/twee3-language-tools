@@ -2,6 +2,14 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.12.0
+
+Adds:
+
+- (Experimental) Passage Auto-packer.
+
+---
+
 ## v0.11.2
 
 Fixes:

@@ -179,6 +179,14 @@ Manual settings:
 
 ## **Experimental Stuff**
 
+### Passage Auto-packer
+
+Uses a simple packing algorithm to space out passages into clusters based on the file they originate from.
+
+To use, search for `Pack passages to clusters` from the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> or <kbd>F1</kbd> by default).
+
+---
+
 ### SugarCube-2: Self-closing macros
 
 ***NOTE:*** SugarCube 2 does *NOT* have a self-closing syntax for container macros, this feature is just to support custom passage processing functions.

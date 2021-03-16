@@ -64,6 +64,31 @@ export type UpdatePassage = {
 	tags?: string[]
 };
 
+export function toUpdatePassage(passage: Passage): UpdatePassage {
+	const sizeArr: number[] = passage.meta.size?.split(",") || [100, 100];
+	const posArr: number[] = passage.meta.position?.split(",") || [0, 0];
+	return {
+		origin: passage.origin,
+		name: passage.name,
+		tags: passage.tags,
+		stringRange: passage.stringRange,
+		range: {
+			startLine: passage.range.start.line,
+			startCharacter: passage.range.start.character,
+			endLine: passage.range.end.line,
+			endCharacter: passage.range.end.character
+		},
+		size: {
+			x: sizeArr.length === 2 ? sizeArr[0] : 100,
+			y: sizeArr.length === 2 ? sizeArr[1] : 100
+		},
+		position: {
+			x: posArr.length === 2 ? posArr[0] : 0,
+			y: posArr.length === 2 ? posArr[1] : 0
+		}
+	};
+}
+
 export async function updatePassages(ctx: vscode.ExtensionContext, passages: UpdatePassage[]) {
 	const files = [... new Set(passages.map(passage => passage.origin.full))];
 	for (const file of files) {

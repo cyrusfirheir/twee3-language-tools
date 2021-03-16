@@ -6,7 +6,7 @@ import { parseText, DocumentSemanticTokensProvider, legend } from './parse-text'
 import { updateDiagnostics } from './diagnostics';
 import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 
-import { sendPassageDataToClient } from "./story-map/socket";
+import { sendPassageDataToClient, toUpdatePassage, updatePassages } from "./story-map/socket";
 import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
 import { fileGlob } from './file-ops';
@@ -15,6 +15,7 @@ import { PassageListProvider, Passage, jumpToPassage } from './passage';
 
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
+import { packer } from './story-map/packer';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -197,6 +198,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("twee3LanguageTools.refreshDiagnostics", () => {
 			const doc = vscode.window.activeTextEditor?.document;
 			if (doc) updateDiagnostics(ctx, doc, collection);
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passage.pack", async () => {
+			const proceed = await vscode.window.showWarningMessage(
+				`This action replaces position data for all passages in workspace. It will also overwrite any unsaved changes.`,
+				"Proceed"
+			);
+			if (proceed === "Proceed") {
+				const passages = ctx.workspaceState.get("passages") as Passage[];
+				updatePassages(ctx, packer(passages).map((p: Passage) => toUpdatePassage(p)));
+			}
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passage.jump", (item: Passage) => {
