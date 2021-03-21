@@ -111,6 +111,7 @@
 <<prepend>><</prepend>>
 <<replace>><</replace>>
 
+<<done>><</done>>
 <<goto>>
 <<repeat>>
 	<<stop>>

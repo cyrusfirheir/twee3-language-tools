@@ -2,6 +2,19 @@
 
 Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.12.2
+
+Adds:
+
+- SugarCube 2:
+	- `<<done>>` macro definition.
+
+Updates:
+
+- (Experimental) [Example passage pre-processor](README.md#sugarcube-2-self-closing-macros) for the SugarCube 2 self-closing macro syntax.
+
+---
+
 ## v0.12.0
 
 Adds:

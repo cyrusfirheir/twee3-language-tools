@@ -436,7 +436,12 @@
 		"parameters": []
 	},
 
-
+	"done": {
+		"name": "done",
+		"container": true,
+		"description": "Silently executes its contents when the incoming passage is done rendering and has been added to the page. Generally, only really useful for running code that needs to manipulate elements from the incoming passage, since you must wait until they've been added to the page.\n\nUsage:\n\n```\n<<done>> … <</done>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-done)",
+		"skipArgs": true
+	},
 	"goto": {
 		"name": "goto",
 		"description": "Immediately forwards the player to the passage with the given name. May be called either with the passage name or with a link markup.\n\nUsage:\n\n```\n<<goto passageName>>\n<<goto linkMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-goto)",

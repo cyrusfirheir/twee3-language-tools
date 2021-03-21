@@ -194,7 +194,11 @@ To use, search for `Pack passages to clusters` from the command palette (<kbd>Ct
 Example of such a function which replaces self-closed instances with the actual closing macro tag (i.e. `<<macro />>` with `<<macro>><</macro>>`):
 ```js
 Config.passages.onProcess = function(p) {
-    return p.text.replace(/<<([A-Za-z][\w-]*|[=-])((?:\s*)((?:(?:`(?:\\.|[^`\\])*`)|(?:"(?:\\.|[^"\\])*")|(?:'(?:\\.|[^'\\])*')|(?:\[(?:[<>]?[Ii][Mm][Gg])?\[[^\r\n]*?\]\]+)|[^>]|(?:>(?!>)))*))\/>>/gm, "<<$1$2>><</$1>>");
+	const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
+
+	const selfCloseMacroRegex = new RegExp(`<<(${macroNamePattern})((?:\\s*)(?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\])*\`)|(?:"(?:\\\\.|[^"\\\\])*")|(?:'(?:\\\\.|[^'\\\\])*')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)\\/>>`, 'gm');
+
+	return p.text.replace(selfCloseMacroRegex, "<<$1$2>><</$1>>");
 };
 ```
 
