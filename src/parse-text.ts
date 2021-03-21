@@ -28,14 +28,17 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 	const lineIndices: number[] = [0];
 	let lastIndex = document.text.indexOf("\n");
 
-	let firstCharNotNewline = lastIndex > 0;
+	const firstLineOnlyLine = lastIndex === -1;
+	const firstCharNotNewline = lastIndex > 0;
+	
+	let firstPass = firstLineOnlyLine || firstCharNotNewline;
+	if (firstPass) {
+		lastIndex = -1;
+		lineIndices.pop();
+	}
 
-	while (lastIndex !== -1) {
-		if (firstCharNotNewline) {
-			lastIndex = -1;
-			lineIndices.pop();
-			firstCharNotNewline = false;
-		}
+	while (firstPass || lastIndex !== -1) {
+		firstPass = false;
 
 		const i = lineIndices.length;
 		lineIndices.push(lastIndex);
