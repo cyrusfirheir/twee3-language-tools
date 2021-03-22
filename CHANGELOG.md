@@ -41,7 +41,7 @@ Adds:
 	- Passage multi-select and the ability to mass edit position, size, and tags.
 	- Move to file feature in story map.
 
-	![move-to-file](https://imgur.com/0JRVDA7.png)
+	![move-to-file](docs/images/twee-storymap-move2file.png)
 
 ---
 
@@ -83,7 +83,7 @@ Adds:
 
 - A sidebar to the storymap.
 	
-	![Sidebar](https://imgur.com/8XkfJVs.png)
+	![Sidebar](docs/images/twee-storymap-sidebar.png)
 
 ---
 
