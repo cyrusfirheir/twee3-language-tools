@@ -37,7 +37,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
 - A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  
 
-    ![Passage List](https://imgur.com/3WObntl.png)  
+    ![Passage List](docs/images/twee-passage-list.png)  
 
 - A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
 
@@ -53,40 +53,40 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 		- Scroll the mousewheel or stretch/pinch on trackpad to zoom in/out.
 		- Hold <kbd>Ctrl/Cmd</kbd> while selecting to add new passages to selection, or remove already added passages from it.
 
-	![Story Map](https://imgur.com/pjtlOrC.png)
+	![Story Map](docs/images/twee-storymap.png)
 
 
 ### Chapbook
 *(id: `chapbook-1`)*
 - Syntax highlighting.  
-    ![Chapbook syntax](https://imgur.com/0SmpnBT.png)
+    ![Chapbook syntax](docs/images/hl-cb1.png)
 
 ### Harlowe
 *(id: `harlowe-3`)*
 - Syntax highlighting.  
-    ![Harlowe syntax](https://imgur.com/XTWOyHP.png)
+    ![Harlowe syntax](docs/images/hl-h3.png)
 
 ### SugarCube
 *(id: `sugarcube-2`)*
 - Syntax highlighting.  
-    ![SugarCube syntax](https://imgur.com/9Z94sM4.png)
+    ![SugarCube syntax](docs/images/hl-sc2.png)
 - Macro documentation on hover. (Contributed by @MinusGix) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube))
-	![Screenshot](https://imgur.com/6Q2AR83.png)
+	![Screenshot](docs/images/sc2-hovertips.png)
 - Container macro pair highlights.
-	![SC macro pairs](https://imgur.com/qjcr3ZK.png)
+	![SC macro pairs](docs/images/sc2-macro-tag-matching.png)
 - Diagnostics:
 	- Macros with opening tags but no closes (and vice-versa):
-		- [Screenshot - diagnostics](https://imgur.com/ReJBG4p.png)
+		- [Screenshot - diagnostics](docs/images/sc2-unclosed-macro.png)
 	- Deprecated macros:
-		- [Screenshot - diagnostic](https://imgur.com/KS14xHZ.png)
+		- [Screenshot - diagnostic](docs/images/sc2-deprecated-macro.png)
 	- Deprecated `<<end...>>` closing macros:
-		- [Screenshot - diagnostic](https://imgur.com/VaXZorc.png)
-		- [Screenshot - quick fix](https://imgur.com/A3MAZG2.png)
+		- [Screenshot - diagnostic](docs/images/sc2-endvariant-macro.png)
+		- [Screenshot - quick fix](docs/images/sc2-endvariant-quickfix.png)
 	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
-		- [Screenshot - diagnostic](https://imgur.com/gv3OJ4i.png)
-		- [Screenshot - quick fix](https://imgur.com/RX5ztR8.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
+		- [Screenshot - diagnostic](docs/images/sc2-unrecognized-macro.png)
+		- [Screenshot - quick fix](docs/images/sc2-unrecognized-quickfix.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
 	- Invalid argument syntax in macros (Contributed by @MinusGix):
-		- [Screenshot - diagnostics](https://imgur.com/xw1OFUt.png)
+		- [Screenshot - diagnostics](docs/images/sc2-parameter-validation.png)
 	- Argument validation (Contributed by @MinusGix): [Read here](docs/parameters.md) for more information.
 
 ---
