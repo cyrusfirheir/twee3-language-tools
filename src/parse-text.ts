@@ -37,9 +37,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 		lineIndices.pop();
 	}
 
-	while (firstPass || lastIndex !== -1) {
-		firstPass = false;
-
+	do {
 		const i = lineIndices.length;
 		lineIndices.push(lastIndex);
 
@@ -168,7 +166,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 
 			newPassages.push(passage);
 		}
-	}
+	} while (lastIndex !== -1);
 
 	let lastPassage = newPassages.pop();
 	if (lastPassage) {
