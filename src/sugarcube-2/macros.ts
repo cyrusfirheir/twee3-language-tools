@@ -42,7 +42,7 @@ export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationTyp
 
 export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
 
-export const macroRegex = new RegExp(`<<(\\/|end)?(${macroNamePattern})(?:\\s*)((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\])*\`)|(?:"(?:\\\\.|[^"\\\\])*")|(?:'(?:\\\\.|[^'\\\\])*')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)(\\/)?>>`, 'gm');
+export const macroRegex = new RegExp(`<<(/|end)?(${macroNamePattern})(?:\\s*)((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\\\n])*?\`)|(?:"(?:\\\\.|[^"\\\\\\n])*?")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)(/)?>>`, 'gm');
 
 const macroFileWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(
 	"**/*.twee-config.{json,yaml,yml}",

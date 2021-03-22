@@ -142,64 +142,63 @@
 			]
 		},
 		"sc-macro": {
-			"begin": "(<</?)([a-zA-Z\\=\\-][a-zA-Z0-9\\-_]*)",
-			"beginCaptures": {
+			"match": "(?m)(<</?)([a-zA-Z\\=\\-][a-zA-Z0-9\\-_]*)(?:\\s*)((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:`(?:\\\\.|[^`\\\\\\n])*?`)|(?:\"(?:\\\\.|[^\"\\\\\\n])*?\")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)(/?>>)",
+			"captures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
 				},
 				"2": {
 					"name": "keyword.control.flow.js"
-				}
-			},
-			"end": "(/?>>)",
-			"endCaptures": {
-				"1": {
+				},
+				"3": {
+					"patterns": [
+						{
+							"include": "#link-markup"
+						},
+						{
+							"include": "#sc-variables"
+						},
+						{
+							"include": "#sc-syntactic-sugar"
+						},
+						{
+							"match": "!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|(?<!\\()/=|%=|\\+=|\\-=|&=|\\^=|\\b(in|instanceof|new|delete|typeof|void)\\b",
+							"name": "keyword.operator"
+						},
+						{
+							"match": "('.*?(?<!\\\\)')",
+							"name": "string.quoted.single.html"
+						},
+						{
+							"match": "(\".*?(?<!\\\\)\")",
+							"name": "string.quoted.double.html"
+						},
+						{
+							"match": "[+-]?(?:\\d*\\.)?\\d+[Mm]?[Ss]",
+							"name": "constant.numeric.css"
+						},
+						{
+							"match": "\\b((0(x|X)[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?))\\b",
+							"name": "constant.numeric.js"
+						},
+						{
+							"match": "\\b(Infinity|NaN|undefined|null|true|false)\\b",
+							"name": "constant.language.js"
+						},
+						{
+							"match": "(\\.[a-zA-Z_]+)",
+							"name": "entity.name.function"
+						},
+						{
+							"match": "([\\(\\)\\{\\}\\[\\]])",
+							"name": "meta.brace"
+						}
+					]
+				},
+				"4": {
 					"name": "punctuation.definition.tag.end.html"
 				}
-			},
-			"patterns": [
-				{
-					"include": "#link-markup"
-				},
-				{
-					"include": "#sc-variables"
-				},
-				{
-					"include": "#sc-syntactic-sugar"
-				},
-				{
-					"match": "!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|(?<!\\()/=|%=|\\+=|\\-=|&=|\\^=|\\b(in|instanceof|new|delete|typeof|void)\\b",
-					"name": "keyword.operator"
-				},
-				{
-					"match": "('.*?(?<!\\\\)')",
-					"name": "string.quoted.single.html"
-				},
-				{
-					"match": "(\".*?(?<!\\\\)\")",
-					"name": "string.quoted.double.html"
-				},
-				{
-					"match": "[+-]?(?:\\d*\\.)?\\d+[Mm]?[Ss]",
-					"name": "constant.numeric.css"
-				},
-				{
-					"match": "\\b((0(x|X)[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?))\\b",
-					"name": "constant.numeric.js"
-				},
-				{
-					"match": "\\b(Infinity|NaN|undefined|null|true|false)\\b",
-					"name": "constant.language.js"
-				},
-				{
-					"match": "(\\.[a-zA-Z_]+)",
-					"name": "entity.name.function"
-				},
-				{
-					"match": "([\\(\\)\\{\\}\\[\\]])",
-					"name": "meta.brace"
-				}
-			]
+			}
 		},
 		"sc-variables": {
 			"match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
