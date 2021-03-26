@@ -111,7 +111,9 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				// console.error("Unescaped meta character in Passage name!");
 				continue;
 			}
-			const specialName = ["StoryTitle", "StoryData", "Start"].includes(passageName);
+			const specialPassages = ["StoryTitle", "StoryData", "Start"];
+			if (document.languageId === "twee3-sugarcube-2") { specialPassages.push("PassageDone", "PassageFooter", "PassageHeader", "PassageReady", "Start", "StoryAuthor", "StoryBanner", "StoryCaption", "StoryDisplayTitle", "StoryInit", "StoryInterface", "StoryMenu", "StorySettings", "StoryShare", "StorySubtitle", "StoryTitle") }
+			const specialName = specialPassages.includes(passageName);
 			r.push({
 				line: i, startCharacter: 0, length: 2, tokenType: "startToken", tokenModifiers: []
 			}, {
