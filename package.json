@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.12.5",
+	"version": "0.13.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -191,9 +191,10 @@
 				"twee3LanguageTools.directories.exclude": {
 					"type": "array",
 					"default": [
-						"**/node_modules/**"
+						"**/node_modules/**",
+						"**/.git/**"
 					],
-					"markdownDescription": "Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened."
+					"markdownDescription": "Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `node_modules` and `.git` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened."
 				},
 				"twee3LanguageTools.passage.list": {
 					"type": "boolean",
