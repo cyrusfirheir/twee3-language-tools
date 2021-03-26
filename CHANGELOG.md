@@ -1,6 +1,19 @@
 # Changelog
 
-Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+Made possible through contributions from:
+- [@Goctionni](https://github.com/Goctionni)
+- [@MinusGix](https://github.com/MinusGix)
+- [@rambdev](https://github.com/rambdev)
+
+And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+
+## v0.13.0
+
+Adds:
+
+- SugarCube 2 macro snippets (thanks to @rambdev).
+
+---
 
 ## v0.12.2
 

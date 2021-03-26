@@ -2,7 +2,12 @@
 
 Syntax highlighting for HTML and select storyformats (see [Features](#features)) on top of Twee 3 code.
 
-Made possible through contributions from [@Goctionni](https://github.com/Goctionni) and [@MinusGix](https://github.com/MinusGix), and feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+Made possible through contributions from:
+- [@Goctionni](https://github.com/Goctionni)
+- [@MinusGix](https://github.com/MinusGix)
+- [@rambdev](https://github.com/rambdev)
+
+And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
 ---
 
@@ -55,6 +60,31 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
 	![Story Map](docs/images/twee-storymap.png)
 
+### SugarCube
+*(id: `sugarcube-2`)*
+- Syntax highlighting:  
+    ![SugarCube syntax](docs/images/hl-sc2.png)
+- Macro documentation on hover. (Contributed by @MinusGix) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)):  
+	- [Screenshot - macro documentation](docs/images/sc2-hovertips.png)
+- Container macro pair highlights:  
+	- [Screenshot - macro pairs](docs/images/sc2-macro-tag-matching.png)
+- Snippets. (Contributed by @rambdev) Type macro names to get code snippet inserts with placeholder values:  
+	- [Screenshot - snippet](docs/images/sc2-snippets.png)
+	- [screenshot - snippet insert](docs/images/sc2-snippets-insert.png)
+- Diagnostics:  
+	- Macros with opening tags but no closes (and vice-versa):  
+		- [Screenshot - diagnostics](docs/images/sc2-unclosed-macro.png)
+	- Deprecated macros:  
+		- [Screenshot - diagnostic](docs/images/sc2-deprecated-macro.png)
+	- Deprecated `<<end...>>` closing macros:  
+		- [Screenshot - diagnostic](docs/images/sc2-endvariant-macro.png)
+		- [Screenshot - quick fix](docs/images/sc2-endvariant-quickfix.png)
+	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):  
+		- [Screenshot - diagnostic](docs/images/sc2-unrecognized-macro.png)
+		- [Screenshot - quick fix](docs/images/sc2-unrecognized-quickfix.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
+	- Invalid argument syntax in macros (Contributed by @MinusGix):  
+		- [Screenshot - diagnostics](docs/images/sc2-parameter-validation.png)
+	- Argument validation (Contributed by @MinusGix): [Read here](docs/parameters.md) for more information.
 
 ### Chapbook
 *(id: `chapbook-1`)*
@@ -65,29 +95,6 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 *(id: `harlowe-3`)*
 - Syntax highlighting.  
     ![Harlowe syntax](docs/images/hl-h3.png)
-
-### SugarCube
-*(id: `sugarcube-2`)*
-- Syntax highlighting.  
-    ![SugarCube syntax](docs/images/hl-sc2.png)
-- Macro documentation on hover. (Contributed by @MinusGix) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube))
-	![Screenshot](docs/images/sc2-hovertips.png)
-- Container macro pair highlights.
-	![SC macro pairs](docs/images/sc2-macro-tag-matching.png)
-- Diagnostics:
-	- Macros with opening tags but no closes (and vice-versa):
-		- [Screenshot - diagnostics](docs/images/sc2-unclosed-macro.png)
-	- Deprecated macros:
-		- [Screenshot - diagnostic](docs/images/sc2-deprecated-macro.png)
-	- Deprecated `<<end...>>` closing macros:
-		- [Screenshot - diagnostic](docs/images/sc2-endvariant-macro.png)
-		- [Screenshot - quick fix](docs/images/sc2-endvariant-quickfix.png)
-	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):
-		- [Screenshot - diagnostic](docs/images/sc2-unrecognized-macro.png)
-		- [Screenshot - quick fix](docs/images/sc2-unrecognized-quickfix.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
-	- Invalid argument syntax in macros (Contributed by @MinusGix):
-		- [Screenshot - diagnostics](docs/images/sc2-parameter-validation.png)
-	- Argument validation (Contributed by @MinusGix): [Read here](docs/parameters.md) for more information.
 
 ---
 
@@ -161,6 +168,8 @@ Manual settings:
 - `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin, folder of origin, or passage tags.)  
 ⠀
 - `twee3LanguageTools.twee-3.warning.spaceAfterStartToken`: Warn about missing space after the start token (`::`) in passage headers? (`true` by default.)  
+- `twee3LanguageTools.twee-3.error.storyData.format`: Throw an error when missing the story format field (`format`) in `StoryData` special passage? (`true` by default.)  
+- `twee3LanguageTools.twee-3.error.storyData.formatVersion`: Throw an error when missing the story format version field (`format-version`) in `StoryData` special passage? (`true` by default.)  
 ⠀
 - `twee3LanguageTools.sugarcube-2.warning.undefinedMacro`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets? (`true` by default.)  
