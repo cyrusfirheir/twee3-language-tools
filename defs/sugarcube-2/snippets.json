@@ -10,5 +10,437 @@
 			"}"
 		],
 		"description": "StoryData JSON chunk."
+	},
+	"SugarCube: Link": {
+		"prefix": ":sclink",
+		"body": [
+			"<<link \"${1:title}\" \"${2:passage}\">>$3<</link>>"
+		]
+	},
+	"SugarCube: Link (no passage)": {
+		"prefix": ":sclinknp",
+		"body": [
+			"<<link \"${1:title}\">>$0<</link>>"
+		]
+	},
+	"SugarCube: Capture": {
+		"prefix": ":sccapture",
+		"body": [
+			"<<capture ${1:variable(s)}>>\n\t$0\n<</capture>>"
+		]
+	},
+	"SugarCube: Set": {
+		"prefix": ":scset",
+		"body": [
+			"<<set $1>>"
+		]
+	},
+	"SugarCube: Unset": {
+		"prefix": ":unset",
+		"body": [
+			"<<unset ${1:variable}>>"
+		]
+	},
+	"SugarCube: Run": {
+		"prefix": ":scrun",
+		"body": [
+			"<<run ${1:code}>>$0"
+		]
+	},
+	"SugarCube: Script": {
+		"prefix": ":scscript",
+		"body": [
+			"<<script>>$0<</script>>"
+		]
+	},
+	"SugarCube: =": {
+		"prefix": ":sc=",
+		"body": [
+			"<<= $1>>$0"
+		]
+	},
+	"SugarCube: -": {
+		"prefix": ":sc-",
+		"body": [
+			"<<- $1>>$0"
+		]
+	},
+	"SugarCube: Include": {
+		"prefix": ":scinclude",
+		"body": [
+			"<<include ${1:passage}>>"
+		]
+	},
+	"SugarCube: No br": {
+		"prefix": ":scnobr",
+		"body": [
+			"<<nobr>>${1:contents}<</nobr>>"
+		]
+	},
+	"SugarCube: No br (wrap)": {
+		"prefix": ":scnobrwrap",
+		"body": [
+			"<<nobr>>$TM_SELECTED_TEXT<</nobr>>"
+		]
+	},
+	"SugarCube: Print": {
+		"prefix": ":scprint",
+		"body": [
+			"<<print ${1:contents}>>"
+		]
+	},
+	"SugarCube: Silently": {
+		"prefix": ":scsilently",
+		"body": [
+			"<<silently>>${1:contents}<</silently>>"
+		]
+	},
+	"SugarCube: Silently (wrap)": {
+		"prefix": ":scsilentlywrap",
+		"body": [
+			"<<silently>>$TM_SELECTED_TEXT<</silently>>"
+		]
+	},
+	"SugarCube: Type": {
+		"prefix": ":sctype",
+		"body": [
+			"<<type ${1:speed} $2>>\n\t$0\n<</type>>"
+		]
+	},
+	"SugarCube: If": {
+		"prefix": ":scif",
+		"body": [
+			"<<if ${1:this} ${2|is,isnot,eq,neq,gt,gte,lt,lte,and,or|} ${3:that}>>\n\t$0\n<</if>>"
+		]
+	},
+	"SugarCube: Else": {
+		"prefix": ":scelse",
+		"body": [
+			"<<else>>\n\t$0"
+		]
+	},
+	"SugarCube: ElseIf": {
+		"prefix": ":scelseif",
+		"body": [
+			"<<elseif ${1:this} ${2|is,isnot,eq,neq,gt,gte,lt,lte,not,and,or,def,ndef|} ${3:that}>>\n\t$0"
+		]
+	},
+	"SugarCube: For": {
+		"prefix": ":scfor",
+		"body": [
+			"<<for $1>>\n\t$0\n<</for>>"
+		]
+	},
+	"SugarCube: For (While)": {
+		"prefix": ":scforwhile",
+		"body": [
+			"<<for ${1:condition}>>\n\t$0\n<</for>>"
+		]
+	},
+	"SugarCube: For (Each)": {
+		"prefix": ":scforeach",
+		"body": [
+			"<<for $1 ${2:valueVariable} range ${3:array}>>\n\t$0\n<</for>>"
+		]
+	},
+	"SugarCube: For (Normal Loop)": {
+		"prefix": ":scforloop",
+		"body": [
+			"<<for ${1:init}; ${2:condition}; ${3:post}>>\n\t$0\n<</for>>"
+		]
+	},
+	"SugarCube: Break": {
+		"prefix": ":scbreak",
+		"body": [
+			"<<break>>"
+		]
+	},
+	"SugarCube: Continue": {
+		"prefix": ":sccontinue",
+		"body": [
+			"<<continue>>"
+		]
+	},
+	"SugarCube: Switch": {
+		"prefix": ":scswitch",
+		"body": [
+			"<<switch ${1:expression}>>\n\t\n<</switch>>"
+		]
+	},
+	"SugarCube: Case": {
+		"prefix": ":sccase",
+		"body": [
+			"<<case ${1:valueList}>>\n\t${2:content}"
+		]
+	},
+	"SugarCube: Default": {
+		"prefix": ":scdefault",
+		"body": [
+			"<<default>>\n\t${2:content}"
+		]
+	},
+	"SugarCube: Button": {
+		"prefix": ":scbutton",
+		"body": [
+			"<<button \"${1:title}\" \"${2:passage}\">>$3<</button>>"
+		]
+	},
+	"SugarCube: Button (no passage)": {
+		"prefix": ":scbuttonnp",
+		"body": [
+			"<<button \"${1:title}\">>$0<</button>>"
+		]
+	},
+	"SugarCube: Check Box": {
+		"prefix": ":sccheckbox",
+		"body": [
+			"<<checkbox ${1:receiverName} ${2:uncheckedValue} ${3:checkedValue} ${4|autocheck,checked|}>>"
+		]
+	},
+	"SugarCube: Cycle": {
+		"prefix": ":sccycle",
+		"body": [
+			"<<cycle ${1:receiverName}>>\n\t<</cycle>>"
+		]
+	},
+	"SugarCube: Option": {
+		"prefix": ":scoption",
+		"body": [
+			"<<option ${1:label}>>\n\t"
+		]
+	},
+	"SugarCube: Options From": {
+		"prefix": ":scoptionsfrom",
+		"body": [
+			"<<optionsfrom ${1:collection}>>"
+		]
+	},
+	"SugarCube: Link Append": {
+		"prefix": ":sclinkappend",
+		"body": [
+			"<<linkappend ${1:linkText}>>${2:content}<</linkappend>>"
+		]
+	},
+	"SugarCube: Link Prepend": {
+		"prefix": ":sclinkprepend",
+		"body": [
+			"<<linkprepend ${1:linkText}>>${2:content}<</linkprepend>>"
+		]
+	},
+	"SugarCube: Link Replace": {
+		"prefix": ":sclinkreplace",
+		"body": [
+			"<<linkreplace ${1:linkText}>>${2:content}<</linkreplace>>"
+		]
+	},
+	"SugarCube: List Box": {
+		"prefix": ":sclistbox",
+		"body": [
+			"<<listbox ${1:receiverName}>>\n\t\n<</listbox>>"
+		]
+	},
+	"SugarCube: Number Box": {
+		"prefix": ":scnumberbox",
+		"body": [
+			"<<numberbox ${1:receiverName} ${2:defaultValue}>>"
+		]
+	},
+	"SugarCube: Radio Button": {
+		"prefix": ":scradiobutton",
+		"body": [
+			"<<radiobutton ${1:receiverName} ${2:defaultValue}>>"
+		]
+	},
+	"SugarCube: Text Area": {
+		"prefix": ":sctextarea",
+		"body": [
+			"<<textarea ${1:receiverName} ${2:defaultValue}>>"
+		]
+	},
+	"SugarCube: Text Box": {
+		"prefix": ":sctextbox",
+		"body": [
+			"<<textbox ${1:receiverName} ${2:defaultValue}>>"
+		]
+	},
+	"SugarCube: Actions": {
+		"prefix": ":scactions",
+		"body": [
+			"<<actions ${1:list}"
+		]
+	},
+	"SugarCube: Back": {
+		"prefix": ":scback",
+		"body": [
+			"<<back $1>>"
+		]
+	},
+	"SugarCube: Choice": {
+		"prefix": ":scchoice",
+		"body": [
+			"<<choice $1>>"
+		]
+	},
+	"SugarCube: Return": {
+		"prefix": ":screturn",
+		"body": [
+			"<<return$1>>"
+		]
+	},
+	"SugarCube: Add Class": {
+		"prefix": ":scaddclass",
+		"body": [
+			"<<addclass ${1:selector} ${2:classNames}>>"
+		]
+	},
+	"SugarCube: Append": {
+		"prefix": ":scappend",
+		"body": [
+			"<<append ${1:selector}>>${2:content}<</append>>"
+		]
+	},
+	"SugarCube: Copy": {
+		"prefix": ":sccopy",
+		"body": [
+			"<<copy ${1:selector}>>"
+		]
+	},
+	"SugarCube: Prepend": {
+		"prefix": ":scprepend",
+		"body": [
+			"<<prepend ${1:selector}>>"
+		]
+	},
+	"SugarCube: Remove": {
+		"prefix": ":scremove",
+		"body": [
+			"<<remove ${1:selector}>>"
+		]
+	},
+	"SugarCube: Remove Class": {
+		"prefix": ":scremoveclass",
+		"body": [
+			"<<removeclass ${1:selector}>>"
+		]
+	},
+	"SugarCube: Replace": {
+		"prefix": ":screplace",
+		"body": [
+			"<<replace ${1:selector}>>${2:content}<</replace>>"
+		]
+	},
+	"SugarCube: Toggle Class": {
+		"prefix": ":sctoggleclass",
+		"body": [
+			"<<toggleclass ${1:selector} ${2:classNames}>>"
+		]
+	},
+	"SugarCube: Adio": {
+		"prefix": ":scaudio",
+		"body": [
+			"<<audio ${1:trackIdList} ${2:action}>>"
+		]
+	},
+	"SugarCube: Cache Audio": {
+		"prefix": ":sccacheaudio",
+		"body": [
+			"<<cacheaudio ${1:trackId} ${2:sourceList}>>"
+		]
+	},
+	"SugarCube: Create Audio Group": {
+		"prefix": ":sccreateaudiogroup",
+		"body": [
+			"<<createaudiogroup ${1:groupId}>>\n\t$0\n<</createaudiogroup>>"
+		]
+	},
+	"SugarCube: Track (Audio Group)": {
+		"prefix": ":sctrack",
+		"body": [
+			"<<track ${1:trackId}>>$0"
+		]
+	},
+	"SugarCube: Track (Playlist)": {
+		"prefix": ":sctrack",
+		"body": [
+			"<<track ${1:trackId} ${2:action}>>$0"
+		]
+	},
+	"SugarCube: Create Playlist": {
+		"prefix": ":sccreateplaylist",
+		"body": [
+			"<<createplaylist ${1:listId}>>\n\t$0\n<</createaudiogroup>>"
+		]
+	},
+	"SugarCube: Playlist": {
+		"prefix": ":scplaylist",
+		"body": [
+			"<<playlist ${1:listId} ${2:action}>>$0"
+		]
+	},
+	"SugarCube: Master Audio": {
+		"prefix": ":scmasteraudio",
+		"body": [
+			"<<masteraudio ${1:action}>>"
+		]
+	},
+	"SugarCube: Remove Audio Group": {
+		"prefix": ":scremoveaudiogroup",
+		"body": [
+			"<<removeaudiogroup ${1:groupId}>>"
+		]
+	},
+	"SugarCube: Remove Playlist": {
+		"prefix": ":scremoveplaylist",
+		"body": [
+			"<<removeplaylist ${1:listId}>>"
+		]
+	},
+	"SugarCube: Wait For Audio": {
+		"prefix": ":scwaitforaudio",
+		"body": [
+			"<<waitforaudio>>"
+		]
+	},
+	"SugarCube: Done": {
+		"prefix": ":scdone",
+		"body": [
+			"<<done>>$0<</done>>"
+		]
+	},
+	"SugarCube: Go To Passage": {
+		"prefix": ":scgoto",
+		"body": [
+			"<<goto $1>>"
+		]
+	},
+	"SugarCube: Repeat": {
+		"prefix": ":screpeat",
+		"body": [
+			"<<repeat ${1:delay}>>\n\t$0\n<</repeat>>"
+		]
+	},
+	"SugarCube: Stop": {
+		"prefix": ":scstop",
+		"body": [
+			"<<stop>>"
+		]
+	},
+	"SugarCube: Timed": {
+		"prefix": ":sctimed",
+		"body": [
+			"<<timed ${1:0s}>>$0<</timed>>"
+		]
+	},
+	"SugarCube: Next": {
+		"prefix": ":scnext",
+		"body": [
+			"<<next ${1:delay}>>\n\t$0"
+		]
+	},
+	"SugarCube: Widget": {
+		"prefix": ":scwidget",
+		"body": [
+			"<<widget \"${1:name}\" ${2| ,block|}>>\n\t$0\n<</widget>>"
+		]
 	}
 }
