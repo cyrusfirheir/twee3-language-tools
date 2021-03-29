@@ -160,6 +160,12 @@
 					],
 					"passageMeta": [
 						"punctuation"
+					],
+					"passageTagScript" : [
+						"#E7A328"
+					],
+					"passageTagStylesheet" : [
+						"#30AADD"
 					]
 				}
 			}
