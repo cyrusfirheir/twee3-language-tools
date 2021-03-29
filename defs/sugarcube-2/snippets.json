@@ -17,7 +17,7 @@
 			"<<link \"${1:title}\" \"${2:passage}\">>$3<</link>>"
 		]
 	},
-	"SugarCube: Link (Wrap Title)": {
+	"Macro: Link (Wrap Title)": {
 		"prefix": ":linkwrap",
 		"body": [
 			"<<link \"$TM_SELECTED_TEXT\" \"${1:passage}\">>$0<</link>>"
