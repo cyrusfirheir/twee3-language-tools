@@ -109,7 +109,7 @@
 			]
 		},
 		"sc-js-macro": {
-			"begin": "(<<)(\\=|\\-|print|run|set|if|elseif)\\b",
+			"begin": "(<<)((?:\\=|\\-)|(?:print|run|set|if|elseif)\\b)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -142,7 +142,7 @@
 			]
 		},
 		"sc-macro": {
-			"begin": "(<</?)([a-zA-Z\\=\\-][a-zA-Z0-9\\-_]*)",
+			"begin": "(<</?)([a-zA-Z][a-zA-Z0-9\\-_]*)",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
