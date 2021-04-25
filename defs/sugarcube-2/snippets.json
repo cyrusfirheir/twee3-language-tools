@@ -68,7 +68,7 @@
 	"Macro: include": {
 		"prefix": ":include",
 		"body": [
-			"<<include ${1:passage}>>"
+			"<<include \"${1:passage}\">>"
 		]
 	},
 	"Macro: nobr": {
@@ -410,7 +410,7 @@
 	"Macro: goto": {
 		"prefix": ":goto",
 		"body": [
-			"<<goto $1>>"
+			"<<goto \"${1:passage}\">>>>"
 		]
 	},
 	"Macro: repeat": {
