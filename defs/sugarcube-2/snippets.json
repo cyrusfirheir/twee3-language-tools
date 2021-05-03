@@ -218,19 +218,19 @@
 	"Macro: linkappend": {
 		"prefix": ":linkappend",
 		"body": [
-			"<<linkappend ${1:linkText}>>${2:content}<</linkappend>>"
+			"<<linkappend \"${1:linktext}\">>${2:content}<</linkappend>>"
 		]
 	},
 	"Macro: linkprepend": {
 		"prefix": ":linkprepend",
 		"body": [
-			"<<linkprepend ${1:linkText}>>${2:content}<</linkprepend>>"
+			"<<linkprepend \"${1:linktext}\">>${2:content}<</linkprepend>>"
 		]
 	},
 	"Macro: linkreplace": {
 		"prefix": ":linkreplace",
 		"body": [
-			"<<linkreplace ${1:linkText}>>${2:content}<</linkreplace>>"
+			"<<linkreplace \"${1:linktext}\">>${2:content}<</linkreplace>>"
 		]
 	},
 	"Macro: listbox": {
