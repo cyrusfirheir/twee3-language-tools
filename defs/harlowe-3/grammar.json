@@ -27,12 +27,15 @@
 			"include": "#html"
 		},
 		{
-			"begin": "<!--",
-			"end": "-->",
-			"name": "comment.block"
+			"include": "#html-comments"
 		}
 	],
 	"repository": {
+		"html-comments": {
+			"begin": "<!--",
+			"end": "-->",
+			"name": "comment.block"
+		},
 		"harlowe-3": {
 			"patterns": [
 				{
@@ -61,6 +64,9 @@
 				}
 			},
 			"patterns": [
+				{
+					"include": "#html-comments"
+				},
 				{
 					"include": "#h-macros"
 				},
