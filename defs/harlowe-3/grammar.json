@@ -62,6 +62,9 @@
 			},
 			"patterns": [
 				{
+					"include": "#h-macros"
+				},
+				{
 					"match": "([a-zA-Z\\-\\_]+):",
 					"name": "keyword.control.flow.js"
 				},
