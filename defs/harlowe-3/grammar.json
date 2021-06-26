@@ -51,7 +51,7 @@
 		},
 		"h-macros": {
 			"name": "meta.harlowe.macros.twee3",
-			"begin": "(\\()",
+			"begin": "(\\((?=[a-zA-Z\\-\\_]+?:))",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.separator.twee3"
