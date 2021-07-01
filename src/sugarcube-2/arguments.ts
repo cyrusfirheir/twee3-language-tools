@@ -628,26 +628,22 @@ namespace MacroParse {
 
 	// Lexing functions.
 	function slurpQuote(lexer: Lexer<Item>, endQuote: string): EOFT | number {
-		loop: for (; ;) {
-			/* eslint-disable indent */
-			switch (lexer.next()) {
-				case '\\':
-					{
-						const ch = lexer.next();
+		for (; ;) {
+			let next = lexer.next();
+			if (next === '\\') {
+				const ch = lexer.next();
 
-						if (ch !== EOF && ch !== '\n') {
-							break;
-						}
-					}
-				/* falls through */
-				case EOF:
-				case '\n':
-					return EOF;
-
-				case endQuote:
-					break loop;
+				if (ch !== EOF && ch !== '\n') {
+					continue;
+				}
+			} else if (next === EOF) {
+				return EOF;
+			} else if (next === '\n' && endQuote !== '`') {
+				// This is special-cased for ` because it might have newlines inside it.
+				return EOF;
+			} else if (next == endQuote) {
+				break;
 			}
-			/* eslint-enable indent */
 		}
 
 		return lexer.pos;

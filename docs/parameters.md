@@ -166,4 +166,3 @@ Example 2: `('a'|'b')`. Equivalent to `'a'|'b'`.
 Example 3: `('a' &+ 'b')`, `'a' &+ ('b')`, etc. I think you get the picture.  
 Example 4: `'a' (&+ 'b')` is valid, and is equivalent to the original.  
 Example 5: `'a' (&+) 'b'`. A syntax error.  
-Example 7: You may run into ambiguous situations like: `'a' |+ 'b' &+ 'c'` where you want `a` *or* `abc`. The given code would lead to `ac` *or* `abc`. Such a solution would be: `'a' |+ ('b' &+ 'c')`

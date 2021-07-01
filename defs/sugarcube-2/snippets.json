@@ -74,7 +74,7 @@
 	"Macro: include": {
 		"prefix": ":include",
 		"body": [
-			"<<include ${1:passage}>>"
+			"<<include \"${1:passage}\">>"
 		]
 	},
 	"Macro: nobr": {
@@ -200,13 +200,13 @@
 	"Macro: checkbox": {
 		"prefix": ":checkbox",
 		"body": [
-			"<<checkbox ${1:receiverName} ${2:uncheckedValue} ${3:checkedValue} ${4|autocheck,checked|}>>"
+			"<<checkbox \"${1:receiverName}\" ${2:uncheckedValue} ${3:checkedValue} ${4|autocheck,checked|}>>"
 		]
 	},
 	"Macro: cycle": {
 		"prefix": ":cycle",
 		"body": [
-			"<<cycle ${1:receiverName}>>\n\t$2\n<</cycle>>"
+			"<<cycle \"${1:receiverName}\">>\n\t$2\n<</cycle>>"
 		]
 	},
 	"Macro: option": {
@@ -224,49 +224,49 @@
 	"Macro: linkappend": {
 		"prefix": ":linkappend",
 		"body": [
-			"<<linkappend ${1:linkText}>>${2:content}<</linkappend>>"
+			"<<linkappend \"${1:linktext}\">>${2:content}<</linkappend>>"
 		]
 	},
 	"Macro: linkprepend": {
 		"prefix": ":linkprepend",
 		"body": [
-			"<<linkprepend ${1:linkText}>>${2:content}<</linkprepend>>"
+			"<<linkprepend \"${1:linktext}\">>${2:content}<</linkprepend>>"
 		]
 	},
 	"Macro: linkreplace": {
 		"prefix": ":linkreplace",
 		"body": [
-			"<<linkreplace ${1:linkText}>>${2:content}<</linkreplace>>"
+			"<<linkreplace \"${1:linktext}\">>${2:content}<</linkreplace>>"
 		]
 	},
 	"Macro: listbox": {
 		"prefix": ":listbox",
 		"body": [
-			"<<listbox ${1:receiverName}>>\n\t\n<</listbox>>"
+			"<<listbox \"${1:receiverName}\">>\n\t\n<</listbox>>"
 		]
 	},
 	"Macro: numberbox": {
 		"prefix": ":numberbox",
 		"body": [
-			"<<numberbox ${1:receiverName} ${2:defaultValue}>>"
+			"<<numberbox \"${1:receiverName}\" ${2:defaultValue}>>"
 		]
 	},
 	"Macro: radiobutton": {
 		"prefix": ":radiobutton",
 		"body": [
-			"<<radiobutton ${1:receiverName} ${2:defaultValue}>>"
+			"<<radiobutton \"${1:receiverName}\" ${2:defaultValue}>>"
 		]
 	},
 	"Macro: textarea": {
 		"prefix": ":textarea",
 		"body": [
-			"<<textarea ${1:receiverName} ${2:defaultValue}>>"
+			"<<textarea \"${1:receiverName}\" ${2:defaultValue}>>"
 		]
 	},
 	"Macro: textbox": {
 		"prefix": ":textbox",
 		"body": [
-			"<<textbox ${1:receiverName} ${2:defaultValue}>>"
+			"<<textbox \"${1:receiverName}\" ${2:defaultValue}>>"
 		]
 	},
 	"Macro: actions": {
@@ -416,7 +416,7 @@
 	"Macro: goto": {
 		"prefix": ":goto",
 		"body": [
-			"<<goto $1>>"
+			"<<goto \"${1:passage}\">>>>"
 		]
 	},
 	"Macro: repeat": {

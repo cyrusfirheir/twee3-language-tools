@@ -196,6 +196,16 @@ To use, search for `Pack passages to clusters` from the command palette (<kbd>Ct
 
 ---
 
+### SugarCube-2: Add All Unrecognized Macros to Definition File
+
+Adds every unrecognized macro to the definition file, instead of doing it one by one.
+
+To use, search for `Unrecognized Macros` from the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> or <kbd>F1</kbd> by default).
+
+However, it is still recommended to add definitions one at a time.
+
+---
+
 ### SugarCube-2: Self-closing macros
 
 ***NOTE:*** SugarCube 2 does *NOT* have a self-closing syntax for container macros, this feature is just to support custom passage processing functions.

@@ -8,6 +8,8 @@
 
 Naked $story and _temporary variables
 
+Hello (He'd thought). Isn't it a good day.
+
 (macroName: "String Args", 123, false)
 
 (link: "Link Text")[
@@ -19,6 +21,8 @@ Naked $story and _temporary variables
 	...
 ]
 (history: where "Intermission" is in its name)
+
+(set: $mymacro to (macro: string-type _arg1, [ (out-data: true) ]))
 
 <script>
 	setup.someFunction.orSomething();

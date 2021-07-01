@@ -248,6 +248,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			sc2m.argumentCache.clear();
 		})
 		,
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", async () => {
+			await sc2ca.addAllUnrecognizedMacros();
+		})
+		,
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
 			providedCodeActionKinds: sc2ca.EndMacro.providedCodeActionKinds
 		})

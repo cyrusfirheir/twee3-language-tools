@@ -37,7 +37,7 @@
 			"patterns": []
 		},
 		"json": {
-			"begin": "^::\\s*StoryData",
+			"begin": "^::\\s*StoryData.*?$",
 			"end": "^(?=::)",
 			"name": "source.json.twee3",
 			"patterns": [

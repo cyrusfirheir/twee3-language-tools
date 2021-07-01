@@ -500,7 +500,6 @@ export class Variant {
 
                 const infoLeft = crawl(format.left, argIndex);
                 if (isFailure(infoLeft.status)) {
-                    infoLeft.status = Status.Failure;
                     return infoLeft;
                 }
 
@@ -510,7 +509,6 @@ export class Variant {
 
                 const infoRight = crawl(format.right, argIndex);
                 if (isFailure(infoRight.status)) {
-                    infoRight.status = Status.Failure;
                     // TODO: should we try wrapping the error or adding our own?
                     return infoRight;
                 }

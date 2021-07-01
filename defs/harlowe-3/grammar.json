@@ -27,12 +27,15 @@
 			"include": "#html"
 		},
 		{
-			"begin": "<!--",
-			"end": "-->",
-			"name": "comment.block"
+			"include": "#html-comments"
 		}
 	],
 	"repository": {
+		"html-comments": {
+			"begin": "<!--",
+			"end": "-->",
+			"name": "comment.block"
+		},
 		"harlowe-3": {
 			"patterns": [
 				{
@@ -48,7 +51,7 @@
 		},
 		"h-macros": {
 			"name": "meta.harlowe.macros.twee3",
-			"begin": "(\\()",
+			"begin": "(\\((?=[a-zA-Z\\-\\_]+?:))",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.separator.twee3"
@@ -61,6 +64,12 @@
 				}
 			},
 			"patterns": [
+				{
+					"include": "#html-comments"
+				},
+				{
+					"include": "#h-macros"
+				},
 				{
 					"match": "([a-zA-Z\\-\\_]+):",
 					"name": "keyword.control.flow.js"
@@ -114,7 +123,7 @@
 			"name": "entity.name.tag"
 		},
 		"json": {
-			"begin": "^::\\s*StoryData",
+			"begin": "^::\\s*StoryData.*?$",
 			"end": "^(?=::)",
 			"name": "source.json.twee3",
 			"patterns": [
