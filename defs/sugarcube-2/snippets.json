@@ -17,7 +17,7 @@
 			"<<link \"${1:title}\" \"${2:passage}\">>$3<</link>>"
 		]
 	},
-	"Macro: Link (Wrap Title)": {
+	"Macro: Link (wrap title)": {
 		"prefix": ":linkwrap",
 		"body": [
 			"<<link \"$TM_SELECTED_TEXT\" \"${1:passage}\">>$0<</link>>"
@@ -27,6 +27,12 @@
 		"prefix": ":linknp",
 		"body": [
 			"<<link \"${1:title}\">>$2<</link>>"
+		]
+	},
+	"Macro: link (same passage)": {
+		"prefix": ":linksp",
+		"body": [
+			"<<link \"${1:title}\" `State.passage`>>$0<</link>>"
 		]
 	},
 	"Macro: capture": {
@@ -57,6 +63,12 @@
 		"prefix": ":script",
 		"body": [
 			"<<script>>$1<</script>>"
+		]
+	},
+	"Macro: script (wrap)": {
+		"prefix": ":scriptwrap",
+		"body": [
+			"<<script>>$TM_SELECTED_TEXT<</script>>"
 		]
 	},
 	"Macro: =": {
@@ -93,6 +105,12 @@
 		"prefix": ":print",
 		"body": [
 			"<<print $1>>"
+		]
+	},
+	"Macro: print (wrap)": {
+		"prefix": ":printwrap",
+		"body": [
+			"<<print \"$TM_SELECTED_TEXT\">>"
 		]
 	},
 	"Macro: silently": {
@@ -170,7 +188,7 @@
 	"Macro: switch": {
 		"prefix": ":switch",
 		"body": [
-			"<<switch ${1:expression}>>\n<<case ${2:valueList}>>\n\t${3:content}\n$0\n<</switch>>"
+			"<<switch ${1:expression}>>\n\t<<case ${2:valueList}>>\n\t${3:content}\n$0\n<</switch>>"
 		]
 	},
 	"Macro: case": {
