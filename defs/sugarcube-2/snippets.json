@@ -32,7 +32,7 @@
 	"Macro: link (same passage)": {
 		"prefix": ":linksp",
 		"body": [
-			"<<link \"${1:title}\" `State.passage`>>$0<</link>>"
+			"<<link \"${1:title}\" `passage()`>>$0<</link>>"
 		]
 	},
 	"Macro: capture": {
