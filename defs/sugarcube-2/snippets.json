@@ -296,91 +296,91 @@
 	"Macro: addclass": {
 		"prefix": ":addclass",
 		"body": [
-			"<<addclass ${1:selector} ${2:classNames}>>"
+			"<<addclass \"${1:selector}\" \"${2:classNames}\">>"
 		]
 	},
 	"Macro: append": {
 		"prefix": ":append",
 		"body": [
-			"<<append ${1:selector}>>${2:content}<</append>>"
+			"<<append \"${1:selector}\">>${2:content}<</append>>"
 		]
 	},
 	"Macro: copy": {
 		"prefix": ":copy",
 		"body": [
-			"<<copy ${1:selector}>>"
+			"<<copy \"${1:selector}\">>"
 		]
 	},
 	"Macro: prepend": {
 		"prefix": ":prepend",
 		"body": [
-			"<<prepend ${1:selector}>>"
+			"<<prepend \"${1:selector}\">>$0<</prepend>>"
 		]
 	},
 	"Macro: remove": {
 		"prefix": ":remove",
 		"body": [
-			"<<remove ${1:selector}>>"
+			"<<remove \"${1:selector}\">>"
 		]
 	},
 	"Macro: removeclass": {
 		"prefix": ":removeclass",
 		"body": [
-			"<<removeclass ${1:selector}>>"
+			"<<removeclass \"${1:selector}\">>"
 		]
 	},
 	"Macro: replace": {
 		"prefix": ":replace",
 		"body": [
-			"<<replace ${1:selector}>>${2:content}<</replace>>"
+			"<<replace \"${1:selector}\">>${2:content}<</replace>>"
 		]
 	},
 	"Macro: toggleclass": {
 		"prefix": ":toggleclass",
 		"body": [
-			"<<toggleclass ${1:selector} ${2:classNames}>>"
+			"<<toggleclass \"${1:selector}\" \"${2:classNames}\">>"
 		]
 	},
 	"Macro: audio": {
 		"prefix": ":audio",
 		"body": [
-			"<<audio ${1:trackIdList} ${2:action}>>"
+			"<<audio \"${1:trackIdList}\" ${2:action}>>"
 		]
 	},
 	"Macro: cacheaudio": {
 		"prefix": ":cacheaudio",
 		"body": [
-			"<<cacheaudio ${1:trackId} ${2:sourceList}>>"
+			"<<cacheaudio \"${1:trackId}\" \"${2:sourceList}\">>"
 		]
 	},
 	"Macro: createaudiogroup": {
 		"prefix": ":createaudiogroup",
 		"body": [
-			"<<createaudiogroup ${1:groupId}>>\n\t$0\n<</createaudiogroup>>"
+			"<<createaudiogroup \"${1:groupId}\">>\n\t$0\n<</createaudiogroup>>"
 		]
 	},
 	"Macro: track (Audio Group)": {
 		"prefix": ":track",
 		"body": [
-			"<<track ${1:trackId}>>"
+			"<<track \"${1:trackId}\">>"
 		]
 	},
 	"Macro: track (Playlist)": {
 		"prefix": ":track",
 		"body": [
-			"<<track ${1:trackId} ${2:action}>>"
+			"<<track \"${1:trackId}\" ${2:action}>>"
 		]
 	},
 	"Macro: createplaylist": {
 		"prefix": ":createplaylist",
 		"body": [
-			"<<createplaylist ${1:listId}>>\n\t$0\n<</createaudiogroup>>"
+			"<<createplaylist \"${1:listId}\">>\n\t$0\n<</createaudiogroup>>"
 		]
 	},
 	"Macro: playlist": {
 		"prefix": ":playlist",
 		"body": [
-			"<<playlist ${1:listId} ${2:action}>>"
+			"<<playlist \"${1:listId}\" ${2:action}>>"
 		]
 	},
 	"Macro: masteraudio": {
@@ -392,13 +392,13 @@
 	"Macro: removeaudiogroup": {
 		"prefix": ":removeaudiogroup",
 		"body": [
-			"<<removeaudiogroup ${1:groupId}>>"
+			"<<removeaudiogroup \"${1:groupId}\">>"
 		]
 	},
 	"Macro: removeplaylist": {
 		"prefix": ":removeplaylist",
 		"body": [
-			"<<removeplaylist ${1:listId}>>"
+			"<<removeplaylist \"${1:listId}\">>"
 		]
 	},
 	"Macro: waitforaudio": {
