@@ -51,7 +51,7 @@
 		},
 		"h-macros": {
 			"name": "meta.harlowe.macros.twee3",
-			"begin": "(\\((?=[a-zA-Z\\-\\_]+?:))",
+			"begin": "(\\((?=(([a-zA-Z\\-_]+?)|([\\$_][A-Za-z\\$_][A-Za-z0-9\\$_]*))?:))",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.separator.twee3"
@@ -81,6 +81,17 @@
 					"include": "#h-variables"
 				},
 				{
+					"include": "#types"
+				},
+				{
+					"match": "([\\(\\)\\{\\}\\[\\]])",
+					"name": "meta.brace"
+				}
+			]
+		},
+		"types": {
+			"patterns": [
+				{
 					"match": "\\b(alnum|alphanumeric|any|array|bool(?:ean)?|changer|colou?r|const|command|dm|data|map|type|set|ds|digit|gradient|empty|even|int(?:eger)?|lambda|lowercase|macro|newline|num(?:ber)?|odd|str(?:ing)?|uppercase|whitespace|a|an|its|name|tags|is|to|into|in|when|via|making|each|and|or|not|does|contains|bind|matches|where)\\b",
 					"name": "keyword.operator"
 				},
@@ -107,10 +118,6 @@
 				{
 					"match": "(\\=)",
 					"name": "constant.language.operator.js"
-				},
-				{
-					"match": "([\\(\\)\\{\\}\\[\\]])",
-					"name": "meta.brace"
 				}
 			]
 		},
