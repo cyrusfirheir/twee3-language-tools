@@ -7,6 +7,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.13.15
+
+Changes:
+
+- StoryData snippet now populates the IFID field on its own. 
+
+---
+
 ## v0.13.14
 
 Adds:

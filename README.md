@@ -38,6 +38,8 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 ### Twee
 - Syntax highlighting.  
 
+- Snippet to generate the `StoryData` special passage: start typing `StoryData` in a Twee document and press <kbd>Tab</kbd> when prompted with the snippet. This populates the IFID field with a newly generated one.
+
 - Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> or <kbd>F1</kbd> by default) and search for "IFID".  
 
 - A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  

@@ -4,7 +4,7 @@
 		"body": [
 			":: StoryData",
 			"{",
-			"\t\"ifid\": \"$1\",",
+			"\t\"ifid\": \"${UUID/(.*)/${1:/upcase}/}\",",
 			"\t\"format\": \"$2\",",
 			"\t\"format-version\": \"$3\"",
 			"}"
