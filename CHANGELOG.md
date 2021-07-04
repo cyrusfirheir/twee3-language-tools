@@ -7,6 +7,22 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.13.14
+
+Adds:
+
+- SugarCube 2 Snippets:
+	- Link (Same Passage)
+	- Print (Wrap)
+	- Script (Wrap)
+
+Changes:
+
+- SugarCube 2 Snippets:
+	- Added missing quotation marks to Audio and DOM macros
+
+---
+
 ## v0.13.0
 
 Adds:
