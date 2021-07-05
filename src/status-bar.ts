@@ -6,6 +6,7 @@ export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vsc
     StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   };
   StatusBarItem.text = `Passages: ${passages.length}`;
+  StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length}\nNumber of Story Passages: Unavailable (WIP)`;
   if (passages.length != 0) {
     StatusBarItem.show();
   } else {
