@@ -72,7 +72,8 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 	- [Screenshot - macro pairs](docs/images/sc2-macro-tag-matching.png)
 - Snippets. (Contributed by @rambdev) Type macro names to get code snippet inserts with placeholder values:  
 	- [Screenshot - snippet](docs/images/sc2-snippets.png)
-	- [screenshot - snippet insert](docs/images/sc2-snippets-insert.png)
+	- [Screenshot - snippet insert](docs/images/sc2-snippets-insert.png)
+	- [Screenshot - wrapping snippets](docs/images/sc2-snippets-wrap.png)
 - Diagnostics:  
 	- Macros with opening tags but no closes (and vice-versa):  
 		- [Screenshot - diagnostics](docs/images/sc2-unclosed-macro.png)

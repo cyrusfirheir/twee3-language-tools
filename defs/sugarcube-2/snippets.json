@@ -434,7 +434,7 @@
 	"Macro: goto": {
 		"prefix": ":goto",
 		"body": [
-			"<<goto \"${1:passage}\">>>>"
+			"<<goto \"${1:passage}\">>"
 		]
 	},
 	"Macro: repeat": {
