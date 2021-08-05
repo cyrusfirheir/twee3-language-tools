@@ -230,13 +230,13 @@
 	"Macro: option": {
 		"prefix": ":option",
 		"body": [
-			"<<option ${1:label}>>\n\t"
+			"<<option ${1:label}>>\n"
 		]
 	},
 	"Macro: optionsfrom": {
 		"prefix": ":optionsfrom",
 		"body": [
-			"<<optionsfrom ${1:collection}>>\n\t"
+			"<<optionsfrom ${1:collection}>>\n"
 		]
 	},
 	"Macro: linkappend": {
@@ -260,7 +260,7 @@
 	"Macro: listbox": {
 		"prefix": ":listbox",
 		"body": [
-			"<<listbox \"${1:receiverName}\">>\n\t\n<</listbox>>"
+			"<<listbox \"${1:receiverName}\">>\n\t$0\n<</listbox>>"
 		]
 	},
 	"Macro: numberbox": {
