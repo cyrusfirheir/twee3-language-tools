@@ -18,6 +18,7 @@ import * as sc2ca from './sugarcube-2/code-actions';
 import { packer } from './story-map/packer';
 
 import { passageCounter } from './status-bar'
+import { sbStoryMapConfirmationDialog } from './status-bar';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -28,6 +29,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
 
 	const sbPassageCounter = passageCounter(ctx);
+
 
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
@@ -265,5 +267,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.Unrecognized(), {
 			providedCodeActionKinds: sc2ca.Unrecognized.providedCodeActionKinds
 		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passageCounter.clickCheck", sbStoryMapConfirmationDialog)
 	);
 };

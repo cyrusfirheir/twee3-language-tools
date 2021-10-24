@@ -5,8 +5,9 @@ export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vsc
   if (!StatusBarItem) {
     StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   };
-  StatusBarItem.text = `Passages: ${passages.length}`;
-  StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length}\nNumber of Story Passages: (WIP)`;
+  StatusBarItem.text = `Passage Count: ${passages.length}`;
+  StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length}\nNumber of Story Passages: (WIP)\nClick to open Story Map`;
+  StatusBarItem.command = "twee3LanguageTools.passageCounter.clickCheck"
   if (passages.length != 0) {
     StatusBarItem.show();
   } else {
@@ -16,3 +17,20 @@ export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vsc
   
 };
 
+export async function sbStoryMapConfirmationDialog() {
+    const settings = vscode.workspace.getConfiguration("twee3LanguageTools.passageCounter");
+    const confirmation = settings.get("openStoryMapWithoutConfirmation");
+    if (confirmation) {
+        vscode.commands.executeCommand("twee3LanguageTools.storyMap.show");
+    } else {
+      const answer = await vscode.window.showInformationMessage(
+        "Would you like to open the Story Map?\n(Opens in default external browser)",
+        { modal: true },
+        "Open This Time", "Always Open"
+      );
+        switch (answer) {
+            case "Always Open": settings.update("openStoryMapWithoutConfirmation", true);
+            case "Open This Time": vscode.commands.executeCommand("twee3LanguageTools.storyMap.show");
+        }
+    }
+}

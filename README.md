@@ -164,7 +164,7 @@ Manual settings:
 - `twee3LanguageTools.directories.include`: Directories in which to look for twee files. Use glob patterns *relative* to the root of the workspace folders (e.g. `src/unprocessed/twee`, `src/static`, `external`). (Searches the entire workspace by default.)  
 - `twee3LanguageTools.directories.exclude`: Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened.  
 ⠀
-- `twee3LanguageTools.storyMap.unusedPortClosingDelay`: Duration in milliseconds before the story-map server port is closed after the UI in the browser window has been closed. (`5000` by default.)
+- `twee3LanguageTools.storyMap.unusedPortClosingDelay`: Duration in milliseconds before the Story Map server port is closed after the UI in the browser window has been closed. (`5000` by default.)
 ⠀
 - `twee3LanguageTools.passage.list`: Display list of passages with quick 'jump' links? (`false` by default.)  
 - `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin, folder of origin, or passage tags.)  
