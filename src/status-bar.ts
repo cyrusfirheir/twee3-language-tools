@@ -1,12 +1,20 @@
 import * as vscode from "vscode";
+import { Passage } from "./passage";
+import { parseRawText } from "./parse-text"
 
 export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vscode.StatusBarItem) {
-  const passages = ctx.workspaceState.get("passages", []);
+  const passages = ctx.workspaceState.get("passages", []) as Passage[];
+  let specCount = 0;
+  for (let i = 0;i < passages.length;i++) {
+    if (passages[i].tags?.includes("script") || passages[i].tags?.includes("stylesheet") || ["PassageDone", "PassageFooter", "PassageHeader", "PassageReady", "StoryAuthor", "StoryBanner", "StoryCaption", "StoryDisplayTitle", "StoryInit", "StoryInterface", "StoryMenu", "StorySettings", "StoryShare", "StorySubtitle", "StoryTitle", "StoryData",].includes(passages[i].name)) {
+      specCount ++;
+    }
+  };
   if (!StatusBarItem) {
     StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   };
   StatusBarItem.text = `Passage Count: ${passages.length}`;
-  StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length}\nNumber of Story Passages: (WIP)\nClick to open Story Map`;
+  StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length}\nNumber of Story Passages: ${passages.length - specCount}\nClick to open Story Map`;
   StatusBarItem.command = "twee3LanguageTools.passageCounter.clickCheck"
   if (passages.length != 0) {
     StatusBarItem.show();
