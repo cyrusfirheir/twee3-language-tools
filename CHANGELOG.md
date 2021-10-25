@@ -7,6 +7,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.14.0
+
+Adds:
+
+- Workspace statistics Status bar item (thanks to @rambdev).
+
+---
+
 ## v0.13.15
 
 Changes:

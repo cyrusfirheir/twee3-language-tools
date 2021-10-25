@@ -27,7 +27,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 {
 	"ifid": "<ifid here>",
 	"format": "<story format here, i.e. 'SugarCube'>",
-	"format-version": "<story format version here, i.e. '2.34.1'>"
+	"format-version": "<story format version here, i.e. '2.35.0'>"
 }
 ```
 
@@ -45,6 +45,10 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 - A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  
 
     ![Passage List](docs/images/twee-passage-list.png)  
+
+- Workspace statistics Status bar item (WIP) (Contributed by @rambdev).  
+	- Total passage count (includes Story passages, Special passages, and Script/Stylesheet-tagged passages)  
+	- Story passage count  
 
 - A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
 
