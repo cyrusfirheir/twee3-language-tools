@@ -281,7 +281,12 @@
 				"twee3LanguageTools.storyMap.unusedPortClosingDelay": {
 					"type": "integer",
 					"default": 5000,
-					"markdownDescription": "Duration in milliseconds before the story-map server port is closed after the UI in the browser window has been closed."
+					"markdownDescription": "Duration in milliseconds before the Story Map server port is closed after the UI in the browser window has been closed."
+				},
+				"twee3LanguageTools.passageCounter.openStoryMapWithoutConfirmation": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "Disables prompt for opening Story Map by clicking the passage counter in the status bar."
 				}
 			}
 		},
@@ -312,7 +317,8 @@
 		"commands": [
 			{
 				"command": "twee3LanguageTools.storyMap.show",
-				"title": "Show Story-map",
+				"title": "Show Story Map",
+				"category": "Twee3 Language Tools",
 				"icon": {
 					"dark": "res/dark/storyMapTurnOn.svg",
 					"light": "res/light/storyMapTurnOn.svg"
@@ -320,7 +326,7 @@
 			},
 			{
 				"command": "twee3LanguageTools.storyMap.stop",
-				"title": "Stop Story-map server",
+				"title": "Stop Story Map server",
 				"icon": {
 					"dark": "res/dark/storyMapTurnOff.svg",
 					"light": "res/light/storyMapTurnOff.svg"
