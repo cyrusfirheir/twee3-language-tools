@@ -16,6 +16,9 @@ import { PassageListProvider, Passage, jumpToPassage } from './passage';
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 import { packer } from './story-map/packer';
+
+import { passageCounter } from './status-bar'
+import { sbStoryMapConfirmationDialog } from './status-bar';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -24,6 +27,9 @@ const documentSelector: vscode.DocumentSelector = {
 
 export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
+
+	const sbPassageCounter = passageCounter(ctx);
+
 
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
@@ -45,6 +51,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			tweeProjectConfig(ctx, doc);
 			updateDiagnostics(ctx, doc, collection);
 			await parseText(ctx, doc);
+			passageCounter(ctx, sbPassageCounter);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		})
 	}
@@ -66,7 +73,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUIWrapper);
 
 	ctx.subscriptions.push(
-		mapShowCommand, mapStopCommand,
+		mapShowCommand, mapStopCommand, sbPassageCounter,
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(ctx), legend)
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
@@ -188,6 +195,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			await parseText(ctx, document);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
+			passageCounter(ctx, sbPassageCounter);
 		})
 		,
 		vscode.window.registerTreeDataProvider(
@@ -259,5 +267,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.Unrecognized(), {
 			providedCodeActionKinds: sc2ca.Unrecognized.providedCodeActionKinds
 		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.passageCounter.clickCheck", sbStoryMapConfirmationDialog)
 	);
 };
