@@ -44,11 +44,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	}
 
 	await start();
-
-	const documents: vscode.TextDocument[] = [];
 	
-	function prepare(file: string) {
-		vscode.workspace.openTextDocument(file).then(async doc => {
+	async function prepare() {
+		const documents: vscode.TextDocument[] = [];
+
+		const fg = fileGlob();
+		for (const file of fg) {
+			const doc = await vscode.workspace.openTextDocument(file);
 			await changeStoryFormat(doc);
 			tweeProjectConfig(ctx, doc);
 			await parseText(ctx, doc);
@@ -56,11 +58,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			
 			documents.push(doc);
-		});
+		}
+		documents.forEach(doc => updateDiagnostics(ctx, doc, collection));
 	}
 
-	fileGlob().forEach(file => prepare(file));
-	documents.forEach(doc => updateDiagnostics(ctx, doc, collection));
+	prepare();
 
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
@@ -137,9 +139,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 				passageListProvider.refresh();
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.directories")) {
-				start().then(() => {
-					fileGlob().forEach(file => prepare(file));
-				});
+				start().then(prepare);
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.cache.argumentInformation") && !vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.cache").get(".argumentInformation")) {
 				// The configuration for this setting has been changed and it is now false, so we

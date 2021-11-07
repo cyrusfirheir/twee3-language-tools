@@ -7,7 +7,7 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
-## v0.14.1
+## v0.14.2
 
 Fixes:
 
