@@ -172,7 +172,7 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>):
             // Overwrite the previous parameters with the parsed version
             macroDefinition.parameters = new Parameters(macroDefinition.parameters);
         } catch (err) {
-            errors.push(new Error(`Error while parsing parameters of '${macroDefinition.name}': ${err.message || "Failed to get error message, please report this."}`));
+            errors.push(new Error(`Error while parsing parameters of '${macroDefinition.name}': ${(err as Error).message || "Failed to get error message, please report this."}`));
         }
     }
     return errors;

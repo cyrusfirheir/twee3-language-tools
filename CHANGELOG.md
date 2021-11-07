@@ -7,6 +7,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.14.1
+
+Fixes:
+
+- Initial workspace diagnostics running in parallel with initial passage discovery, which resulted in nonexistent passage references.
+
+---
+
 ## v0.14.0
 
 Adds:

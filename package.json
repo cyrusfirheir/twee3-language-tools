@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.14.0",
+	"version": "0.14.1",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -266,7 +266,7 @@
 				"twee3LanguageTools.sugarcube-2.error.parameterValidation": {
 					"type": "boolean",
 					"default": true,
-					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Depends upon `argumentParsing`."
+					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Requires `argumentParsing` to be on."
 				},
 				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
 					"type": "boolean",

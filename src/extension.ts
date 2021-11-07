@@ -44,19 +44,23 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	}
 
 	await start();
+
+	const documents: vscode.TextDocument[] = [];
 	
 	function prepare(file: string) {
 		vscode.workspace.openTextDocument(file).then(async doc => {
 			await changeStoryFormat(doc);
 			tweeProjectConfig(ctx, doc);
-			updateDiagnostics(ctx, doc, collection);
 			await parseText(ctx, doc);
 			passageCounter(ctx, sbPassageCounter);
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-		})
+			
+			documents.push(doc);
+		});
 	}
 
 	fileGlob().forEach(file => prepare(file));
+	documents.forEach(doc => updateDiagnostics(ctx, doc, collection));
 
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
