@@ -46,25 +46,24 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	await start();
 
 	async function prepare() {
-		const documents: vscode.TextDocument[] = [];
+		const fg = fileGlob();
 
-		await Promise.all(fileGlob().map(async file => {
+		for (const file of fg) {
 			const doc = await vscode.workspace.openTextDocument(file);
 
 			await parseText(ctx, doc);
 			passageCounter(ctx, sbPassageCounter);
 
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-
-			documents.push(doc);
-		}));
+		}
 
 		await tweeProjectConfig(ctx);
 
-		return Promise.all(documents.map(async doc => {
+		for (const file of fg) {
+			const doc = await vscode.workspace.openTextDocument(file);
 			await changeStoryFormat(doc);
 			updateDiagnostics(ctx, doc, collection);
-		}));
+		}
 	}
 
 	await prepare();
