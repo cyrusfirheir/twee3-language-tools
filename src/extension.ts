@@ -62,7 +62,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		documents.forEach(doc => updateDiagnostics(ctx, doc, collection));
 	}
 
-	prepare();
+	await prepare();
 
 	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
 		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
