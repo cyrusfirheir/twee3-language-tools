@@ -44,22 +44,27 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	}
 
 	await start();
-	
+
 	async function prepare() {
 		const documents: vscode.TextDocument[] = [];
 
-		const fg = fileGlob();
-		for (const file of fg) {
+		await Promise.all(fileGlob().map(async file => {
 			const doc = await vscode.workspace.openTextDocument(file);
-			await changeStoryFormat(doc);
-			tweeProjectConfig(ctx, doc);
+
 			await parseText(ctx, doc);
 			passageCounter(ctx, sbPassageCounter);
+
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
-			
+
 			documents.push(doc);
-		}
-		documents.forEach(doc => updateDiagnostics(ctx, doc, collection));
+		}));
+
+		await tweeProjectConfig(ctx);
+
+		return Promise.all(documents.map(async doc => {
+			await changeStoryFormat(doc);
+			updateDiagnostics(ctx, doc, collection);
+		}));
 	}
 
 	await prepare();
@@ -115,9 +120,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			}
 		})
 		,
-		vscode.workspace.onDidOpenTextDocument(document => {
+		vscode.workspace.onDidOpenTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
-			changeStoryFormat(document);
+			await changeStoryFormat(document);
 			updateDiagnostics(ctx, document, collection);
 		})
 		,
@@ -128,11 +133,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
-				fileGlob().forEach(file => {
-					vscode.workspace.openTextDocument(file).then(doc => {
-						changeStoryFormat(doc);
-						updateDiagnostics(ctx, doc, collection);
-					});
+				fileGlob().forEach(async file => {
+					const doc = await vscode.workspace.openTextDocument(file);
+					await changeStoryFormat(doc);
+					updateDiagnostics(ctx, doc, collection);
 				});
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.passage")) {
@@ -195,11 +199,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidSaveTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
-			tweeProjectConfig(ctx, document);
+
 			await parseText(ctx, document);
+			passageCounter(ctx, sbPassageCounter);
+
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
-			passageCounter(ctx, sbPassageCounter);
+
+			tweeProjectConfig(ctx);
 		})
 		,
 		vscode.window.registerTreeDataProvider(
