@@ -30,7 +30,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	const sbPassageCounter = passageCounter(ctx);
 
-
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
 

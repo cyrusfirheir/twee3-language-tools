@@ -8,7 +8,7 @@
         :data-action="element.id"
         :key="`toolbar-id-${element.id}`"
         :class="{ active: element.active }"
-        :title="`element.text (${element.active ? 'On' : 'Off'})`"
+        :title="`${element.text}: ${element.active ? 'On' : 'Off'}`"
         @click="onToggleClick(element)"
       >
         <span class="icon" :class="element.id"></span>

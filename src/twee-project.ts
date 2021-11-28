@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { validate } from "uuid";
-import headsplit from "./headsplit";
 import { Passage } from "./passage";
 
 export interface StoryData {
