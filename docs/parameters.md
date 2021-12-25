@@ -18,7 +18,7 @@ Will provide a diagnostic at the start of the link, telling you that it is malfo
 
 Now, this is useful and helps catch bugs, making so you have to spend less time manually loading passages for testing, but what about macros that do *fancy* custom argument parsing? Such as `<<set>>`, `<<switch>>`, `<<for>>` and more?
 These have `skipArgs` set on their definitions, example macro that doesn't want its argument's syntax to be checked (using JSON, but the same applies to YAML):
-```
+```json
 "fancy": {
     "name": "fancy",
     "description": "Performs fancy text manipulation!",
@@ -70,14 +70,21 @@ So, to resolve these cases:
 We have a way of specifying the types of the values a macro could receive, which is done - as usual - within the file which defines all of the macros that your project has:
 A field named `"parameters"` specifies all of the possible variants (which can be roughly thought of as overloads in some programming languages).  
 Here is how one might implement the `linkreplace` macro.
+(in JSON):
 ```json
 "linkreplace": {
     "name": "linkreplace",
-    "parameters": {
-        // The name of the variant and its format.
-        "primary": "text |+ 'transition'|'t8n'"
-    }
+    "parameters": [
+        "text |+ 'transition'|'t8n'"
+    ]
 }
+```
+(in YAML):
+```yaml
+linkreplace:
+  name: linkreplace
+  parameters:
+    - "text |+ 'transition'|'t8n'"
 ```
 Now, this likely looks a bit arcane.  
 The simplest part is the first element of the array: `"text"`, what is this?  
