@@ -159,7 +159,7 @@
 		"name": "checkbox",
 		"description": "Creates a checkbox, used to modify the value of the variable with the given name.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<checkbox receiverName uncheckedValue checkedValue [autocheck|checked]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-checkbox)",
 		"parameters": [
-			"text &+ bool|text|null|undefined|number|NaN &+ bool|text|null|undefined|number|NaN |+ 'autocheck'|'checked'"
+			"receiver &+ bool|text|null|undefined|number|NaN &+ bool|text|null|undefined|number|NaN |+ 'autocheck'|'checked'"
 		]
 	},
 	"cycle": {
@@ -171,7 +171,7 @@
 		"container": true,
 		"description": "Creates a cycling link, used to modify the value of the variable with the given name. The cycling options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<cycle receiverName [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n<</cycle>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-cycle)",
 		"parameters": [
-			"text |+ 'autoselect'"
+			"receiver |+ 'autoselect'"
 		]
 	},
 	"option": {
@@ -236,37 +236,37 @@
 		"container": true,
 		"description": "Creates a listbox, used to modify the value of the variable with the given name. The list options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<listbox receiverName [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n<</listbox>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-listbox)",
 		"parameters": [
-			"text |+ 'autoselect'"
+			"receiver |+ 'autoselect'"
 		]
 	},
 	"numberbox": {
 		"name": "numberbox",
 		"description": "Creates a number input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<numberbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-numberbox)",
 		"parameters": [
-			"text &+ number |+ 'autofocus'",
-			"text &+ number |+ passage|linkNoSetter |+ 'autofocus'"
+			"receiver &+ number |+ 'autofocus'",
+			"receiver &+ number |+ passage|linkNoSetter |+ 'autofocus'"
 		]
 	},
 	"radiobutton": {
 		"name": "radiobutton",
 		"description": "Creates a radio button, used to modify the value of the variable with the given name. Multiple `<<radiobutton>>` macros may be set up to modify the same variable, which makes them part of a radio button group.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<radiobutton receiverName checkedValue [autocheck|checked]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-radiobutton)",
 		"parameters": [
-			"text &+ bool|number|text|null|undefined|NaN |+ 'autocheck'|'checked'"
+			"receiver &+ bool|number|text|null|undefined|NaN |+ 'autocheck'|'checked'"
 		]
 	},
 	"textarea": {
 		"name": "textarea",
 		"description": "Creates a multiline text input block, used to modify the value of the variable with the given name.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<textarea receiverName defaultValue [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-textarea)",
 		"parameters": [
-			"text &+ text |+ 'autofocus'"
+			"receiver &+ text |+ 'autofocus'"
 		]
 	},
 	"textbox": {
 		"name": "textbox",
 		"description": "Creates a text input box, used to modify the value of the variable with the given name, optionally forwarding the player to another passage.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<textbox receiverName defaultValue [passage] [autofocus]>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-textbox)",
 		"parameters": [
-			"text &+ text |+ 'autofocus'",
-			"text &+ text |+ passage|linkNoSetter |+ 'autofocus'"
+			"receiver &+ text |+ 'autofocus'",
+			"receiver &+ text |+ passage|linkNoSetter |+ 'autofocus'"
 		]
 	},
 	

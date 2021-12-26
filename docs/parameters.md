@@ -129,6 +129,7 @@ There are a number of parameter types:
 - `string`: A quoted string. You may want to use `text` instead. Ex: ``
 - `text`: Arbitrary text, quoted or not. Includes much of the above (except for links/images). Ex: `<<ex test>>` (text: `test`), `<<ex "lorem ipsum">>` (text: `lorem ipsum`), `<<ex 24.9>>` (text: `24.9`).
 - `passage`: A passage name. (Note: Not currently verified to be valid).
+- `receiver`: The name of a SugarCube variable as a string. Such as `<<textbox "$name">>`, where it writes the value to the variable `$name`.
 There are more proposed parameter types that may be implemented at a future data, if you have suggestions for useful types, please open an issue on the Github repository.
 
 #### Parameter Types Warning

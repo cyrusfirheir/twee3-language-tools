@@ -58,6 +58,29 @@ export const parameterTypes: ParameterType[] = [
     // This allows so many because they could all be turned-into/considered text.
     makeSimpleParameterType("text", "Argument is not text", t => t === ArgType.Bareword || t === ArgType.String || t === ArgType.True || t === ArgType.False || t === ArgType.Null || t === ArgType.NaN || t === ArgType.Number),
     {
+        name: ["receiver"],
+        validate(info: ArgumentInfo): Error | Warning | null {
+            if (info.arg.type === ArgType.String) {
+                let text = info.arg.text;
+                if (text[0] === "_" || text[0] === "$") {
+                    if (text.length === 1) {
+                        return new Error("Variable receiver had sigil but did not have an actual name");
+                    } else {
+                        return null;
+                    }
+                } else {
+                    // TODO: We could maybe have a quick-fix for this.
+                    return new Error("Text given to variable receiver did not have a sigil. Did you mean to write $" + text + " or _" + text + "?");
+                }
+            } else if (info.arg.type === ArgType.Expression || info.arg.type === ArgType.SettingsSetupAccess || info.arg.type === ArgType.Variable) {
+                // We just have to assume that they're correct
+                return null;
+            } else {
+                return new Error("Argument is not a potentially valid variable receiver");
+            }
+        }
+    },
+    {
         name: ["linkNoSetter"],
         validate(info: ArgumentInfo): Error | Warning | null {
             if (info.arg.type !== ArgType.Link) {
