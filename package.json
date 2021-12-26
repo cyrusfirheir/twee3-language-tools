@@ -383,6 +383,14 @@
 				"command": "twee3LanguageTools.sc2.addAllUnrecognizedMacros",
 				"title": "Add All Unrecognized Macros to Definition File",
 				"category": "Twee3 Language Tools"
+			},
+			{
+				"command": "twee3LanguageTools.toggleItalics",
+				"title": "Toggles italics wherever the cursor is"
+			},
+			{
+				"command": "twee3LanguageTools.toggleBold",
+				"title": "Toggles boldness wherever the cursor is"
 			}
 		],
 		"menus": {
@@ -426,7 +434,19 @@
 					"group": "inline"
 				}
 			]
-		}
+		},
+		"keybindings": [
+			{
+				"key": "ctrl+i",
+				"command": "twee3LanguageTools.toggleItalics",
+				"when": "editorTextFocus && !editorReadonly"
+			},
+			{
+				"key": "ctrl+b",
+				"command": "twee3LanguageTools.toggleBold",
+				"when": "editorTextFocus && !editorReadOnly"
+			}
+		]
 	},
 	"devDependencies": {
 		"@types/express": "^4.17.9",
