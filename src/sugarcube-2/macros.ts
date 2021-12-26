@@ -4,7 +4,7 @@ import { Arg, ArgType, ArgumentParseError, makeMacroArgumentsRange, parseArgumen
 import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 import { Passage } from '../passage';
-import { isArrayEqual } from './validation';
+import { isArrayEqual, isObjectSimpleEqual } from './validation';
 
 export type MacroName = string;
 export interface macro {
@@ -28,6 +28,9 @@ export interface macroDef {
 	deprecated?: boolean;
 	deprecatedSuggestions?: string[];
 	skipArgs?: boolean,
+	decoration?: vscode.DecorationRenderOptions,
+	// The created decoration type, this is filled when the macro is needed
+	decoration_type?: vscode.TextEditorDecorationType
 }
 
 export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
@@ -106,11 +109,25 @@ const updateMacroCache = function () {
 					if (!isMacroFunctionallyEquivalent(lastMacroCache[key], list[key])) {
 						// They weren't equivalent, thus we remove it from cache.
 						argumentCache.clearMacro(key);
+						lastMacroCache[key].decoration_type?.dispose();
+					} else {
+						// Copy over the decoration type
+						list[key].decoration_type = lastMacroCache[key].decoration_type;
 					}
 				} else {
 					// The macro no longer exists. Remove it from cache.
 					argumentCache.clearMacro(key);
+					// We have to clean up the type
+					lastMacroCache[key].decoration_type?.dispose();
 				}
+			}
+		}
+
+		for (const key in list) {
+			let macro: macroDef = list[key];
+			// If it has a decoration definition but we haven't created the type yet
+			if (macro.decoration && !macro.decoration_type) {
+				macro.decoration_type = vscode.window.createTextEditorDecorationType(macro.decoration);
 			}
 		}
 
@@ -173,7 +190,8 @@ function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean
 		isArrayEqual(left.parents, right.parents) &&
 		left.deprecated === right.deprecated &&
 		isArrayEqual(left.deprecatedSuggestions, right.deprecatedSuggestions) &&
-		left.skipArgs === right.skipArgs;
+		left.skipArgs === right.skipArgs &&
+		isObjectSimpleEqual(left.decoration, right.decoration);
 }
 
 interface CollectedMacros {
@@ -795,4 +813,77 @@ export const hover = async function (document: vscode.TextDocument, position: vs
 
 	// There was no macro intersecting, thus we have no hover result.
 	return null;
+}
+
+export const updateDecorations = async function (ctx: vscode.ExtensionContext, editor: vscode.TextEditor) {
+	interface MacroData {
+		el: macro,
+		def: macroDef
+	}
+
+	if (!vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2").get("definedMacroDecorations")) {
+        return;
+    }
+
+	let collected = await collectCache.get(editor.document);
+	let macroDefinitions = await macroList();
+
+	await clearDecorations(ctx, editor);
+
+	let entries: (MacroData | null)[] = collected.macros.map(el => {
+		let def: macroDef;
+		if (el.name.startsWith("end") && macroDefinitions[el.name.substring(3)]?.container) {
+			def = macroDefinitions[el.name.substring(3)];
+			el.open = false;
+		} else {
+			def = macroDefinitions[el.name];
+		}
+
+		return {el, def};
+	})
+	.filter(v => v.def.decoration_type !== undefined);
+
+	// This could be cleaner
+	let hasEntries = entries.length !== 0;
+	while (hasEntries) {
+		let active = [];
+		let target = null;
+		let dec_type = null;
+		for (let i = 0; i < entries.length; i++) {
+			let entry = entries[i];
+			if (target === null) {
+				if (entry !== null) {
+					target = entry.def.name;
+					dec_type = entry.def.decoration_type;
+				}
+			}
+
+			if (entry === null) {
+				continue;
+			}
+
+			if (entry.def.name === target) {
+				active.push(entry.el.range);
+				entries[i] = null;
+			}
+		}
+
+		if (dec_type) {
+			editor.setDecorations(dec_type, active)
+		}
+
+		if (target === null) {
+			hasEntries = false;
+		}
+	}
+}
+
+export const clearDecorations = async function(ctx: vscode.ExtensionContext, editor: vscode.TextEditor) {
+	let macroDefinitions = await macroList();
+	for (let key in macroDefinitions) {
+		let macro = macroDefinitions[key];
+		if (macro.decoration_type) {
+			editor.setDecorations(macro.decoration_type, []);
+		}
+	}
 }

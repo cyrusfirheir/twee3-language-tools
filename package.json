@@ -268,6 +268,11 @@
 					"default": true,
 					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Requires `argumentParsing` to be on."
 				},
+				"twee3LanguageTools.sugarcube-2.definedMacroDecorations": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "If a macro has a decoration defined for it, it will be displayed when seen in a file."
+				},
 				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
 					"type": "boolean",
 					"default": false,

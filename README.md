@@ -147,6 +147,7 @@ The following properties are currently programmed, even though not all of them a
 - **deprecated** `(boolean)` *optional*: If the macro is deprecated or not. `false` by default.
 - **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array.
 - **parameters** `(object)` *optional*: Allows for macro argument validation. [Read here](docs/parameters.md) for more information.
+- **decoration** `(object)` *optional*: Allows for declaring decorations to be displayed on that macro. Uses [DecorationRenderOptions](https://code.visualstudio.com/api/references/vscode-api#DecorationRenderOptions)' fields. Requires `definedMacroDecorations` setting to be enabled.
 
 **NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following file can also be used as an example):
 - `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml))
@@ -178,6 +179,7 @@ Manual settings:
 - `twee3LanguageTools.twee-3.error.storyData.format`: Throw an error when missing the story format field (`format`) in `StoryData` special passage? (`true` by default.)  
 - `twee3LanguageTools.twee-3.error.storyData.formatVersion`: Throw an error when missing the story format version field (`format-version`) in `StoryData` special passage? (`true` by default.)  
 ⠀
+- `twee3LanguageTools.sugarcube-2.definedMacroDecorations`: Whether to use the decorations field in macro definitions. (`false` by default.)
 - `twee3LanguageTools.sugarcube-2.warning.undefinedMacro`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets? (`true` by default.)  
 - `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax? (`true` by default.)  
