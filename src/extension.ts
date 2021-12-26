@@ -13,6 +13,8 @@ import { fileGlob } from './file-ops';
 
 import { PassageListProvider, Passage, jumpToPassage } from './passage';
 
+import * as formatting from "./formatting";
+
 import * as sc2m from './sugarcube-2/macros';
 import * as sc2ca from './sugarcube-2/code-actions';
 import { packer } from './story-map/packer';
@@ -267,6 +269,28 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", async () => {
 			await sc2ca.addAllUnrecognizedMacros();
+		})
+		,
+		// TODO: Allow configuration for which version Harlowe should use since it supports both ''
+		// and ** for bold, and // and * for italics
+		vscode.commands.registerTextEditorCommand("twee3LanguageTools.toggleItalics", editor => {
+			let languageId = editor.document.languageId;
+			if (languageId === "twee3-sugarcube-2") {
+				formatting.styleByWrapping(editor, "//");
+			} else if (languageId === "twee3-harlowe-3") {
+				formatting.styleByWrapping(editor, "*");
+			}
+			// TODO: Other story format support
+		})
+		,
+		vscode.commands.registerTextEditorCommand("twee3LanguageTools.toggleBold", (editor, edit) => {
+			let languageId = editor.document.languageId;
+			if (languageId === "twee3-sugarcube-2") {
+				formatting.styleByWrapping(editor, "''");
+			}  else if (languageId === "twee3-harlowe-3") {
+				formatting.styleByWrapping(editor, "**");
+			}
+			// TODO: Other story format support
 		})
 		,
 		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
