@@ -70,6 +70,51 @@ export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
     return true;
 }
 
+/**
+ * Performs a surface level comparison of the fields of the two objects
+ * This is probably less efficient than it should be and perhaps should be replaced with lodash's 
+ * isEqual
+ */
+export function isObjectSimpleEqual(left?: Record<string, any>, right?: Record<string, any>): boolean {
+    if (left === right) {
+        // They're the same object
+        return true;
+    } else if (left === undefined || right === undefined) {
+        return false;
+    }
+
+    let left_keys = Object.keys(left);
+    let right_keys = Object.keys(right);
+
+    if (left_keys.length != right_keys.length) {
+        return false;
+    }
+
+    for (let i = 0; i < left_keys.length; i++) {
+        let key = left_keys[i];
+        if (!(key in right)) {
+            return false;
+        }
+
+        if (left[key] !== right[key]) {
+            return false;
+        }
+    }
+
+    for (let i = 0; i < right_keys.length; i++) {
+        let key = right_keys[i];
+        if (!(key in left)) {
+            return false;
+        }
+
+        if (left[key] !== right[key]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 /**
  * Tries getting the evaluated value of a TwineScript passage name.

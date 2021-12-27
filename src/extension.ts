@@ -21,6 +21,7 @@ import { packer } from './story-map/packer';
 
 import { passageCounter } from './status-bar'
 import { sbStoryMapConfirmationDialog } from './status-bar';
+import { updateDecorations, updateTextEditorDecorations } from './decorations';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -117,6 +118,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor && /^twee3.*/.test(editor.document.languageId)) {
 				updateDiagnostics(ctx, editor.document, collection);
+				updateDecorations(ctx, editor);
 			}
 		})
 		,
@@ -124,11 +126,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			if (!/^twee3.*/.test(document.languageId)) return;
 			await changeStoryFormat(document);
 			updateDiagnostics(ctx, document, collection);
+			updateTextEditorDecorations(ctx);
 		})
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
 			if (!/^twee3.*/.test(e.document.languageId)) return;
 			updateDiagnostics(ctx, e.document, collection);
+			updateTextEditorDecorations(ctx);
 		})
 		,
 		vscode.workspace.onDidChangeConfiguration(e => {
@@ -157,6 +161,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking")) {
 				sc2m.argumentCache.clearMacrosUsingPassage();
+			}
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.definedMacroDecorations")) {
+				updateTextEditorDecorations(ctx);
 			}
 		})
 		,
@@ -303,4 +310,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passageCounter.clickCheck", sbStoryMapConfirmationDialog)
 	);
+
+	// This is needed so that on first load, the active file will get colors.
+	updateTextEditorDecorations(ctx);
 };
