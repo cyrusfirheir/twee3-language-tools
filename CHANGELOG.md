@@ -7,6 +7,20 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.15.0
+
+Adds:
+
+- Receiver parameter type for SugarCube 2 macro parameter validation. [PR #64](https://github.com/cyrusfirheir/twee3-language-tools/pull/64)  
+- <kbd>Ctrl + I</kbd> and <kbd>Ctrl + B</kbd> keybindings for italics and bold in SugarCube 2 and Harlowe projects. [PR #66](https://github.com/cyrusfirheir/twee3-language-tools/pull/66)
+- Custom decoration declarations for SugarCube 2 macros. [PR #67](https://github.com/cyrusfirheir/twee3-language-tools/pull/67)
+
+Fixes:
+
+- Parameter documentation improvements.
+
+---
+
 ## v0.14.3
 
 Fixes:
