@@ -147,7 +147,7 @@
 	"button": {
 		"name": "button",
 		"container": true,
-		"description": "Creates a button that silently executes its contents when clicked, optionally forwarding the player to another passage. May be called either with the link text and passage name as separate arguments, with a link markup, or with an image markup.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<button linkText [passageName]>> … <</button>>\n<<button linkMarkup>> … <</button>>\n<<button imageMarkup>> … <</button>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-button)",
+		"description": "Creates a button that silently executes its contents when clicked, optionally forwarding the player to another passage. May be called with either the link text and passage name as separate arguments, a link markup, or an image markup.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<button linkText [passageName]>> … <</button>>\n<<button linkMarkup>> … <</button>>\n<<button imageMarkup>> … <</button>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-button)",
 		"selfClose": true,
 		"parameters": [
 			"text |+ passage",
@@ -169,9 +169,10 @@
 			"optionsfrom"
 		],
 		"container": true,
-		"description": "Creates a cycling link, used to modify the value of the variable with the given name. The cycling options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<cycle receiverName [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n<</cycle>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-cycle)",
+		"description": "Creates a cycling link, used to modify the value of the variable with the given name. The cycling options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<cycle receiverName [once] [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n\t<</cycle>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-cycle)",
 		"parameters": [
-			"receiver |+ 'autoselect'"
+			"text |+ 'autoselect'",
+			"text &+ 'once' |+ 'autoselect'"
 		]
 	},
 	"option": {
@@ -195,7 +196,7 @@
 	"link": {
 		"name": "link",
 		"container": true,
-		"description": "Creates a link that silently executes its contents when clicked, optionally forwarding the player to another passage. May be called either with the link text and passage name as separate arguments, with a link markup, or with an image markup.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<link linkText [passageName]>> … <</link>>\n<<link linkMarkup>> … <</link>>\n<<link imageMarkup>> … <</link>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-link)",
+		"description": "Creates a link that silently executes its contents when clicked, optionally forwarding the player to another passage. May be called with either the link text and passage name as separate arguments, a link markup, or an image markup.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<link linkText [passageName]>> … <</link>>\n<<link linkMarkup>> … <</link>>\n<<link imageMarkup>> … <</link>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-link)",
 		"selfClose": true,
 		"parameters": [
 			"text |+ passage",
@@ -491,9 +492,9 @@
 	"widget": {
 		"name": "widget",
 		"container": true,
-		"description": "Creates a new widget macro (henceforth, widget) with the given name. Widgets allow you to create macros by using the standard macros and markup that you use normally within your story. Widgets may access arguments passed to them via the `$args` array-like object—see below for details.\n\nUsage:\n\n```\n<<widget widgetName>> … <</widget>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-widget)",
+		"description": "Creates a new widget macro (henceforth, widget) with the given name. Widgets allow you to create macros by using the standard macros and markup that you use normally within your story. All widgets may access arguments passed to them via the _args special variable. Block widgets may access the contents they enclose via the _contents special variable.\n\nUsage:\n\n```\n<<widget widgetName [container]>> … <</widget>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-widget)",
 		"parameters": [
-			"text"
+			"text |+ 'container'"
 		]
 	},
 	
