@@ -444,12 +444,22 @@
 			{
 				"key": "ctrl+i",
 				"command": "twee3LanguageTools.toggleItalics",
-				"when": "editorTextFocus && !editorReadonly"
+				"when": "editorTextFocus && !editorReadOnly && editorLangId == twee3-sugarcube-2"
 			},
 			{
 				"key": "ctrl+b",
 				"command": "twee3LanguageTools.toggleBold",
-				"when": "editorTextFocus && !editorReadOnly"
+				"when": "editorTextFocus && !editorReadOnly && editorLangId == twee3-sugarcube-2"
+			},
+			{
+				"key": "ctrl+i",
+				"command": "twee3LanguageTools.toggleItalics",
+				"when": "editorTextFocus && !editorReadOnly && editorLangId == twee3-harlowe-2"
+			},
+			{
+				"key": "ctrl+b",
+				"command": "twee3LanguageTools.toggleBold",
+				"when": "editorTextFocus && !editorReadOnly && editorLangId == twee3-harlowe-2"
 			}
 		]
 	},
