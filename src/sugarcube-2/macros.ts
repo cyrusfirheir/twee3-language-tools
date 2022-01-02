@@ -5,6 +5,7 @@ import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameter
 import * as macroListCore from './macros.json';
 import { Passage } from '../passage';
 import { isArrayEqual, isObjectSimpleEqual } from './validation';
+import { configurationCache, getConfiguration, parseConfiguration, updateConfigurationCache } from './configuration';
 
 export type MacroName = string;
 export interface macro {
@@ -47,119 +48,58 @@ export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
 
 export const macroRegex = new RegExp(`<<(/|end)?(${macroNamePattern})(?:\\s*)((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\\\n])*?\`)|(?:"(?:\\\\.|[^"\\\\\\n])*?")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)(/)?>>`, 'gm');
 
-const macroFileWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-	"**/*.twee-config.{json,yaml,yml}",
-	false,
-	false,
-	false,
-);
-macroFileWatcher.onDidChange(async (e) => {
-	await updateMacroCache();
-	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
-});
-macroFileWatcher.onDidCreate(async (e) => {
-	await updateMacroCache();
-	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
-});
-macroFileWatcher.onDidDelete(async (e) => {
-	await updateMacroCache();
-	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
-});
-
-/**
- * Cache of macro definitions.
- * Updated whenever the files change.
- */
-let macroCache: Promise<Record<string, macroDef>> | null = null;
 export const macroList = function (): Promise<Record<string, macroDef>> {
-	if (macroCache === null) {
-		updateMacroCache();
-	}
-
-	if (macroCache === null) {
-		// Macro cache is still null.. probably an error.
-		// Just return a promise for an empty object.
-		return Promise.resolve({});
-	} else {
-		// After updating macro list, it should not be null.
-		return macroCache;
-	}
+	return getConfiguration().then(config => config.macros);
 }
 
 /**
- * Update the cache with by parsing the files.
+ * Helper function to update the macros as needed
  */
-const updateMacroCache = function () {
-	// Essentially we get the last macroCache (if there was one) and the parsed macros
-	let list = Promise.all([macroCache, parseMacroList()])
-		.then(([lastMacroCache, list]) => {
-		// Before we cache it, we parse the parameters into a more useful format.
-		let errors = parseMacroParameters(list);
-		// We can continue despite errors from parsing the parameters, but we report them.
-		if (errors.length > 0) {
-			// Note: Since this is called early on, these messages might not be displayed.
-			let errorMessages: string = errors.map(err => err.message).join(", \n");
-			vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
-		}
+export const onUpdateMacroCache = function (lastMacroCache: Record<string, macroDef> | undefined, list: Record<string, macroDef>) {
+	// Before we cache it, we parse the parameters into a more useful format.
+	let errors = parseMacroParameters(list);
+	// We can continue despite errors from parsing the parameters, but we report them.
+	if (errors.length > 0) {
+		// Note: Since this is called early on, these messages might not be displayed.
+		let errorMessages: string = errors.map(err => err.message).join(", \n");
+		vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
+	}
 
-		// Check for changed macros and clear those from the arguments cache.
-		if (lastMacroCache !== null) {
-			for (const key in lastMacroCache) {
-				if (key in list) {
-					if (!isMacroFunctionallyEquivalent(lastMacroCache[key], list[key])) {
-						// They weren't equivalent, thus we remove it from cache.
-						argumentCache.clearMacro(key);
-						lastMacroCache[key].decoration_type?.dispose();
-					} else {
-						// Copy over the decoration type
-						list[key].decoration_type = lastMacroCache[key].decoration_type;
-					}
-				} else {
-					// The macro no longer exists. Remove it from cache.
+	// Check for changed macros and clear those from the arguments cache.
+	if (lastMacroCache) {
+		for (const key in lastMacroCache) {
+			if (key in list) {
+				if (!isMacroFunctionallyEquivalent(lastMacroCache[key], list[key])) {
+					// They weren't equivalent, thus we remove it from cache.
 					argumentCache.clearMacro(key);
-					// We have to clean up the type
 					lastMacroCache[key].decoration_type?.dispose();
+				} else {
+					// Copy over the decoration type
+					list[key].decoration_type = lastMacroCache[key].decoration_type;
 				}
+			} else {
+				// The macro no longer exists. Remove it from cache.
+				argumentCache.clearMacro(key);
+				// We have to clean up the type
+				lastMacroCache[key].decoration_type?.dispose();
 			}
 		}
+	}
 
-		for (const key in list) {
-			let macro: macroDef = list[key];
-			// If it has a decoration definition but we haven't created the type yet
-			if (macro.decoration && !macro.decoration_type) {
-				macro.decoration_type = vscode.window.createTextEditorDecorationType(macro.decoration);
-			}
+	for (const key in list) {
+		let macro: macroDef = list[key];
+		// If it has a decoration definition but we haven't created the type yet
+		if (macro.decoration && !macro.decoration_type) {
+			macro.decoration_type = vscode.window.createTextEditorDecorationType(macro.decoration);
 		}
-
-		return list;
-	}, function () {
-		// No list.
-		return null;
-	});
-
-	macroCache = list;
-	return macroCache;
+	}
 }
 
 /**
  * Parses the macros from the files without caching.
  */
 const parseMacroList = async function () {
-	let list: any = Object.assign(Object.create(null), macroListCore);
-
-	let customList: any = {};
-
-	for (let v of await vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/node_modules/**")) {
-		let file = await vscode.workspace.openTextDocument(v);
-		try {
-			customList = yaml.parse(file.getText())["sugarcube-2"]?.macros || {};
-		} catch (ex) {
-			vscode.window.showErrorMessage(`\nCouldn't parse ${file.fileName}!\n\n${ex}\n\n`);
-		}
-		list = Object.assign(list, customList);
-	}
-
-	return list;
+	return (await parseConfiguration()).macros;
 };
 
 
