@@ -171,8 +171,8 @@
 		"container": true,
 		"description": "Creates a cycling link, used to modify the value of the variable with the given name. The cycling options are populated via `<<option>>` and/or `<<optionsfrom>>`.\n\nSEE: [Interactive macro warning](https://www.motoslave.net/sugarcube/2/docs/#macros-interactive-warning)\n\nUsage:\n\n```\n<<cycle receiverName [once] [autoselect]>>\n\t[<<option label [value [selected]]>> …]\n\t[<<optionsfrom collection>> …]\n\t<</cycle>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-cycle)",
 		"parameters": [
-			"text |+ 'autoselect'",
-			"text &+ 'once' |+ 'autoselect'"
+			"receiver |+ 'autoselect'",
+			"receiver &+ 'once' |+ 'autoselect'"
 		]
 	},
 	"option": {
