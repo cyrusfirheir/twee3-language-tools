@@ -781,6 +781,7 @@ export const updateDecorations = async function (ctx: vscode.ExtensionContext, e
 
 		return {el, def};
 	})
+	.filter(v => v.def !== undefined)
 	.filter(v => v.def.decoration_type !== undefined);
 
 	// This could be cleaner
