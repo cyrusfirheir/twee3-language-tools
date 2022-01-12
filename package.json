@@ -390,6 +390,11 @@
 				"category": "Twee3 Language Tools"
 			},
 			{
+				"command": "twee3LanguageTools.sc2.addAllUnrecognizedMacrosInFile",
+				"title": "Add All Unrecognized Macros in this file to Definition FIle",
+				"category": "Twee3 Language Tools"
+			},
+			{
 				"command": "twee3LanguageTools.toggleItalics",
 				"title": "Toggles italics wherever the cursor is"
 			},

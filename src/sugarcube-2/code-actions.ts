@@ -95,6 +95,35 @@ export const addMacrosToFile = async (macros: Record<string, macroDef>) => {
 	}
 };
 
+export const addAllUnrecognizedMacrosInCurrentFile = async (document: vscode.TextDocument) => {
+	if (document.languageId !== "twee3-sugarcube-2") {
+		return;
+	}
+
+	let macroDefinitions = await macroList();
+	let uniqueMacros: Record<string, macroDef> = {};
+
+	let collected = await collectCache.get(document);
+	for (let j = 0; j < collected.macros.length; j++) {
+		let name: MacroName = collected.macros[j].name;
+		let def: macroDef = {
+			name,
+		};
+
+		if (name in macroDefinitions || name in uniqueMacros) {
+			continue;
+		}
+
+		if (collected.macros.some(el => el.name == def.name && !el.open)) {
+			def.container = true;
+		}
+
+		uniqueMacros[name] = def;
+	}
+
+	await addMacrosToFile(uniqueMacros);
+}
+
 // Currently this function has the slight 'issue' that it will take the first definition it thinks 
 // of when finding a macro. This means that if the first usage is a container macro and the later
 // usages aren't, it will think it is a container macro.

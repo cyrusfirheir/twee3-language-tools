@@ -278,6 +278,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			await sc2ca.addAllUnrecognizedMacros();
 		})
 		,
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacrosInFile", async() => {
+			let editor = vscode.window.activeTextEditor;
+			if (editor) {
+				await sc2ca.addAllUnrecognizedMacrosInCurrentFile(editor.document);
+			}
+		})
+		,
 		// TODO: Allow configuration for which version Harlowe should use since it supports both ''
 		// and ** for bold, and // and * for italics
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.toggleItalics", editor => {
