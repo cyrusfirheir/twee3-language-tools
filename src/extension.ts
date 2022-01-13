@@ -274,8 +274,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			sc2m.argumentCache.clear();
 		})
 		,
-		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", async () => {
-			await sc2ca.addAllUnrecognizedMacros();
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", () => {
+			sc2ca.addAllUnrecognizedMacros();
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacrosInFile", async() => {
