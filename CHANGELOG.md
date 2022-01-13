@@ -7,6 +7,21 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.15.2
+
+
+Adds:
+
+- A [Getting Started Guide](docs/getting-started.md) for working with Twee ([PR 78](https://github.com/cyrusfirheir/twee3-language-tools/pull/78)).  
+- SugarCube 2: A command to add all unrecognized macros in the current file. Helpful in large projects, where adding all at once is rather slow, or you only care about the current file ([PR 82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)).
+
+Fixes ([PR 82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)):
+
+- `updateDecorations` code which wasn't guarding against undefined properly, so it'd spit out errors.  
+- Improves the existing 'add all unrecognized macros' command to have a progress bar which informs the user of what it is doing, and allows cancelling it if it is taking too long. Especially helpful in large projects where that might take a while.
+
+---
+
 ## v0.15.0
 
 Adds:
