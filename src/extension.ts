@@ -274,8 +274,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			sc2m.argumentCache.clear();
 		})
 		,
-		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", async () => {
-			await sc2ca.addAllUnrecognizedMacros();
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", () => {
+			sc2ca.addAllUnrecognizedMacros();
+		})
+		,
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacrosInFile", async() => {
+			let editor = vscode.window.activeTextEditor;
+			if (editor) {
+				await sc2ca.addAllUnrecognizedMacrosInCurrentFile(editor.document);
+			}
 		})
 		,
 		// TODO: Allow configuration for which version Harlowe should use since it supports both ''

@@ -95,43 +95,112 @@ export const addMacrosToFile = async (macros: Record<string, macroDef>) => {
 	}
 };
 
-// Currently this function has the slight 'issue' that it will take the first definition it thinks 
-// of when finding a macro. This means that if the first usage is a container macro and the later
-// usages aren't, it will think it is a container macro.
-export const addAllUnrecognizedMacros = async () => {
-	// let collected = await collectCache.get(document);
-	const macroDefinitions = await macroList();
-	let allDiags = vscode.languages.getDiagnostics();
-	let uniqueMacros: Record<string, macroDef> = Object.create(null);
-	
-	for (let i = 0; i < allDiags.length; i++) {
-		let path: vscode.Uri = allDiags[i][0];
-		let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
-		if (document.languageId !== "twee3-sugarcube-2") {
+export const addAllUnrecognizedMacrosInCurrentFile = async (document: vscode.TextDocument) => {
+	if (document.languageId !== "twee3-sugarcube-2") {
+		return;
+	}
+
+	let macroDefinitions = await macroList();
+	let uniqueMacros: Record<string, macroDef> = {};
+
+	let collected = await collectCache.get(document);
+	for (let j = 0; j < collected.macros.length; j++) {
+		let name: MacroName = collected.macros[j].name;
+		let def: macroDef = {
+			name,
+		};
+
+		if (name in macroDefinitions || name in uniqueMacros) {
 			continue;
 		}
 
-		// We don't bother using the diagnostics.
-		let collected = await collectCache.get(document);
-		for (let j = 0; j < collected.macros.length; j++) {
-			let name: MacroName = collected.macros[j].name;
-			let def: macroDef = {
-				name,
-			};
-
-			if (name in uniqueMacros || name in macroDefinitions) {
-				continue;
-			}
-
-			// TODO: This could be made more efficient by just updating the uniqueMacro entry
-			// when we run across another instance of it.
-			if (collected.macros.some(el => el.name == def.name && !el.open)) {
-				def.container = true;
-			}
-
-			uniqueMacros[name] = def;
+		if (collected.macros.some(el => el.name == def.name && !el.open)) {
+			def.container = true;
 		}
+
+		uniqueMacros[name] = def;
 	}
 
 	await addMacrosToFile(uniqueMacros);
+}
+
+// Currently this function has the slight 'issue' that it will take the first definition it thinks 
+// of when finding a macro. This means that if the first usage is a container macro and the later
+// usages aren't, it will think it is a container macro.
+export const addAllUnrecognizedMacros = () => {
+	// TODO: It would be good to make so that you can't start two of these.
+
+	let storyFormat = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat").get("current");
+	if (storyFormat !== "sugarcube-2") {
+		// We can't just check each document, because vscode just assigns a lot of them 'twee'
+		return;
+	}
+
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		cancellable: true,
+		title: 'Adding all unrecognized macros'
+	}, async (progress, token) => {
+		// Show that we're starting to process
+		progress.report({
+			message: "Beginning processing..",
+		});
+
+		const macroDefinitions = await macroList();
+		let allDiags = vscode.languages.getDiagnostics();
+		let uniqueMacros: Record<string, macroDef> = Object.create(null);
+	
+		if (token.isCancellationRequested) {
+			return;
+		}
+
+		// TODO: Can we do better than iterating over all files with diagnostics?
+		for (let i = 0; i < allDiags.length; i++) {
+			// The cancellation's break so that the macros can still be added
+			if (token.isCancellationRequested) {
+				break;
+			}
+			
+			const path: vscode.Uri = allDiags[i][0];
+			progress.report({
+				message: "Opening: " + path.toString(),
+			});
+			const document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+
+			progress.report({
+				message: "Processing: " + path.toString(),
+			});
+
+			const collected = await collectCache.get(document);
+
+			if (token.isCancellationRequested) {
+				break;
+			}
+
+			for (let j = 0; j < collected.macros.length; j++) {
+				let name: MacroName = collected.macros[j].name;
+				let def: macroDef = {
+					name,
+				};
+
+				if (name in uniqueMacros || name in macroDefinitions) {
+					continue;
+				}
+
+				// TODO: This could be made more efficient by just updating the uniqueMacro entry
+				// when we run across another instance of it.
+				if (collected.macros.some(el => el.name == def.name && !el.open)) {
+					def.container = true;
+				}
+
+				uniqueMacros[name] = def;
+			}
+		}
+
+		progress.report({
+			message: "Adding macros to definitions..",
+		});
+
+		await addMacrosToFile(uniqueMacros);
+	});
 }
