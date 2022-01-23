@@ -71,6 +71,28 @@ export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
 }
 
 /**
+ * Uses `isObjectSimpleEqual` to decide if all the elements in an array are equal
+ */
+export function isArraySimpleObjectsEqual<T>(left?: T[], right?: T[]): boolean {
+    if (left === right) {
+        // They're the same array, or both undefined
+        return true;
+    } else if (left === undefined || right === undefined) {
+        // We already checked for equality, so if either are undefined then we know it isn't equal
+        return false;
+    } else if (left.length !== right.length) {
+        return false;
+    }
+
+    for (let i = 0; i < left.length; i++) {
+        if (!isObjectSimpleEqual(left[i], right[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * Performs a surface level comparison of the fields of the two objects
  * This is probably less efficient than it should be and perhaps should be replaced with lodash's 
  * isEqual

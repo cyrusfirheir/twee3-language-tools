@@ -72,7 +72,10 @@
 	"if": {
 		"name": "if",
 		"children": [
-			"else",
+			{
+				"name": "else",
+				"max": 1
+			},
 			"elseif"
 		],
 		"container": true,
@@ -123,7 +126,10 @@
 		"name": "switch",
 		"children": [
 			"case",
-			"default"
+			{
+				"name": "default",
+				"max": 1
+			}
 		],
 		"container": true,
 		"description": "Evaluates the given expression and compares it to the value(s) within its `<<case>>` children. The value(s) within each case are compared to the result of the expression given to the parent `<<switch>>`. Upon a successful match, the matching case will have its contents executed. If no cases match and an optional `<<default>>` case exists, which must be the final case, then its contents will be executed. At most one case will execute.\n\nUsage:\n\n```\n<<switch expression>>\n\t[<<case valueList>> …]\n\t[<<default>> …]\n<</switch>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-switch)",
