@@ -4,7 +4,7 @@ import { Arg, ArgType, ArgumentParseError, makeMacroArgumentsRange, parseArgumen
 import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
 import * as macroListCore from './macros.json';
 import { Passage } from '../passage';
-import { isArrayEqual, isObjectSimpleEqual } from './validation';
+import { isArrayEqual, isArraySimpleObjectsEqual, isObjectSimpleEqual } from './validation';
 import { configurationCache, getConfiguration, parseConfiguration, updateConfigurationCache } from './configuration';
 
 export type MacroName = string;
@@ -24,7 +24,7 @@ export interface macroDef {
 	parameters?: Parameters,
 	container?: boolean;
 	selfClose?: boolean;
-	children?: string[];
+	children?: ChildDefObj[];
 	parents?: string[];
 	deprecated?: boolean;
 	deprecatedSuggestions?: string[];
@@ -32,6 +32,12 @@ export interface macroDef {
 	decoration?: vscode.DecorationRenderOptions,
 	// The created decoration type, this is filled when the macro is needed
 	decoration_type?: vscode.TextEditorDecorationType
+}
+
+export interface ChildDefObj {
+	name: string;
+	// TODO: min?
+	max?: number;
 }
 
 export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
@@ -63,6 +69,22 @@ export const onUpdateMacroCache = function (lastMacroCache: Record<string, macro
 		// Note: Since this is called early on, these messages might not be displayed.
 		let errorMessages: string = errors.map(err => err.message).join(", \n");
 		vscode.window.showErrorMessage(`Errors encountered parsing parameters of macros: \n${errorMessages}`);
+	}
+
+	// Change the children array entries that are strings into objects
+	// Convert the strings into ChildDef objects
+	for (const key in list) {
+		let macro: macroDef = list[key];
+		if (Array.isArray(macro.children)) {
+			for (let i = 0; i <  macro.children.length; i++) {
+				if (typeof(macro.children[i]) === "string") {
+					macro.children[i] = {
+						// TODO: This would be nicer if we had a PreConvertedMacroDef
+						name: macro.children[i] as unknown as string,
+					};
+				}
+			}
+		}
 	}
 
 	// Check for changed macros and clear those from the arguments cache.
@@ -126,7 +148,7 @@ function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean
 	return left.name === right.name &&
 		left.container === right.container &&
 		left.selfClose === right.selfClose &&
-		isArrayEqual(left.children, right.children) &&
+		isArraySimpleObjectsEqual(left.children, right.children) &&
 		isArrayEqual(left.parents, right.parents) &&
 		left.deprecated === right.deprecated &&
 		isArrayEqual(left.deprecatedSuggestions, right.deprecatedSuggestions) &&
@@ -456,7 +478,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 	let macroDefinitions = await macroList();
 	const passages: Passage[] = ctx.workspaceState.get("passages", []);
 
-	collected.macros.forEach(el => {
+	collected.macros.forEach((el, cur_index) => {
 		let cur: macroDef;
 		if (el.name.startsWith("end") && macroDefinitions[el.name.substring(3)]?.container) {
 			cur = macroDefinitions[el.name.substring(3)];
@@ -489,6 +511,59 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 						source: 'sc2-ex',
 						code: 106
 					});
+				}
+
+				if (
+					cur.children && cur.children.length > 0 && cur.container &&
+					vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("childrenValidation")
+				) {
+					let children: Record<string, number> = Object.create(null);
+					const start_index = cur_index + 1;
+					// Get the macros that appear after the current index
+					// and filter them for ones which are contained within the macro's range
+					const macros = collected.macros.slice(start_index, el.pair);
+					for (let i = 0; i < macros.length; i++) {
+						const macro = macros[i];
+						let def: macroDef;
+						if (macro.name.startsWith("end") && macroDefinitions[macro.name.substring(3)]?.container) {
+							def = macroDefinitions[macro.name.substring(3)];
+							macro.open = false;
+						} else {
+							def = macroDefinitions[macro.name];
+						}
+
+						// If this is a container and the macro is open then skip over it
+						if (def.container && macro.open) {
+							i = macro.pair - start_index;
+							continue;
+						}
+
+						for (let j = 0; j < cur.children.length; j++) {
+							if (cur.children[j].name === macro.name) {
+								if (!children[macro.name]) {
+									children[macro.name] = 1;
+								} else {
+									children[macro.name]++;
+								}
+							}
+						}
+					}
+
+					for (let j = 0; j < cur.children.length; j++) {
+						const child = cur.children[j];
+						const childCount = children[child.name];
+						const max = child.max;
+						if (max !== undefined) {
+							if (childCount > max) {
+								d.push({
+									severity: vscode.DiagnosticSeverity.Error,
+									range: el.range,
+									message: `\nChild macro, <<${child.name}>>, of <<${el.name}> was used more than the maximumum number of times: ${childCount} > ${max}\n\n`,
+									code: 114,
+								});
+							}
+						}
+					}
 				}
 			} else {
 				if (!el.open) {

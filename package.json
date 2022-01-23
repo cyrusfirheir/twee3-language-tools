@@ -258,6 +258,11 @@
 					"default": true,
 					"markdownDescription": "Provides warnings for links like `[[passage]]` when `passage` is not a valid passage name. This could cause false positives in cases where you are using a global variable."
 				},
+				"twee3LanguageTools.sugarcube-2.error.childrenValidation": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Provides errors/warnings about issues with the children of a macro, such as using two else branches in the same if macro."
+				},
 				"twee3LanguageTools.sugarcube-2.error.argumentParsing": {
 					"type": "boolean",
 					"default": true,
