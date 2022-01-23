@@ -20,7 +20,7 @@ Supported file extensions:
 - `.tw`
 - `.twee`
 
-To set the correct storyformat for the files, a `StoryData` passage with the storyformat (and version) (see example below) mentioned in it is preferred. If not, the extension provides the option to set the format explictly. (See [Extension Settings.](#extension-settings))
+To set the correct storyformat for the files, a `StoryData` passage with the storyformat (and version) (see example below) mentioned in it is preferred. If not, the extension provides the option to set the format explictly.)
 
 ```json
 :: StoryData
@@ -42,7 +42,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
 - Command palette tool to generate IFID: open the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> or <kbd>F1</kbd> by default) and search for "IFID".  
 
-- A list of passages for quick jumps (can be grouped by files, folders, or passage tags. See [extension-settings](#extension-settings).) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  
+- A list of passages for quick jumps (can be grouped by files, folders, or passage tags.) Open from the Twee 3 Language Tools tab on the activity bar (the forking paths logo.)  
 
     ![Passage List](docs/images/twee-passage-list.png)  
 
@@ -86,7 +86,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 	- Deprecated `<<end...>>` closing macros:  
 		- [Screenshot - diagnostic](docs/images/sc2-endvariant-macro.png)
 		- [Screenshot - quick fix](docs/images/sc2-endvariant-quickfix.png)
-	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting ([see settings](#extension-settings)):  
+	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting:  
 		- [Screenshot - diagnostic](docs/images/sc2-unrecognized-macro.png)
 		- [Screenshot - quick fix](docs/images/sc2-unrecognized-quickfix.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
 	- Invalid argument syntax in macros (Contributed by @MinusGix):  
@@ -142,7 +142,7 @@ The following properties are currently programmed, even though not all of them a
 - **description** `(string)` *optional*: Description of macro. Shown on hover. Supports markdown.
 - **container** `(boolean)` *optional*: If the macro is a container (i.e. requires a closing tag) or not. `false` by default.
 - **selfClose** `(boolean)` *optional*: If the macro is a self-closable. Requires macro to be a container first. `false` by default.
-- **children** `(string array)` *optional*: If the macro has children, specify their names as an array
+- **children** `(string|child-definition array)` *optional*: If the macro has children, specify them as an array of strings or child-definition (WIP) objects.
 - **parents** `(string array)` *optional*: If the macro is a child macro, specify the names of its parents as an array (currently unused in code.)
 - **deprecated** `(boolean)` *optional*: If the macro is deprecated or not. `false` by default.
 - **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array.
@@ -151,47 +151,6 @@ The following properties are currently programmed, even though not all of them a
 
 **NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following file can also be used as an example):
 - `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml))
-
----
-
-## **Extension Settings**
-
-This extension contributes the following settings:
-
-Automatically set by the `StoryData` special passage (if it exists):
-- `twee3LanguageTools.storyformat.current`: Identifier of the storyformat in use.
-
-Manual settings:
-
-**NOTE:** It's recommended to change these settings separately for each workspace instead of globally.
-
-- `twee3LanguageTools.storyformat.override` : Identifier of the storyformat to override the format set by `StoryData`.  
-⠀
-- `twee3LanguageTools.directories.include`: Directories in which to look for twee files. Use glob patterns *relative* to the root of the workspace folders (e.g. `src/unprocessed/twee`, `src/static`, `external`). (Searches the entire workspace by default.)  
-- `twee3LanguageTools.directories.exclude`: Directories to exclude from the search of twee files. Use *absolute* glob patterns (e.g. `**/src/processed/**`). (Excludes `**/node_modules/**` by default.) If passage listing is active, excluded files will not be scanned for passages. They also will not be scanned for errors until manually opened.  
-⠀
-- `twee3LanguageTools.storyMap.unusedPortClosingDelay`: Duration in milliseconds before the Story Map server port is closed after the UI in the browser window has been closed. (`5000` by default.)
-⠀
-- `twee3LanguageTools.passage.list`: Display list of passages with quick 'jump' links? (`false` by default.)  
-- `twee3LanguageTools.passage.group`: Group passages by? (`None` by default. Can be grouped by file of origin, folder of origin, or passage tags.)  
-⠀
-- `twee3LanguageTools.twee-3.warning.spaceAfterStartToken`: Warn about missing space after the start token (`::`) in passage headers? (`true` by default.)  
-- `twee3LanguageTools.twee-3.error.storyData.format`: Throw an error when missing the story format field (`format`) in `StoryData` special passage? (`true` by default.)  
-- `twee3LanguageTools.twee-3.error.storyData.formatVersion`: Throw an error when missing the story format version field (`format-version`) in `StoryData` special passage? (`true` by default.)  
-⠀
-- `twee3LanguageTools.sugarcube-2.definedMacroDecorations`: Whether to use the decorations field in macro definitions. (`false` by default.)
-- `twee3LanguageTools.sugarcube-2.warning.undefinedMacro`: Warn about macros/widgets which were not found in definitions (`*.twee-config.yaml` or `*.twee-config.json` files) or the core SugarCube macro library? (`true` by default.)  
-- `twee3LanguageTools.sugarcube-2.warning.deprecatedMacro`: Warn about deprecated macros/widgets? (`true` by default.)  
-- `twee3LanguageTools.sugarcube-2.warning.endMacro`: Warn about the deprecated `<<end...>>` closing tag syntax? (`true` by default.)  
-- `twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking`: Provides warnings for links like `[[passage]]` when `passage` is not a valid passage name. This could cause false positives in cases where you are using a global variable. (`true` by default.)  
-⠀
-- `twee3LanguageTools.sugarcube-2.error.argumentParsing`: Provide errors about invalid argument syntax being passed into macros? (`true` by default.)  
-- `twee3LanguageTools.sugarcube-2.error.parameterValidation`: Provide errors about invalid argument types being passed into macros? (`true` by default.)  
-⠀
-- `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)  
-⠀
-- `twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable`: Enable self-closing syntax for container macros? [Read here](#sugarcube-2-self-closing-macros) for more information. (`false` by default.)  
-- `twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.warning.irrationalSelfClose`: Warn about self-closed instances of content focused macros (e.g. `<<script />>`)? (`true` by default.)  
 
 ---
 

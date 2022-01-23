@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.15.2",
+	"version": "0.15.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -232,6 +232,11 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Throw an error when missing the story format version field (`format-version`) in `StoryData` special passage?"
+				},				
+				"twee3LanguageTools.sugarcube-2.definedMacroDecorations": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "If a macro has a decoration defined for it, it will be displayed when seen in a file."
 				},
 				"twee3LanguageTools.sugarcube-2.features.macroTagMatching": {
 					"type": "boolean",
@@ -272,11 +277,6 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Provide errors about invalid parameter types being passed into macros? Requires `argumentParsing` to be on."
-				},
-				"twee3LanguageTools.sugarcube-2.definedMacroDecorations": {
-					"type": "boolean",
-					"default": false,
-					"markdownDescription": "If a macro has a decoration defined for it, it will be displayed when seen in a file."
 				},
 				"twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable": {
 					"type": "boolean",

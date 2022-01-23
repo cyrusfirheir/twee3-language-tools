@@ -7,15 +7,26 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
-## v0.15.2
-
+## v0.15.3
 
 Adds:
 
-- A [Getting Started Guide](docs/getting-started.md) for working with Twee ([PR 78](https://github.com/cyrusfirheir/twee3-language-tools/pull/78)).  
-- SugarCube 2: A command to add all unrecognized macros in the current file. Helpful in large projects, where adding all at once is rather slow, or you only care about the current file ([PR 82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)).
+- ([PR #86](https://github.com/cyrusfirheir/twee3-language-tools/pull/86)) SugarCube 2: Basic max check for validating children macros such as else. (Resolving [Issue #85](https://github.com/cyrusfirheir/twee3-language-tools/issues/85).)
 
-Fixes ([PR 82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)):
+Fixes:
+
+- SugarCube 2: Background color of matched macro opening/closing tags was the same as that of editor selections, make it impossible to see how much of the text was actually selected. Removed background color so it works like other text.
+
+---
+
+## v0.15.2
+
+Adds:
+
+- A [Getting Started Guide](docs/getting-started.md) for working with Twee ([PR #78](https://github.com/cyrusfirheir/twee3-language-tools/pull/78)).  
+- SugarCube 2: A command to add all unrecognized macros in the current file. Helpful in large projects, where adding all at once is rather slow, or you only care about the current file ([PR #82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)).
+
+Fixes ([PR #82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)):
 
 - `updateDecorations` code which wasn't guarding against undefined properly, so it'd spit out errors.  
 - Improves the existing 'add all unrecognized macros' command to have a progress bar which informs the user of what it is doing, and allows cancelling it if it is taking too long. Especially helpful in large projects where that might take a while.

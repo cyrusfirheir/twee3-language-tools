@@ -41,8 +41,6 @@ export interface ChildDefObj {
 }
 
 export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
-	backgroundColor: new vscode.ThemeColor("editorBracketMatch.background"),
-	borderRadius: "0.25rem",
 	textDecoration: "underline",
 	fontWeight: "bold",
 	overviewRulerLane: vscode.OverviewRulerLane.Center,
