@@ -27,8 +27,8 @@
         @moveToFile="moveToFile(selectedPassages, $event)"
       />
     </div>
-    <div class="story-area" @click="deselectPassage()" @mousedown="onMapMouseDown($event)">
-      <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }" @wheel.prevent="onWheel($event)">
+    <div class="story-area" @click="deselectPassage()" @mousedown="onMapMouseDown($event)" @wheel.prevent="onWheel($event)">
+      <div class="story-map" :style="{ transform: `${translateStr} scale(${zoom})` }">
         <svg class="story-map-back" :style="svgStyle">
           <template v-if="!draggedPassage">
             <!-- I would prefer if I could keep drawing lines while dragging -->
