@@ -369,6 +369,7 @@ export default class Sidebar extends Vue {
     .sidebar-outer {
         height: 100%;
         width: 450px;
+        overflow: auto;
         overflow: overlay;
         color: #FFF;
         padding: 20px;

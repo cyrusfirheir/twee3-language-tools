@@ -232,7 +232,7 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Throw an error when missing the story format version field (`format-version`) in `StoryData` special passage?"
-				},				
+				},
 				"twee3LanguageTools.sugarcube-2.definedMacroDecorations": {
 					"type": "boolean",
 					"default": false,
