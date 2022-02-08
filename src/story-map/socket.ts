@@ -5,6 +5,7 @@ import * as socketio from "socket.io";
 import { Passage, PassageRange, PassageStringRange } from "../passage";
 import { readFile, writeFile } from "../file-ops";
 import { parseRawText } from "../parse-text";
+import { storyMapIO } from "./index";
 
 export function getLinkedPassageNames(passageContent: string): string[] {
 	const parts = passageContent.split(/\[(?:img)?\[/).slice(1);
@@ -120,4 +121,14 @@ export async function updatePassages(ctx: vscode.ExtensionContext, passages: Upd
 			languageId: "twee3"
 		});
 	}
+}
+
+export function focusPassage(context: vscode.ExtensionContext, storyMap: storyMapIO, editor: vscode.TextEditor) {
+	const passages = context.workspaceState.get("passages") as Passage[];
+	const editorPath = editor?.document.fileName.split("\\").filter((step) => step.length > 0) as [string];
+	const editorPosition = editor?.selection.active;
+	storyMap.client?.emit('focus-passage', passages.find((passage) => 
+		passage.origin.full.split("/").filter((step) => step.length > 0).every((step, index) => step == editorPath[index])
+		&& editorPosition && passage.range.start.line <= editorPosition.line && passage.range.end.line - 1 >= editorPosition.line // double check to appease typeerror
+	)?.name);
 }

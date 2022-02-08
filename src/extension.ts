@@ -6,7 +6,7 @@ import { parseText, DocumentSemanticTokensProvider, legend } from './parse-text'
 import { updateDiagnostics } from './diagnostics';
 import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 
-import { sendPassageDataToClient, toUpdatePassage, updatePassages } from "./story-map/socket";
+import { sendPassageDataToClient, toUpdatePassage, updatePassages, focusPassage } from "./story-map/socket";
 import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
 import { fileGlob } from './file-ops';
@@ -284,6 +284,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 				await sc2ca.addAllUnrecognizedMacrosInCurrentFile(editor.document);
 			}
 		})
+		,
+		vscode.commands.registerTextEditorCommand("twee3LanguageTools.storyMap.focusPassage", (editor) => focusPassage(ctx, storyMap, editor))
 		,
 		// TODO: Allow configuration for which version Harlowe should use since it supports both ''
 		// and ** for bold, and // and * for italics

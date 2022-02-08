@@ -287,6 +287,20 @@ export default class AppComponent extends Vue {
     socket.on('connect', () => {
       console.log('connected');
     });
+    socket.on('focus-passage', (passageName) => {
+      let passage = this.passages.find((passage) => passage.name == passageName);
+      if (passage) {
+        this.selectedPassages = [passage];
+        let storyArea = document.querySelector(".story-area");
+        let target: Vector = {
+          x: ((passage.position.x + passage.size.x / 2) * this.zoom - storyArea.clientWidth / 2) * -1,
+          y: ((passage.position.y + passage.size.y / 2) * this.zoom - storyArea.clientHeight / 2) * -1,
+        };
+        this.translate = target;
+      } else {
+        console.error(`focus-passage: invalid passage name '${passageName}'`);
+      }
+    });
     socket.on('passage-data', (passageData: PassageData) => {
       const passages = passageData.list;
       console.log('Client received passages', { passages, storyData: passageData.storyData });

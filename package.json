@@ -343,6 +343,11 @@
 				}
 			},
 			{
+				"command": "twee3LanguageTools.storyMap.focusPassage",
+				"title": "Focus passage in Story Map",
+				"category": "Twee3 Language Tools"
+			},
+			{
 				"command": "twee3LanguageTools.passage.pack",
 				"title": "Pack passages to clusters (Experimental)",
 				"category": "Twee3 Language Tools"
