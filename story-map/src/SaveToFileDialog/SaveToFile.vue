@@ -451,6 +451,7 @@ export default class SaveToFile extends Vue {
             justify-content: flex-start;
             align-content: flex-start;
             height: calc(600px - 160px);
+            overflow: auto;
 
             .folder-item,
             .file-item {
