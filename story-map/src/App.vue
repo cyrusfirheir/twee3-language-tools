@@ -520,8 +520,8 @@ export default class AppComponent extends Vue {
   onWheel(event: WheelEvent) {
     const scrollAmount = getScrollDistance(event);
     const zoomAmount = (scrollAmount > 0)
-      ? (scrollAmount / 1000)                   // deltaY 100  ->  .1
-      : 1 - (1 / (1 + (scrollAmount / 1000)));  // deltaY -100 -> -.11111
+      ? 1 - (1 / (1 + (scrollAmount / 1000))) // deltaY 100  -> .11111
+      : (scrollAmount / 1000);                // deltaY -100 -> -.1
 
     const zoomMod = 1 - zoomAmount;
 
