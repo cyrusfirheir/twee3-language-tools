@@ -418,7 +418,7 @@ export default class AppComponent extends Vue {
       return this.onMapMouseDown(event);
     }
 
-    if (!this.selectedPassages.some(p => p.name === passage.name)) {
+    if (!event.ctrlKey && !this.selectedPassages.some(p => p.name === passage.name)) {
       this.selectedPassages = [passage];
     }
     
@@ -570,7 +570,7 @@ export default class AppComponent extends Vue {
     // If there is an event, there is a click. If there's a click
     // The click should not be too long
     if (passage === null) return this.selectedPassages = [];
-    if (event && Date.now() - this.mouseDownTimestamp > 200) return;
+    if (event && Date.now() - this.mouseDownTimestamp < 200) return;
     if (event?.ctrlKey) {
       const itemSelected = this.selectedPassages.findIndex(p => p.name === passage.name);
       if (itemSelected === -1) {
@@ -584,7 +584,7 @@ export default class AppComponent extends Vue {
   }
 
   deselectPassage() {
-    if (Date.now() - this.mouseDownTimestamp > 200) return;
+    if (Date.now() - this.mouseDownTimestamp < 200) return;
     this.selectedPassages = [];
   }
 
