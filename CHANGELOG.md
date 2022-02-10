@@ -7,6 +7,12 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.16.1
+
+Merges [PR #93](https://github.com/cyrusfirheir/twee3-language-tools/pull/93).
+
+---
+
 ## v0.16.0
 
 Adds:
