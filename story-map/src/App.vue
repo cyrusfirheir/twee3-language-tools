@@ -570,7 +570,10 @@ export default class AppComponent extends Vue {
     // If there is an event, there is a click. If there's a click
     // The click should not be too long
     if (passage === null) return this.selectedPassages = [];
-    if (event && Date.now() - this.mouseDownTimestamp < 200) return;
+    // I'm pretty sure this was actually meant to filter out long clicks instead of double clicks
+    // but the lag meant that the window for a short click became too small.
+    // It would be better to not rely on time to determine drag
+    if (event && Date.now() - this.mouseDownTimestamp > 400) return;
     if (event?.ctrlKey) {
       const itemSelected = this.selectedPassages.findIndex(p => p.name === passage.name);
       if (itemSelected === -1) {
@@ -584,7 +587,7 @@ export default class AppComponent extends Vue {
   }
 
   deselectPassage() {
-    if (Date.now() - this.mouseDownTimestamp < 200) return;
+    if (Date.now() - this.mouseDownTimestamp > 200) return;
     this.selectedPassages = [];
   }
 
