@@ -10,8 +10,14 @@ import { configurationCache, getConfiguration, parseConfiguration, updateConfigu
 export type MacroName = string;
 export interface macro {
 	id: number;
+	/**
+	 * The id of the pair to this macro, which is either the closing or opening version.
+	 */
 	pair: number;
 	name: MacroName;
+	/**
+	 * Whether it is the opening variant of the macro, primarily for containers.
+	 */
 	open: boolean;
 	selfClosed: boolean;
 	endVariant: boolean;
@@ -36,8 +42,8 @@ export interface macroDef {
 
 export interface ChildDefObj {
 	name: string;
-	// TODO: min?
 	max?: number;
+	min?: number;
 }
 
 export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
@@ -512,7 +518,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 				}
 
 				if (
-					cur.children && cur.children.length > 0 && cur.container &&
+					cur.children && cur.children.length > 0 && cur.container && el.open && 
 					vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.error").get("childrenValidation")
 				) {
 					let children: Record<string, number> = Object.create(null);
@@ -522,12 +528,18 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 					const macros = collected.macros.slice(start_index, el.pair);
 					for (let i = 0; i < macros.length; i++) {
 						const macro = macros[i];
+						// Get the macro definition
 						let def: macroDef;
 						if (macro.name.startsWith("end") && macroDefinitions[macro.name.substring(3)]?.container) {
 							def = macroDefinitions[macro.name.substring(3)];
 							macro.open = false;
 						} else {
 							def = macroDefinitions[macro.name];
+						}
+
+						// If there was no definition, we simply skip it.
+						if (def === undefined) {
+							continue;
 						}
 
 						// If this is a container and the macro is open then skip over it
@@ -552,12 +564,24 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 						const childCount = children[child.name];
 						const max = child.max;
 						if (max !== undefined) {
-							if (childCount > max) {
+							if (childCount !== undefined && childCount > max) {
 								d.push({
 									severity: vscode.DiagnosticSeverity.Error,
 									range: el.range,
 									message: `\nChild macro, <<${child.name}>>, of <<${el.name}> was used more than the maximumum number of times: ${childCount} > ${max}\n\n`,
 									code: 114,
+								});
+							}
+						}
+
+						const min = child.min;
+						if (min !== undefined) {
+							if (childCount === undefined || childCount < min) {
+								d.push({
+									severity: vscode.DiagnosticSeverity.Error,
+									range: el.range,
+									message: `\nExpected there be at least ${min} of <<${child.name}>>`,
+									code: 115,
 								});
 							}
 						}
