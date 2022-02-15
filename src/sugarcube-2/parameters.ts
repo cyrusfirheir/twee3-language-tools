@@ -57,6 +57,7 @@ export const parameterTypes: ParameterType[] = [
     makeSimpleParameterType("string", "Argument is not a quoted string", ArgType.String),
     // This allows so many because they could all be turned-into/considered text.
     makeSimpleParameterType("text", "Argument is not text", t => t === ArgType.Bareword || t === ArgType.String || t === ArgType.True || t === ArgType.False || t === ArgType.Null || t === ArgType.NaN || t === ArgType.Number),
+    makeSimpleParameterType("var", "Argument is not a variable", type => type === ArgType.SettingsSetupAccess || type === ArgType.Variable),
     {
         name: ["receiver"],
         validate(info: ArgumentInfo): Error | Warning | null {
