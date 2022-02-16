@@ -126,11 +126,13 @@ There are a number of parameter types:
 - `image`: An image in the [Twine syntax](http://www.motoslave.net/sugarcube/2/docs/#markup-image): `[img[Image]]`, `[img[Image][Passage]]`, etc.
     - `imageNoSetter`: An image that does not allow the setter syntax (`[img[Image][Passage][$clickedImage = true]]`). Most notably required by the `<<link>>` macro.
 - `bareword`: A word that is on its own. Ex: `<<ex Alpha>>` (value: `Alpha`).
-- `string`: A quoted string. You may want to use `text` instead. Ex: ``
-- `text`: Arbitrary text, quoted or not. Includes much of the above (except for links/images). Ex: `<<ex test>>` (text: `test`), `<<ex "lorem ipsum">>` (text: `lorem ipsum`), `<<ex 24.9>>` (text: `24.9`).
-- `passage`: A passage name. (Note: Not currently verified to be valid).
-- `receiver`: The name of a SugarCube variable as a string. Such as `<<textbox "$name">>`, where it writes the value to the variable `$name`.
-There are more proposed parameter types that may be implemented at a future data, if you have suggestions for useful types, please open an issue on the Github repository.
+- `string`: A quoted string. You may want to use `text` instead. Ex: `<<ex "Hi">>` or `<<ex 'Hi'>>` but not `<<ex Hi>>`
+- `passage`: A passage name, which is verified to ensure that it is a valid passage name.  
+- `receiver`: The name of a SugarCube variable as a string. Such as `<<textbox "$name">>`, where it writes the value to the variable `$name`.  
+- `var`: A `setup.thing` var, `settings.thing` var, `$thing`, or `_thing`. Matches exactly a variable, not likely useful in many situations.  
+- `text`: Arbitrary text, quoted or not. Includes much of the above (except for links/images). Ex: `<<ex test>>` (text: `test`), `<<ex "lorem ipsum">>` (text: `lorem ipsum`), `<<ex 24.9>>` (text: `24.9`).  
+There are more proposed parameter types that may be implemented at a future date, if you have suggestions for useful types, please open an issue on the Github repository.
+
 
 #### Parameter Types Warning
 One should not rely on Parameter Types completely. All parameter types can be replaced with a: variable, access to settings, access to setup, or expression. Since the extension does not come with a supercomputer, it can not check if variables passed into macros will have sane values.  
