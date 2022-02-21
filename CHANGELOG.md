@@ -7,6 +7,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.17.0
+
+Adds:
+
+- Webview version of Story Map, which is now the default mode. Change using the `twee3LanguageTools.storyMap.windowType` setting.
+
+---
+
 ## v0.16.3
 
 Merges [PR #96](https://github.com/cyrusfirheir/twee3-language-tools/pull/96).

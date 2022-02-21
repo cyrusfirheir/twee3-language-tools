@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.16.4",
+	"version": "0.17.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -292,6 +292,19 @@
 					"type": "integer",
 					"default": 5000,
 					"markdownDescription": "Duration in milliseconds before the Story Map server port is closed after the UI in the browser window has been closed."
+				},
+				"twee3LanguageTools.storyMap.windowType": {
+					"type": "string",
+					"enum": [
+						"Browser",
+						"VSCode"
+					],
+					"markdownEnumDescriptions": [
+						"`Browser`: Set Story Map to open in separate browser window.",
+						"`VSCode`: Set Story Map to open inside VSCode."
+					],
+					"default": "VSCode",
+					"markdownDescription": "Type of window to launch the Story Map in."
 				},
 				"twee3LanguageTools.passageCounter.openStoryMapWithoutConfirmation": {
 					"type": "boolean",

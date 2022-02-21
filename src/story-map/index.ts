@@ -60,7 +60,16 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 				client.emit('twee-workspace', ws);
 			});
 	});
-	open(hostUrl);
+	
+	if (vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("windowType", "VSCode") === "VSCode") {
+		const panel = vscode.window.createWebviewPanel("t3lt.storyMap", "Story Map", vscode.ViewColumn.One, {
+			enableScripts: true
+		});
+		panel.webview.html = `<!DOCTYPE html><html lang="en"><body style="height: 100vh; padding: 0;"><iframe style="height: 100%; width: 100%; border: none;" src="http://localhost:42069"></iframe></body></html>`;
+	} else {
+		open(hostUrl);
+	}
+
 	vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
 }
 

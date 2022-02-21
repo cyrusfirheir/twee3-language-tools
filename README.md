@@ -50,7 +50,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 	- Total passage count (includes Story passages, Special passages, and Script/Stylesheet-tagged passages)  
 	- Story passage count  
 
-- A story-map view (Contributed by @Goctionni) that opens in the browser! Still in *very* early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
+- A story-map view (Contributed by @Goctionni) that opens inside VSCode (and optionally, in the browser)! Still in early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
 
 	- Currently implemented features:  
 		- Snap to grid (button on top-left.)  
@@ -63,6 +63,8 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 		- Use the middle-mouse button, or hold down <kbd>Shift</kbd> while dragging the mouse to pan the map grid.
 		- Scroll the mousewheel or stretch/pinch on trackpad to zoom in/out.
 		- Hold <kbd>Ctrl/Cmd</kbd> while selecting to add new passages to selection, or remove already added passages from it.
+	
+	- Recommended in-VSCode usage: Drag the tab to one side in its own separate group, and lock the group to prevent new tabs from opening on top of it.
 
 	![Story Map](docs/images/twee-storymap.png)
 

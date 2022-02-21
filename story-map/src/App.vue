@@ -1,7 +1,7 @@
 <template>
   <div
     class="layout"
-    :class="{ 'show-sidebar': selectedPassages.length }"
+    :class="{ 'show-sidebar': showSidebar && selectedPassages.length }"
     @mouseup="onMouseUp($event)"
     @mousemove="onMouseMove($event)"
   >
@@ -12,6 +12,7 @@
       @toggle="toggleSetting($event)"
     />
     <div class="sidebar">
+      <button class="toggle-sidebar" v-if="selectedPassages.length" :class="{ 'sidebar-off': !showSidebar }" @click="showSidebar = !showSidebar">Toggle Sidebar</button>
       <Sidebar
         :passages="selectedPassages"
         :allTags="allTags"
@@ -134,6 +135,7 @@ export default class AppComponent extends Vue {
     snapToGrid: true,
     gridSize: 25,
   };
+  showSidebar: boolean = true;
 
   get allTags(): string[] {
     const { passages, storyData } = this;
@@ -764,6 +766,42 @@ html, body {
 .toolbar {
   grid-area: titlebar;
   z-index: 100;
+}
+
+.toggle-sidebar {
+  position: absolute;
+  z-index: 100;
+
+  font-size: 0;
+  color: transparent;
+  background: #101619;
+  border: none;
+  outline: 1px solid hsla(0,0%,100%,.5);
+  
+  transform: translate(-100%, 20px);
+  width: 30px;
+  height: 30px;
+
+  cursor: pointer;
+
+  &::before {
+    position: absolute;
+    content: ">";
+    font-weight: bold;
+    
+    color: #fff;
+    font-size: 30px;
+
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  &.sidebar-off {
+    &::before {
+      transform: translate(-50%, -50%) rotate(180deg);
+    }
+  }
 }
 
 .sidebar {

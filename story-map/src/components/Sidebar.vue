@@ -130,7 +130,7 @@ export default class Sidebar extends Vue {
     @Prop({ default: () => []}) allTags!: string[];
     @Prop({ default: () => ({})}) tagColors!: { [tag: string]: string };
 
-    linksContainerHeight = 'autp';
+    linksContainerHeight = 'auto';
     tagSuggestions: string[] | null = null;
     activeTagSuggestion = '';
     addTagModel = '';
