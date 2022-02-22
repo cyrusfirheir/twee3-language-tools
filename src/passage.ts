@@ -198,12 +198,14 @@ export class WorkspacePassageSymbolProvider implements vscode.WorkspaceSymbolPro
 
 	provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
 		const symbols: vscode.SymbolInformation[] = [];
-		const queryRegex = new RegExp(query.split("").join(".*") + ".*", "i");
-		(this.context.workspaceState.get("passages", []) as Passage[]).forEach(passage => {
-			if (queryRegex.test(passage.name)) {
-				symbols.push(createPassageSymbol(passage));
-			}
-		});
+		if (query.length) {
+			const queryRegex = new RegExp(query.split("").join(".*") + ".*", "i");
+			(this.context.workspaceState.get("passages", []) as Passage[]).forEach(passage => {
+				if (queryRegex.test(passage.name)) {
+					symbols.push(createPassageSymbol(passage));
+				}
+			});
+		}
 		return symbols;
 	}
 }
