@@ -84,6 +84,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUIWrapper);
 	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUIWrapper);
 
+	const passageList = vscode.window.createTreeView("t3lt-passages-list", {
+		showCollapseAll: true,
+		treeDataProvider: passageListProvider
+	});
+
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand, sbPassageCounter,
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(ctx), legend)
@@ -215,11 +220,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 			tweeProjectConfig(ctx);
 		})
-		,
-		vscode.window.registerTreeDataProvider(
-			't3lt-passages-list',
-			passageListProvider
-		)
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.refreshDiagnostics", () => {
 			const doc = vscode.window.activeTextEditor?.document;
