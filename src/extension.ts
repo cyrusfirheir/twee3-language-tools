@@ -11,7 +11,7 @@ import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
 import { fileGlob } from './file-ops';
 
-import { PassageListProvider, Passage, jumpToPassage } from './passage';
+import { PassageSymbolProvider, PassageListProvider, Passage, jumpToPassage, WorkspacePassageSymbolProvider } from './passage';
 
 import * as formatting from "./formatting";
 
@@ -92,6 +92,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand, sbPassageCounter,
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(ctx), legend)
+		,
+		vscode.languages.registerDocumentSymbolProvider(documentSelector, new PassageSymbolProvider(ctx))
+		,
+		vscode.languages.registerWorkspaceSymbolProvider(new WorkspacePassageSymbolProvider(ctx))
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
 			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {

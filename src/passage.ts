@@ -169,3 +169,41 @@ export function jumpToPassage(passage: Passage | OpenPassageParams) {
 		editor.revealRange(range, vscode.TextEditorRevealType.AtTop);
 	});
 }
+
+function createPassageSymbol(passage: Passage) {
+	return new vscode.SymbolInformation(
+		passage.name,
+		vscode.SymbolKind.Class,
+		"",
+		new vscode.Location(vscode.Uri.file(passage.origin.full), passage.range)
+	);
+}
+
+export class PassageSymbolProvider implements vscode.DocumentSymbolProvider {
+	constructor(private context: vscode.ExtensionContext) { }
+	
+	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+		const symbols: vscode.SymbolInformation[] = [];
+		(this.context.workspaceState.get("passages", []) as Passage[]).forEach(passage => {
+			if (passage.origin.full === document.uri.path) {
+				symbols.push(createPassageSymbol(passage));
+			}
+		});
+		return symbols;
+	}
+}
+
+export class WorkspacePassageSymbolProvider implements vscode.WorkspaceSymbolProvider {
+	constructor(private context: vscode.ExtensionContext) { }
+
+	provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
+		const symbols: vscode.SymbolInformation[] = [];
+		const queryRegex = new RegExp(query.split("").join(".*") + ".*", "i");
+		(this.context.workspaceState.get("passages", []) as Passage[]).forEach(passage => {
+			if (queryRegex.test(passage.name)) {
+				symbols.push(createPassageSymbol(passage));
+			}
+		});
+		return symbols;
+	}
+}
