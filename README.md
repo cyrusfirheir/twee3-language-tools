@@ -63,8 +63,6 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 		- Use the middle-mouse button, or hold down <kbd>Shift</kbd> while dragging the mouse to pan the map grid.
 		- Scroll the mousewheel or stretch/pinch on trackpad to zoom in/out.
 		- Hold <kbd>Ctrl/Cmd</kbd> while selecting to add new passages to selection, or remove already added passages from it.
-	
-	- Recommended in-VSCode usage: Drag the tab to one side in its own separate group, and lock the group to prevent new tabs from opening on top of it.
 
 	![Story Map](docs/images/twee-storymap.png)
 

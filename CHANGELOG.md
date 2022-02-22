@@ -7,6 +7,12 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.17.1
+
+- Webview Story Map now auto opens to a side in a locked editor group. Resolves [Issue #103](https://github.com/cyrusfirheir/twee3-language-tools/issues/103).
+
+---
+
 ## v0.17.0
 
 Adds:
