@@ -161,7 +161,7 @@
 		},
 		"link-markup": {
 			"name": "meta.markup.underline.link.twee3",
-			"match": "(\\[\\[)(.*?)(\\]\\])",
+			"match": "(\\[\\[)([^\\[]*?)(\\]\\])",
 			"captures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"

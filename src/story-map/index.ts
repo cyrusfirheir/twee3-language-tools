@@ -20,7 +20,7 @@ export interface storyMapIO {
 export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 	const port = 42069;
 
-	const hostUrl = `http://localhost:${port}/`
+	const hostUrl = `http://localhost:${port}/`;
 	const storyMapPath = path.join(ctx.extensionPath, 'res/story-map');
 
 	const app = express();
@@ -65,8 +65,13 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 		const panel = vscode.window.createWebviewPanel("t3lt.storyMap", "Story Map", vscode.ViewColumn.Beside, {
 			enableScripts: true
 		});
-		panel.webview.html = `<!DOCTYPE html><html lang="en"><body style="height: 100vh; padding: 0;"><iframe style="height: 100%; width: 100%; border: none;" src="http://localhost:42069"></iframe></body></html>`;
-		vscode.commands.executeCommand("workbench.action.lockEditorGroup");
+		
+		panel.webview.html = `<!DOCTYPE html><html lang="en"><body style="height: 100vh; padding: 0;"><iframe style="height: 100%; width: 100%; border: none;" src="${hostUrl}"></iframe></body></html>`;
+
+		const firstLaunchLock = panel.onDidChangeViewState(() => {
+			vscode.commands.executeCommand("workbench.action.lockEditorGroup");
+			firstLaunchLock.dispose();
+		});
 	} else {
 		open(hostUrl);
 	}
