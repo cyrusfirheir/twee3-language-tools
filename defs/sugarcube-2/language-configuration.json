@@ -119,5 +119,12 @@
 			"open": "<",
 			"close": ">"
 		}
-	]
+	],
+	"folding": {
+		"offSide": true,
+		"markers": {
+			"start": "<<widget .*>>",
+			"end": "<</widget>>"
+		}
+	}
 }
