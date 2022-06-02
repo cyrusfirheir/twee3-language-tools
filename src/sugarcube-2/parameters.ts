@@ -415,7 +415,7 @@ export class Variant {
             Success,
         }
         function isFailure (status: Status): status is (Status.Failure | Status.NotFoundFailure){
-            return status === Status.Failure || status == Status.NotFoundFailure;
+            return status === Status.Failure || status === Status.NotFoundFailure;
         }
 
         interface CrawlInformation extends ValidateInformation {

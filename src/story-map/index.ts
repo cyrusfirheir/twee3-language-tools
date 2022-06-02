@@ -29,6 +29,8 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 	storyMap.server = new Server(app);
 	storyMap.server.listen(port, () => console.log(`Server connected on ${hostUrl}`));
 
+	const inVSC = vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("windowType", "VSCode") === "VSCode";
+	
 	const io = new socketio.Server(storyMap.server, { cors: { origin: 'http://localhost:8080' } });
 	io.on('connection', (client: socketio.Socket) => {
 		if (storyMap.client) storyMap.client.disconnect(true);
@@ -45,11 +47,7 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 				sendPassageDataToClient(ctx, client);
 			})
 			.on('disconnect', () => {
-				console.log('client disconnected');
-				storyMap.client = undefined;
-				storyMap.disconnectTimeout = setTimeout(() => {
-					if (!storyMap.client) stopUI(storyMap);
-				}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
+				if (!inVSC) disconnectHandler(storyMap);
 			})
 			.on('move-to-file', async (moveData: MoveData) => {
 				await moveToFile(ctx, moveData);
@@ -61,12 +59,14 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 			});
 	});
 	
-	if (vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("windowType", "VSCode") === "VSCode") {
+	if (inVSC) {
 		const panel = vscode.window.createWebviewPanel("t3lt.storyMap", "Story Map", vscode.ViewColumn.Beside, {
 			enableScripts: true
 		});
 		
 		panel.webview.html = `<!DOCTYPE html><html lang="en"><body style="height: 100vh; padding: 0;"><iframe style="height: 100%; width: 100%; border: none;" src="${hostUrl}"></iframe></body></html>`;
+
+		panel.onDidDispose(e => stopUI(storyMap));
 
 		const firstLaunchLock = panel.onDidChangeViewState(() => {
 			vscode.commands.executeCommand("workbench.action.lockEditorGroup");
@@ -77,6 +77,14 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 	}
 
 	vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
+}
+
+function disconnectHandler(storyMap: storyMapIO) {
+	console.log('client disconnected');
+	storyMap.client = undefined;
+	storyMap.disconnectTimeout = setTimeout(() => {
+		if (!storyMap.client) stopUI(storyMap);
+	}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
 }
 
 export function stopUI(storyMap: storyMapIO) {

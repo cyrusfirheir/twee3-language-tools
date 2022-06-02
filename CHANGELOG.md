@@ -7,6 +7,16 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.18.3
+
+Fixes:
+
+- Premature closing of the storymap when in webview mode ([Comment on #103](https://github.com/cyrusfirheir/twee3-language-tools/issues/103#issuecomment-1144213162)).
+- Sanitizes tags when added from the story map. Resolves [Issue #115](https://github.com/cyrusfirheir/twee3-language-tools/issues/115).
+- Fixes saving of changes to tags array from story map.
+
+---
+
 ## v0.18.0
 
 Adds:

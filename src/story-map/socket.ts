@@ -128,7 +128,7 @@ export function focusPassage(context: vscode.ExtensionContext, storyMap: storyMa
 	const editorPath = editor?.document.fileName.split("\\").filter((step) => step.length > 0) as [string];
 	const editorPosition = editor?.selection.active;
 	storyMap.client?.emit('focus-passage', passages.find((passage) => 
-		passage.origin.full.split("/").filter((step) => step.length > 0).every((step, index) => step == editorPath[index])
+		passage.origin.full.split("/").filter((step) => step.length > 0).every((step, index) => step === editorPath[index])
 		&& editorPosition && passage.range.start.line <= editorPosition.line && passage.range.end.line - 1 >= editorPosition.line // double check to appease typeerror
 	)?.name);
 }

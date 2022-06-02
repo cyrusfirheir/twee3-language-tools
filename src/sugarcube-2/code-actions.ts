@@ -114,7 +114,7 @@ export const addAllUnrecognizedMacrosInCurrentFile = async (document: vscode.Tex
 			continue;
 		}
 
-		if (collected.macros.some(el => el.name == def.name && !el.open)) {
+		if (collected.macros.some(el => el.name === def.name && !el.open)) {
 			def.container = true;
 		}
 
@@ -189,7 +189,7 @@ export const addAllUnrecognizedMacros = () => {
 
 				// TODO: This could be made more efficient by just updating the uniqueMacro entry
 				// when we run across another instance of it.
-				if (collected.macros.some(el => el.name == def.name && !el.open)) {
+				if (collected.macros.some(el => el.name === def.name && !el.open)) {
 					def.container = true;
 				}
 

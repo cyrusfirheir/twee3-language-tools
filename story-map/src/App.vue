@@ -290,7 +290,7 @@ export default class AppComponent extends Vue {
       console.log('connected');
     });
     socket.on('focus-passage', (passageName) => {
-      let passage = this.passages.find((passage) => passage.name == passageName);
+      let passage = this.passages.find((passage) => passage.name === passageName);
       if (passage) {
         this.selectedPassages = [passage];
         let storyArea = document.querySelector(".story-area");
@@ -310,6 +310,13 @@ export default class AppComponent extends Vue {
         // convert RawPassage to Passage
         .map((passageRaw) => parseRaw(passageRaw))
         .map((passage, index, allPassages) => linkPassage(passage, allPassages));
+      
+      const _sp = [];
+      this.selectedPassages.forEach(({ name }) => {
+        const i = this.passages.findIndex(el => el.name === name);
+        if (i >= 0) _sp.push(this.passages[i]);
+      });
+      this.selectedPassages = _sp;
       
       this.storyData = passageData.storyData;
       this.tagColors = passageData?.storyData?.['tag-colors'] || {};
@@ -564,7 +571,7 @@ export default class AppComponent extends Vue {
     this.changedPassages.forEach((passage) => {
       passage.originalPosition = { ...passage.position };
       passage.originalSize = { ...passage.size };
-      passage.originalTags = [ ...passage.originalTags ];
+      passage.originalTags = [ ...passage.tags ];
     });
   }
 
@@ -619,9 +626,8 @@ export default class AppComponent extends Vue {
 
   addPassageTag(passages: Passage[], tag: string) {
     for (const passage of passages) {
-      if (!passage.tags.some((oldTag) => !oldTag.toLowerCase().localeCompare(tag.trim().toLowerCase()))){
-        passage.tags.push(tag.trim());
-      }
+      tag = tag.trim().replace(/\s+/g, "-");
+      if (!passage.tags.includes(tag)) passage.tags.push(tag);
     }
   }
 

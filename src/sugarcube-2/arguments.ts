@@ -103,7 +103,7 @@ class Lexer<T> {
 	accept(valid: string): boolean {
 		const ch = this.next();
 
-		if (ch == EOF) {
+		if (ch === EOF) {
 			return false;
 		} else if (valid.includes(ch as string)) {
 			return true;
@@ -117,7 +117,7 @@ class Lexer<T> {
 		for (; ;) {
 			const ch = this.next();
 
-			if (ch == EOF) {
+			if (ch === EOF) {
 				return;
 			} else if (!valid.includes(ch as string)) {
 				break;
@@ -641,7 +641,7 @@ namespace MacroParse {
 			} else if (next === '\n' && endQuote !== '`') {
 				// This is special-cased for ` because it might have newlines inside it.
 				return EOF;
-			} else if (next == endQuote) {
+			} else if (next === endQuote) {
 				break;
 			}
 		}

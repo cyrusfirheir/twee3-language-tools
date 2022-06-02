@@ -13,7 +13,7 @@ export function styleByWrapping(editor: TextEditor, startPattern: string, endPat
     for (const [i, selection] of selections.entries()) {
 
         let cursorPos = selection.active;
-        const shift = shifts.map(([pos, s]) => (selection.start.line == pos.line && selection.start.character >= pos.character) ? s : 0)
+        const shift = shifts.map(([pos, s]) => (selection.start.line === pos.line && selection.start.character >= pos.character) ? s : 0)
             .reduce((a, b) => a + b, 0);
 
         if (selection.isEmpty) {
@@ -88,7 +88,7 @@ function wrapRange(editor: TextEditor, wsEdit: WorkspaceEdit, shifts: [Position,
         // Fix cursor position
         if (!isSelected) {
             if (!range.isEmpty) { // means quick styling
-                if (cursor.character == range.end.character) {
+                if (cursor.character === range.end.character) {
                     newCursorPos = cursor.with({ character: cursor.character + shift - ptnLength });
                 } else {
                     newCursorPos = cursor.with({ character: cursor.character + shift - startPtn.length });
@@ -112,7 +112,7 @@ function wrapRange(editor: TextEditor, wsEdit: WorkspaceEdit, shifts: [Position,
         // Fix cursor position
         if (!isSelected) {
             if (!range.isEmpty) { // means quick styling
-                if (cursor.character == range.end.character) {
+                if (cursor.character === range.end.character) {
                     newCursorPos = cursor.with({ character: cursor.character + shift + ptnLength });
                 } else {
                     newCursorPos = cursor.with({ character: cursor.character + shift + startPtn.length });
@@ -147,8 +147,8 @@ function getContext(editor: TextEditor, cursorPos: Position, startPattern: strin
     let leftText = editor.document.getText(new Range(cursorPos.line, startPositionCharacter, cursorPos.line, cursorPos.character));
     let rightText = editor.document.getText(new Range(cursorPos.line, cursorPos.character, cursorPos.line, endPositionCharacter));
 
-    if (rightText == endPattern) {
-        if (leftText == startPattern) {
+    if (rightText === endPattern) {
+        if (leftText === startPattern) {
             return `${startPattern}|${endPattern}`;
         } else {
             return `${startPattern}text|${endPattern}`;
