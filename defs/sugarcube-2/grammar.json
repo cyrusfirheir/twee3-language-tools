@@ -52,6 +52,9 @@
 				},
 				{
 					"include": "#sc-variables"
+				},
+				{
+					"include": "#sc-templates"
 				}
 			]
 		},
@@ -202,7 +205,11 @@
 			]
 		},
 		"sc-variables": {
-			"match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
+			"match": "([\\$_])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
+			"name": "entity.name.tag"
+		},
+		"sc-templates": {
+			"match": "(\\?)([A-Za-z][A-Za-z0-9_\\-]*)\\b",
 			"name": "entity.name.tag"
 		},
 		"sc-syntactic-sugar": {
