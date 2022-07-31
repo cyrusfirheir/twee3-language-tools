@@ -70,12 +70,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	await prepare();
 
-	if (!vscode.workspace.getConfiguration("editor").get("semanticTokenColorCustomizations.enabled")) {
-		vscode.workspace.getConfiguration("editor").update("semanticTokenColorCustomizations", {
-			"enabled": true
-		}, true);
-	}
-
 	const storyMap: storyMapIO = { client: undefined, server: undefined, disconnectTimeout: undefined };
 
 	const startUIWrapper = () => startUI(ctx, storyMap);
