@@ -466,5 +466,22 @@
 		"body": [
 			"<<widget \"${1:name}\">>\n\t$0\n<</widget>>"
 		]
-	}
+	},
+	"StoryInterface": {
+		"prefix": ":storyinterface",
+		"body": [
+			":: StoryInterface",
+			"<!-- https://www.motoslave.net/sugarcube/2/docs/#special-passage-storyinterface --> ",
+		  	"<!-- take note of 'data-init-passage' and 'data-passage' --> ",
+		  	"<div id=\"${1:interface}\">",
+		  	"  <div id=\"${2:menu}\" data-init-passage=\"${2/(.*)/${1:/capitalize}/}\"></div>",
+		  	"  <div id=\"${3:notifications}\" data-passage=\"${3/(.*)/${1:/capitalize}/}\"></div>",
+		  	"",
+		  	"  <!-- you must have one element with #id of 'passages' --> ",
+		  	"  <div id=\"passages\"></div>",
+		  	"  ${4:<div id=\"${5}\" ${6|data-passage,data-init-passage|}=\"${5/(.*)/${1:/capitalize}/}\"></div>}",
+		  	"</div>"
+		],
+		"description": "Adds default markup for StoryInterface"
+	  }
 }
