@@ -42,6 +42,12 @@
 					"include": "#h-macros"
 				},
 				{
+					"include": "#h-hook-body"
+				},
+				{
+					"include": "#h-collapsed"
+				},
+				{
 					"include": "#h-hook"
 				},
 				{
@@ -49,6 +55,67 @@
 				}
 			]
 		},
+    "in-hooks": {
+			"patterns": [
+				{
+					"include": "#html-comments"
+				},
+				{
+					"include": "#h-macros"
+				},
+				{
+					"include": "#h-hook"
+				},
+				{
+					"include": "#h-hook-body"
+				},
+				{
+					"include": "#h-collapsed"
+				},
+				{
+					"include": "#h-variables"
+				},
+				{
+					"include": "#html"
+				}
+			]
+    },
+    "in-macros": {
+      "patterns": [
+				{
+					"include": "#html-comments"
+				},
+				{
+					"include": "#h-macros"
+				},
+				{
+					"include": "#h-macro-parens"
+				},
+				{
+					"include": "#h-variables"
+				},
+				{
+					"match": "([a-zA-Z\\-\\_]+):",
+					"name": "keyword.control.flow.js"
+				},
+				{
+					"include": "#h-hook-body"
+				},
+				{
+					"include": "#h-properties"
+				},
+				{
+					"include": "#operators"
+				},
+				{
+					"include": "#types"
+				},
+				{
+					"match": "([\\(\\)\\{\\}])",
+					"name": "meta.brace"
+				}
+      ]
+    },
 		"h-macros": {
 			"name": "meta.harlowe.macros.twee3",
 			"begin": "(\\((?=(([a-zA-Z\\-_]+?)|([\\$_][A-Za-z\\$_][A-Za-z0-9\\$_]*))?:))",
@@ -65,46 +132,84 @@
 			},
 			"patterns": [
 				{
-					"include": "#html-comments"
-				},
-				{
-					"include": "#h-macros"
-				},
-				{
-					"match": "([a-zA-Z\\-\\_]+):",
-					"name": "keyword.control.flow.js"
-				},
-				{
-					"include": "#h-hook"
-				},
-				{
-					"include": "#h-variables"
-				},
-				{
-					"include": "#types"
-				},
-				{
-					"match": "([\\(\\)\\{\\}\\[\\]])",
-					"name": "meta.brace"
+					"include": "#in-macros"
 				}
 			]
 		},
+		"h-macro-parens": {
+			"name": "meta.harlowe.macroparens.twee3",
+			"begin": "(\\()",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.separator.twee3"
+				}
+			},
+			"end": "(\\))",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.separator.twee3"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#in-macros"
+				}
+			]
+		},
+    "operators": {
+      "patterns": [
+				{
+					"match": "\\b(alnum|alphanumeric|an?y?|array|bool(?:ean)?|changer|colou?r|const|command|dm|data|map|type|set|ds|digit|gradient|empty|even|int(?:eger)?|lambda|lowercase|macro|newline|num(?:ber)?|odd|str(?:ing)?|uppercase|whitespace|a|an|its|name|tags|is|to|into|in|when|via|making|each|and|or|not|does|contains|bind|matches|where)\\b",
+					"name": "keyword.operator"
+				},
+				{
+					"match": "%|\\*|\\-|\\+|<=|>=|<|>",
+					"name": "keyword.operator"
+				}
+      ]
+    },
 		"types": {
 			"patterns": [
 				{
-					"match": "\\b(alnum|alphanumeric|any|array|bool(?:ean)?|changer|colou?r|const|command|dm|data|map|type|set|ds|digit|gradient|empty|even|int(?:eger)?|lambda|lowercase|macro|newline|num(?:ber)?|odd|str(?:ing)?|uppercase|whitespace|a|an|its|name|tags|is|to|into|in|when|via|making|each|and|or|not|does|contains|bind|matches|where)\\b",
-					"name": "keyword.operator"
-				},
-				{
-					"match": "!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|(?<!\\()/=|%=|\\+=|\\-=|&=|\\^=|\\b(instanceof|new|delete|typeof|void)\\b",
-					"name": "keyword.operator"
-				},
-				{
-					"match": "('.*?(?<!\\\\)')",
+          "begin": "'",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.html"
+            }
+          },
+          "end": "'",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.html"
+            }
+          },
+          "patterns": [
+            {
+              "match": "[^']|\\\\'",
+              "name": "string.quoted.single.html"
+            }
+          ],
 					"name": "string.quoted.single.html"
 				},
 				{
-					"match": "(\".*?(?<!\\\\)\")",
+          "begin": "\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.html"
+            }
+          },
+          "end": "\"",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.html"
+            }
+          },
+          "patterns": [
+            {
+              "match": "[^\"]|\\\\\"",
+              "name": "string.quoted.double.html"
+            }
+          ],
 					"name": "string.quoted.double.html"
 				},
 				{
@@ -112,22 +217,105 @@
 					"name": "constant.numeric.js"
 				},
 				{
-					"match": "\\b(Infinity|NaN|undefined|null|true|false)\\b",
+					"match": "\\b(true|false)\\b",
 					"name": "constant.language.js"
-				},
-				{
-					"match": "(\\=)",
-					"name": "constant.language.operator.js"
 				}
 			]
 		},
+    "h-collapsed": {
+      "patterns": [
+        {
+          "name": "meta.harlowe.collapsed-unclosed.twee3",
+          "begin": "(\\{=+)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "end": "^(?=::)|(?=\\])",
+          "patterns": [
+            {
+              "include": "#in-hooks"
+            }
+          ]
+        },
+        {
+          "name": "meta.harlowe.collapsed.twee3",
+          "begin": "(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "end": "(\\})",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#in-hooks"
+            }
+          ]
+        }
+      ]
+    },
+    "h-hook-body": {
+      "patterns": [
+        {
+          "name": "meta.harlowe.hooks-unclosed.twee3",
+          "begin": "(\\[=+)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "end": "^(?=::)|(?=\\])",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#in-hooks"
+            }
+          ]
+        },
+        {
+          "name": "meta.harlowe.hooks.twee3",
+          "begin": "(\\[)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "end": "(\\])",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.separator.twee3"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#in-hooks"
+            }
+          ]
+        }
+      ]
+    },
 		"h-hook": {
-			"match": "(\\<([a-zA-z0-9]+)\\|)|(\\|([a-zA-z0-9]+)\\>)",
+			"match": "([\\<\\(]([a-zA-z0-9]+)\\|)|(\\|([a-zA-z0-9]+)[\\>\\)])",
 			"name": "entity.name.tag"
 		},
 		"h-variables": {
 			"match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
 			"name": "entity.name.tag"
+		},
+		"h-properties": {
+      "match": "of|'s\\b",
+      "name": "entity.name.type"
 		},
 		"json": {
 			"begin": "^::\\s*StoryData.*?$",
