@@ -4,8 +4,17 @@ Made possible through contributions from:
 - [@Goctionni](https://github.com/Goctionni)
 - [@MinusGix](https://github.com/MinusGix)
 - [@rambdev](https://github.com/rambdev)
+- [@togashikokujin](https://github.com/togashikokujin)
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+
+## v0.19.0
+
+Fixes:
+
+- Harlowe 3 syntax highlighting ([PR #120](https://github.com/cyrusfirheir/twee3-language-tools/pull/120)).
+
+---
 
 ## v0.18.3
 

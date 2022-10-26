@@ -6,6 +6,7 @@ Made possible through contributions from:
 - [@Goctionni](https://github.com/Goctionni)
 - [@MinusGix](https://github.com/MinusGix)
 - [@rambdev](https://github.com/rambdev)
+- [@togashikokujin](https://github.com/togashikokujin)
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
@@ -46,11 +47,11 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 
     ![Passage List](docs/images/twee-passage-list.png)  
 
-- Workspace statistics Status bar item (WIP) (Contributed by @rambdev).  
+- Workspace statistics Status bar item (WIP).  
 	- Total passage count (includes Story passages, Special passages, and Script/Stylesheet-tagged passages)  
 	- Story passage count  
 
-- A story-map view (Contributed by @Goctionni) that opens inside VSCode (and optionally, in the browser)! Still in early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
+- A story-map view that opens inside VSCode (and optionally, in the browser)! Still in early stages. Also accessible from the Twee 3 Language Tools tab on the activity bar.
 
 	- Currently implemented features:  
 		- Snap to grid (button on top-left.)  
@@ -70,11 +71,11 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 *(id: `sugarcube-2`)*
 - Syntax highlighting:  
     ![SugarCube syntax](docs/images/hl-sc2.png)
-- Macro documentation on hover. (Contributed by @MinusGix) (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)):  
+- Macro documentation on hover. (Custom definitions can be added via `*.twee-config.yml`. See: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)):  
 	- [Screenshot - macro documentation](docs/images/sc2-hovertips.png)
 - Container macro pair highlights:  
 	- [Screenshot - macro pairs](docs/images/sc2-macro-tag-matching.png)
-- Snippets. (Contributed by @rambdev) Type macro names to get code snippet inserts with placeholder values:  
+- Snippets. Type macro names to get code snippet inserts with placeholder values:  
 	- [Screenshot - snippet](docs/images/sc2-snippets.png)
 	- [Screenshot - snippet insert](docs/images/sc2-snippets-insert.png)
 	- [Screenshot - wrapping snippets](docs/images/sc2-snippets-wrap.png)
@@ -89,9 +90,9 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting:  
 		- [Screenshot - diagnostic](docs/images/sc2-unrecognized-macro.png)
 		- [Screenshot - quick fix](docs/images/sc2-unrecognized-quickfix.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
-	- Invalid argument syntax in macros (Contributed by @MinusGix):  
+	- Invalid argument syntax in macros:  
 		- [Screenshot - diagnostics](docs/images/sc2-parameter-validation.png)
-	- Argument validation (Contributed by @MinusGix): [Read here](docs/parameters.md) for more information.
+	- Argument validation: [Read here](docs/parameters.md) for more information.
 
 ### Chapbook
 *(id: `chapbook-1`)*
