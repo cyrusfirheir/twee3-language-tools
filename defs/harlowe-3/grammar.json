@@ -3,31 +3,11 @@
 	"scopeName": "source.harlowe-3.twee3",
 	"patterns": [
 		{
-			"include": "#harlowe-3"
+			"include": "#h-passage"
 		},
 		{
-			"include": "#json"
-		},
-		{
-			"include": "#script"
-		},
-		{
-			"include": "#stylesheet"
-		},
-		{
-			"include": "#link-markup"
-		},
-		{
-			"include": "#script-tag"
-		},
-		{
-			"include": "#style-tag"
-		},
-		{
-			"include": "#html"
-		},
-		{
-			"include": "#html-comments"
+			"match": ".*",
+			"name": "comment.block"
 		}
 	],
 	"repository": {
@@ -39,52 +19,36 @@
 		"harlowe-3": {
 			"patterns": [
 				{
-					"include": "#h-macros"
-				},
-				{
-					"include": "#h-hook-body"
-				},
-				{
-					"include": "#h-collapsed"
-				},
-				{
-					"include": "#h-hook"
-				},
-				{
-					"include": "#h-variables"
-				}
-			]
-		},
-    "in-hooks": {
-			"patterns": [
-				{
 					"include": "#html-comments"
 				},
 				{
 					"include": "#h-macros"
 				},
 				{
-					"include": "#h-hook"
+					"include": "#link-markup"
 				},
 				{
-					"include": "#h-hook-body"
+					"include": "#h-named-hook"
 				},
 				{
 					"include": "#h-collapsed"
 				},
 				{
 					"include": "#h-variables"
+				},
+				{
+					"include": "#script-tag"
+				},
+				{
+					"include": "#style-tag"
 				},
 				{
 					"include": "#html"
 				}
 			]
-    },
-    "in-macros": {
-      "patterns": [
-				{
-					"include": "#html-comments"
-				},
+		},
+		"in-macros": {
+			"patterns": [
 				{
 					"include": "#h-macros"
 				},
@@ -99,7 +63,7 @@
 					"name": "keyword.control.flow.js"
 				},
 				{
-					"include": "#h-hook-body"
+					"include": "#h-hook"
 				},
 				{
 					"include": "#h-properties"
@@ -114,19 +78,46 @@
 					"match": "([\\(\\)\\{\\}])",
 					"name": "meta.brace"
 				}
-      ]
-    },
+			]
+		},
+		"h-passage": {
+			"name": "meta.harlowe3.passage.twee3",
+			"begin": "^:: ",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.separator.twee3"
+				}
+			},
+			"end": "^(?=:: )",
+			"patterns": [
+				{
+					"include": "#json"
+				},
+				{
+					"include": "#script"
+				},
+				{
+					"include": "#stylesheet"
+				},
+				{
+					"include": "#harlowe-3"
+				}
+			]
+		},
 		"h-macros": {
 			"name": "meta.harlowe.macros.twee3",
-			"begin": "(\\((?=(([a-zA-Z\\-_]+?)|([\\$_][A-Za-z\\$_][A-Za-z0-9\\$_]*))?:))",
+			"begin": "(\\((?=[\\$_]?[a-zA-Z][-\\w]*:))",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.separator.twee3"
 				}
 			},
-			"end": "(\\))",
+			"end": "(^(?=:: ))|(\\))",
 			"endCaptures": {
 				"1": {
+					"name": "invalid.illegal"
+				},
+				"2": {
 					"name": "punctuation.separator.twee3"
 				}
 			},
@@ -144,9 +135,12 @@
 					"name": "punctuation.separator.twee3"
 				}
 			},
-			"end": "(\\))",
+			"end": "(^(?=:: ))|(\\))",
 			"endCaptures": {
 				"1": {
+					"name": "invalid.illegal"
+				},
+				"2": {
 					"name": "punctuation.separator.twee3"
 				}
 			},
@@ -156,8 +150,8 @@
 				}
 			]
 		},
-    "operators": {
-      "patterns": [
+		"operators": {
+			"patterns": [
 				{
 					"match": "\\b(alnum|alphanumeric|an?y?|array|bool(?:ean)?|changer|colou?r|const|command|dm|data|map|type|set|ds|digit|gradient|empty|even|int(?:eger)?|lambda|lowercase|macro|newline|num(?:ber)?|odd|str(?:ing)?|uppercase|whitespace|a|an|its|name|tags|is|to|into|in|when|via|making|each|and|or|not|does|contains|bind|matches|where)\\b",
 					"name": "keyword.operator"
@@ -166,50 +160,50 @@
 					"match": "%|\\*|\\-|\\+|<=|>=|<|>",
 					"name": "keyword.operator"
 				}
-      ]
-    },
+			]
+		},
 		"types": {
 			"patterns": [
 				{
-          "begin": "'",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.string.begin.html"
-            }
-          },
-          "end": "'",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.string.end.html"
-            }
-          },
-          "patterns": [
-            {
-              "match": "[^']|\\\\'",
-              "name": "string.quoted.single.html"
-            }
-          ],
+					"begin": "'",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.html"
+						}
+					},
+					"end": "'",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.end.html"
+						}
+					},
+					"patterns": [
+						{
+							"match": "[^']|\\\\'",
+							"name": "string.quoted.single.html"
+						}
+					],
 					"name": "string.quoted.single.html"
 				},
 				{
-          "begin": "\"",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.string.begin.html"
-            }
-          },
-          "end": "\"",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.string.end.html"
-            }
-          },
-          "patterns": [
-            {
-              "match": "[^\"]|\\\\\"",
-              "name": "string.quoted.double.html"
-            }
-          ],
+					"begin": "\"",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.html"
+						}
+					},
+					"end": "\"",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.end.html"
+						}
+					},
+					"patterns": [
+						{
+							"match": "[^\"]|\\\\\"",
+							"name": "string.quoted.double.html"
+						}
+					],
 					"name": "string.quoted.double.html"
 				},
 				{
@@ -222,103 +216,159 @@
 				}
 			]
 		},
-    "h-collapsed": {
-      "patterns": [
-        {
-          "name": "meta.harlowe.collapsed-unclosed.twee3",
-          "begin": "(\\{=+)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "end": "^(?=::)|(?=\\])",
-          "patterns": [
-            {
-              "include": "#in-hooks"
-            }
-          ]
-        },
-        {
-          "name": "meta.harlowe.collapsed.twee3",
-          "begin": "(\\{)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "end": "(\\})",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#in-hooks"
-            }
-          ]
-        }
-      ]
-    },
-    "h-hook-body": {
-      "patterns": [
-        {
-          "name": "meta.harlowe.hooks-unclosed.twee3",
-          "begin": "(\\[=+)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "end": "^(?=::)|(?=\\])",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#in-hooks"
-            }
-          ]
-        },
-        {
-          "name": "meta.harlowe.hooks.twee3",
-          "begin": "(\\[)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "end": "(\\])",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.separator.twee3"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#in-hooks"
-            }
-          ]
-        }
-      ]
-    },
+		"h-collapsed": {
+			"patterns": [
+				{
+					"name": "meta.harlowe.collapsed-unclosed.twee3",
+					"begin": "(\\{=+)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"end": "^(?=::)|(?=\\])",
+					"patterns": [
+						{
+							"include": "#harlowe-3"
+						}
+					]
+				},
+				{
+					"name": "meta.harlowe.collapsed.twee3",
+					"begin": "(\\{)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"end": "(^(?=:: ))|(\\})",
+					"endCaptures": {
+						"1": {
+							"name": "invalid.illegal"
+						},
+						"2": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#harlowe-3"
+						}
+					]
+				}
+			]
+		},
+		"h-named-hook": {
+			"patterns": [
+				{
+					"name": "meta.harlowe.hooks-unclosed.twee3",
+					"begin": "(\\|[a-zA-Z0-9]\\w*[\\>\\)])(\\[=+)",
+					"beginCaptures": {
+						"1": {
+							"name": "entity.name.tag.hook"
+						},
+						"2": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"end": "^(?=:: )|(?=\\])",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#harlowe-3"
+						}
+					]
+				},
+				{
+					"name": "meta.harlowe.hooks.twee3",
+					"begin": "(\\|[a-zA-Z0-9]\\w*[\\>\\)])(\\[)",
+					"beginCaptures": {
+						"1": {
+							"name": "entity.name.tag.hook"
+						},
+						"2": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"end": "(^(?=:: ))|(\\])",
+					"endCaptures": {
+						"1": {
+							"name": "invalid.illegal"
+						},
+						"2": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#harlowe-3"
+						}
+					]
+				},
+				{
+					"include": "#h-hook"
+				}
+			]
+		},
 		"h-hook": {
-			"match": "([\\<\\(]([a-zA-z0-9]+)\\|)|(\\|([a-zA-z0-9]+)[\\>\\)])",
-			"name": "entity.name.tag"
+			"patterns": [
+				{
+					"name": "meta.harlowe.hooks-unclosed.twee3",
+					"begin": "\\[=+",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"end": "^(?=:: )|(?=\\])",
+					"patterns": [
+						{
+							"include": "#harlowe-3"
+						}
+					]
+				},
+				{
+					"name": "meta.harlowe.hooks.twee3",
+					"begin": "\\[",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.separator.twee3"
+						}
+					},
+					"end": "(^(?=:: ))|(\\])([\\<\\(][a-zA-Z0-9]\\w*\\|)?",
+					"endCaptures": {
+						"1": {
+							"name": "invalid.illegal"
+						},
+						"2": {
+							"name": "punctuation.separator.twee3"
+						},
+						"3": {
+							"name": "entity.name.tag.hook"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#harlowe-3"
+						}
+					]
+				}
+			]
 		},
 		"h-variables": {
-			"match": "([\\$_\\?])([A-Za-z_\\$][A-Za-z0-9_\\$]*)\\b",
+			"match": "([\\$_]|\\?[\\$_]?)([A-Za-z][A-Za-z0-9_]*)\\b",
 			"name": "entity.name.tag"
 		},
 		"h-properties": {
-      "match": "of|'s\\b",
-      "name": "entity.name.type"
+			"match": "of|'s\\b",
+			"name": "entity.name.type"
 		},
 		"json": {
-			"begin": "^::\\s*StoryData.*?$",
+			"begin": "(?<=^:: )\\s*StoryData.*?$",
 			"end": "^(?=::)",
 			"name": "source.json.twee3",
 			"patterns": [
@@ -328,7 +378,7 @@
 			]
 		},
 		"script": {
-			"begin": "^::.+\\[\\s*script\\s*\\]",
+			"begin": "(?<=^:: ).+\\[\\s*script\\s*\\]",
 			"end": "^(?=::)",
 			"name": "source.js.twee3",
 			"patterns": [
@@ -338,7 +388,7 @@
 			]
 		},
 		"stylesheet": {
-			"begin": "^::.+\\[\\s*stylesheet\\s*\\]",
+			"begin": "(?<=^:: ).+\\[\\s*stylesheet\\s*\\]",
 			"end": "^(?=::)",
 			"name": "source.css.twee3",
 			"patterns": [
