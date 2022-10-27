@@ -20,8 +20,15 @@ export function getLinkedPassageNames(passageContent: string): string[] {
 export async function sendPassageDataToClient(context: vscode.ExtensionContext, client: socketio.Socket) {
 	let storyData = {};
 	const rawPassages = context.workspaceState.get("passages", []) as Passage[];
+
+	// Load in all the file contents so we only read a given file once
+	const fullOrigins = Array.from(new Set(rawPassages.map(passage => passage.origin.full)));
+	const fileContents = new Map();
+
+	await Promise.all(fullOrigins.map(async full => fileContents.set(full, await readFile(full))))
+
 	const passagePromises = rawPassages.map(async (passage) => {
-		const passageContent = await passage.getContent();
+		const passageContent = passage.getContentFromText(fileContents.get(passage.origin.full))
 		let linksToNames: string[] = [];
 		if (passage.name === 'StoryData') {
 			try {
