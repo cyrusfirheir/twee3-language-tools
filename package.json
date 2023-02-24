@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.19.2",
+	"version": "0.19.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -56,26 +56,14 @@
 			},
 			{
 				"id": "twee3-chapbook-1",
-				"aliases": [
-					"twee3-cb1",
-					"twee3-chapbook-1"
-				],
 				"configuration": "./defs/chapbook-1/language-configuration.json"
 			},
 			{
 				"id": "twee3-harlowe-3",
-				"aliases": [
-					"twee3-h3",
-					"twee3-harlowe-3"
-				],
 				"configuration": "./defs/harlowe-3/language-configuration.json"
 			},
 			{
 				"id": "twee3-sugarcube-2",
-				"aliases": [
-					"twee3-sc2",
-					"twee3-sugarcube-2"
-				],
 				"configuration": "./defs/sugarcube-2/language-configuration.json"
 			}
 		],
