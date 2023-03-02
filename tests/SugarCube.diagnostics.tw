@@ -14,8 +14,6 @@
 /* should throw unrecognized macro error */
 <<widgetName "lol">>
 
-
-
 /* Passage validation */
 
 <<link "link text">><</link>>
@@ -23,6 +21,7 @@
 <<link linktext >><</link>>
 <<link linktext>><</link>>
 
+<<for _i = 0; _i < 5; _i++>><</for>>
 
 /* container tag matching highlights */
 

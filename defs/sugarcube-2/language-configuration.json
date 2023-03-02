@@ -7,14 +7,6 @@
 	},
 	"brackets": [
 		[
-			"<!--",
-			"-->"
-		],
-		[
-			"<",
-			">"
-		],
-		[
 			"{",
 			"}"
 		],
@@ -86,8 +78,12 @@
 			]
 		},
 		{
-			"open": "<",
-			"close": ">"
+			"open": "<<",
+			"close": ">>",
+			"notIn": [
+				"comment",
+				"string"
+			]
 		},
 	],
 	"surroundingPairs": [

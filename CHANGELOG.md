@@ -8,6 +8,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.19.4
+
+Fixes:
+
+- Bracket pair definition for angle brackets removed. No more rogue pair coloring for SugarCube 2 macro syntax highlights.
+
+---
+
 ## v0.19.0
 
 Fixes:
