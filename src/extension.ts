@@ -111,7 +111,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
 						.filter(el => el.open && el.id !== el.pair).reverse()
 						.find(el => (new vscode.Range(el.range.start, collected.macros[el.pair].range.end)).contains(pos));
 					if (target) {
-						r.push(target.range, collected.macros[target.pair].range);
+						r.push(
+							new vscode.Range(
+								target.range.start,
+								target.range.start.translate(0, "<<".length + target.name.length)
+							),
+							new vscode.Range(
+								target.range.end.translate(0, -1 * ">>".length),
+								target.range.end
+							),
+							collected.macros[target.pair].range
+						);
 					}
 				});
 				e.textEditor.setDecorations(sc2m.macroTagMatchingDecor, r);
