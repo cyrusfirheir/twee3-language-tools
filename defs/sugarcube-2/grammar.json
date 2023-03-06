@@ -48,6 +48,9 @@
 					"include": "#sc-js-macro"
 				},
 				{
+					"include": "#sc-macro-link-markup"
+				},
+				{
 					"include": "#sc-macro"
 				},
 				{
@@ -111,8 +114,8 @@
 				}
 			]
 		},
-		"sc-macro": {
-			"begin": "(<</?)((?:\\=|\\-)|(?:[a-zA-Z][a-zA-Z0-9\\-_]*))",
+		"sc-macro-link-markup": {
+			"begin": "(?i)(<</?)((?:\\=|\\-)|(?:[a-zA-Z][a-zA-Z0-9\\-_]*))(?=(\\s+\\[(?:img)?\\[)(.*?)(\\]\\]))",
 			"beginCaptures": {
 				"1": {
 					"name": "punctuation.definition.tag.begin.html"
@@ -136,10 +139,34 @@
 				},
 				{
 					"include": "#sc-syntactic-sugar"
+				}
+			]
+		},
+		"sc-macro": {
+			"begin": "(?i)(<</?)((?:\\=|\\-)|(?:[a-zA-Z][a-zA-Z0-9\\-_]*))(?!(\\s+\\[(?:img)?\\[)(.*?)(\\]\\]))",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.begin.html"
+				},
+				"2": {
+					"name": "keyword.control.flow.js"
+				}
+			},
+			"end": "(/?>>)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.end.html"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#link-markup"
 				},
 				{
-					"match": "\\b(in|instanceof|new|delete|typeof|void)\\b",
-					"name": "keyword.operator"
+					"include": "#sc-variables"
+				},
+				{
+					"include": "#sc-syntactic-sugar"
 				},
 				{
 					"name": "source.js.twee3",

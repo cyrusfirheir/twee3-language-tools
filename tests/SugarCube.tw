@@ -16,6 +16,7 @@ $variablesAndStuff and text and stuff.
 
 <<link `'"That doesn\'t even make any sense!"'.sQ()`>> <</link>>
 
+<<link [[link|markup]]>><</link>>
 
 
 /* custom style markup tests - currently removed. to be reworked */
