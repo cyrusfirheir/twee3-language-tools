@@ -127,6 +127,7 @@ export const parameterTypes: ParameterType[] = [
             }
 
             if (passageName !== undefined) {
+				passageName = passageName.replace(/\\/g, "");
                 if (!info.state.passages.find(passage => passage.name === passageName)) {
                     return new Warning(`Nonexistent passage: "${passageName}"`);
                 }
