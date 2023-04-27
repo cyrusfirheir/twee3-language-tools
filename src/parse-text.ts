@@ -112,6 +112,8 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				continue;
 			}
 
+			passageName = passageName.replace(/\\(.)/g, "$1");
+
 			const specialPassages = ["StoryTitle", "StoryData", "Start"];
 			
 			if (document.languageId === "twee3-sugarcube-2") specialPassages.push("PassageDone", "PassageFooter", "PassageHeader", "PassageReady", "Start", "StoryAuthor", "StoryBanner", "StoryCaption", "StoryDisplayTitle", "StoryInit", "StoryInterface", "StoryMenu", "StorySettings", "StoryShare", "StorySubtitle", "StoryTitle");
