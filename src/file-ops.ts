@@ -78,7 +78,7 @@ export async function moveToFile(context: vscode.ExtensionContext, moveData: Mov
 	}
 
 	moveData.toFileContent = text.join("");
-	const fName = moveData.toFile + (minimatch(moveData.toFile, "**/*.{tw,twee}") ? "" : ".tw");
+	const fName = moveData.toFile + (minimatch(moveData.toFile, "**/*.{tw,twee}", { dot: true }) ? "" : ".tw");
 	await writeFile(fName, moveData.toFileContent);
 	await parseRawText(context, {
 		text: moveData.toFileContent,
@@ -97,7 +97,7 @@ export function fileGlob() {
 	let files: string[] = [];
 	vscode.workspace.workspaceFolders?.forEach(el => {
 		include.forEach(elem => {
-			files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude })];
+			files = [...files, ...glob.sync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude, dot: true })];
 		});
 	});
 	return files;
@@ -142,7 +142,7 @@ export async function getWorkspace() {
 			if (type === vscode.FileType.Directory) {
 				const path = folder.path + "/" + name;
 
-				if (exclude.some(el => minimatch(path + "/", el))) continue;
+				if (exclude.some(el => minimatch(path + "/", el, { dot: true }))) continue;
 
 				tree.content.folders.push(await getFolderTree(root, vscode.Uri.file(path)));
 			} else if (type === vscode.FileType.File && /\.tw(?:ee)?$/.test(name)) {
