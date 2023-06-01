@@ -12,6 +12,16 @@
 
 $variablesAndStuff and text and stuff.
 
+$variable.property
+
+$variable.property_with_underscores
+
+_temporary.property
+
+_temporary.property_with_underscores
+
+$var.nest_ed.nested.nested
+
 ?template or summin.
 
 <<link `'"That doesn\'t even make any sense!"'.sQ()`>> <</link>>
