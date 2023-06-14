@@ -22,10 +22,12 @@ export async function tweeProjectConfig(context: vscode.ExtensionContext) {
 
 			const errors: string[] = [];
 
-			if (!data.ifid) errors.push("IFID not found!");
-			else if (!validate(data.ifid)) errors.push("Invalid IFID!");
-
 			const storyDataErrorConfig = vscode.workspace.getConfiguration("twee3LanguageTools.twee-3.error.storyData");
+			
+			if (storyDataErrorConfig.get("ifid")) {
+				if (!data.ifid) errors.push("IFID not found!");
+				else if (!validate(data.ifid)) errors.push("Invalid IFID!");
+			}
 
 			if (!data.format && storyDataErrorConfig.get("format")) errors.push("Story Format name not found!");
 			if (!data["format-version"] && storyDataErrorConfig.get("formatVersion")) errors.push("Story Format version not found!");

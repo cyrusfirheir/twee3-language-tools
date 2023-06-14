@@ -93,10 +93,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.languages.registerHoverProvider(documentSelector, {
 			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
-				if (document.languageId == "twee3-sugarcube-2") {
-					return sc2m.hover(document, position);
-				} else {
-					return null;
+				switch (document.languageId) {
+					case "twee3-sugarcube-2": return sc2m.hover(document, position);
+					default: return null;
 				}
 			}
 		})

@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.19.11",
+	"version": "0.19.12",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -37,10 +37,6 @@
 		"twine"
 	],
 	"activationEvents": [
-		"onLanguage:twee3",
-		"onLanguage:twee3-chapbook-1",
-		"onLanguage:twee3-harlowe-3",
-		"onLanguage:twee3-sugarcube-2",
 		"workspaceContains:**/*.{tw,twee}"
 	],
 	"main": "./out/extension.js",
@@ -225,15 +221,20 @@
 					"default": true,
 					"markdownDescription": "Warn about missing space after the start token (`::`) in passage headers?"
 				},
+				"twee3LanguageTools.twee-3.error.storyData.ifid": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Throw an error if story IFID (`ifid`) in `StoryData` special passage is missing/invalid?"
+				},
 				"twee3LanguageTools.twee-3.error.storyData.format": {
 					"type": "boolean",
 					"default": true,
-					"markdownDescription": "Throw an error when missing the story format field (`format`) in `StoryData` special passage?"
+					"markdownDescription": "Throw an error if story format (`format`) in `StoryData` special passage is missing?"
 				},
 				"twee3LanguageTools.twee-3.error.storyData.formatVersion": {
 					"type": "boolean",
 					"default": true,
-					"markdownDescription": "Throw an error when missing the story format version field (`format-version`) in `StoryData` special passage?"
+					"markdownDescription": "Throw an error if story format version (`format-version`) in `StoryData` special passage is missing?"
 				},
 				"twee3LanguageTools.sugarcube-2.definedMacroDecorations": {
 					"type": "boolean",
