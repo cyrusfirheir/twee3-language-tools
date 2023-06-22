@@ -36,6 +36,15 @@
 		"sugarcube-2": {
 			"patterns": [
 				{
+					"include": "#sc-verbatim"
+				},
+				{
+					"include": "#sc-code"
+				},
+				{
+					"include": "#sc-nowiki"
+				},
+				{
 					"include": "#sc-comments"
 				},
 				{
@@ -43,9 +52,6 @@
 				},
 				{
 					"include": "#sc-script-tag"
-				},
-				{
-					"include": "#sc-js-macro"
 				},
 				{
 					"include": "#sc-macro-link-markup"
@@ -60,6 +66,18 @@
 					"include": "#sc-templates"
 				}
 			]
+		},
+		"sc-verbatim": {
+			"begin": "\"{3}",
+			"end": "\"{3}"
+		},
+		"sc-nowiki": {
+			"begin": "(?i)(?<=<nowiki>)",
+			"end": "(?i)(?=</nowiki>)"
+		},
+		"sc-code": {
+			"begin": "\\{{3}",
+			"end": "\\}{3}"
 		},
 		"sc-comments": {
 			"begin": "\\/\\*",
@@ -205,7 +223,7 @@
 			}
 		},
 		"sc-syntactic-sugar": {
-			"match": "\\b(to|is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|ndef)\\b",
+			"match": "\\b(to|is|isnot|eq|neq|gt|gte|lt|lte|and|or|not|def|ndef|class)\\b",
 			"name": "keyword.operator"
 		},
 		"json": {

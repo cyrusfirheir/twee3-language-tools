@@ -40,7 +40,9 @@
 	<</if>>
 <</if>>
 
-
+<<type 40ms class "foo bar">>
+	stuff stuff
+<</type>>
 
 /* skip parsing */
 
