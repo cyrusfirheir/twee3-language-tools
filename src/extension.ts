@@ -11,7 +11,7 @@ import { startUI, stopUI, storyMapIO } from "./story-map/index";
 
 import { fileGlob } from './file-ops';
 
-import { PassageSymbolProvider, PassageListProvider, Passage, jumpToPassage, WorkspacePassageSymbolProvider } from './passage';
+import { PassageSymbolProvider, PassageListProvider, Passage, jumpToPassage, WorkspacePassageSymbolProvider, passageAtCursor } from './passage';
 
 import * as formatting from "./formatting";
 
@@ -293,6 +293,30 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		})
 		,
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.storyMap.focusPassage", (editor) => focusPassage(ctx, storyMap, editor))
+		,
+		vscode.commands.registerTextEditorCommand("twee3LanguageTools.passage.setAsStart", async (editor) => {
+			const passage = passageAtCursor(ctx, editor);
+			if (passage) {
+				const passages = ctx.workspaceState.get("passages", []) as Passage[];
+				const storyData = passages.find((passage) => passage.name === "StoryData");
+				if (storyData) {
+					const range = new vscode.Range(storyData.range.start.translate(1), storyData.range.end);
+					
+					const data: any = ctx.workspaceState.get("StoryData", {});
+					data["start"] = passage.name;
+					const editorConfig = vscode.workspace.getConfiguration("editor");
+					const tabString = editorConfig.get("insertSpaces") ?? false
+						? editorConfig.get("tabSize") as number ?? 4
+						: "\t";
+					const dataString = JSON.stringify(data, null, tabString) + "\n\n";
+
+					const edit = new vscode.WorkspaceEdit();
+					edit.replace(vscode.Uri.file(storyData.origin.full), range, dataString);
+
+					vscode.workspace.applyEdit(edit);
+				}
+			}
+		})
 		,
 		// TODO: Allow configuration for which version Harlowe should use since it supports both ''
 		// and ** for bold, and // and * for italics

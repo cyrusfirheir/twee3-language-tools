@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.19.13",
+	"version": "0.20.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -364,6 +364,11 @@
 				"category": "Twee3 Language Tools"
 			},
 			{
+				"command": "twee3LanguageTools.passage.setAsStart",
+				"title": "Set passage as story start",
+				"category": "Twee3 Language Tools"
+			},
+			{
 				"command": "twee3LanguageTools.passage.pack",
 				"title": "Pack passages to clusters (Experimental)",
 				"category": "Twee3 Language Tools"
@@ -434,6 +439,11 @@
 				{
 					"when": "editorLangId == twee3 || editorLangId == twee3-chapbook-1 || editorLangId == twee3-harlowe-3 || editorLangId == twee3-sugarcube-2",
 					"command": "twee3LanguageTools.storyMap.focusPassage",
+					"group": "twee3LanguageToolsContextMenu"
+				},
+				{
+					"when": "editorLangId == twee3 || editorLangId == twee3-chapbook-1 || editorLangId == twee3-harlowe-3 || editorLangId == twee3-sugarcube-2",
+					"command": "twee3LanguageTools.passage.setAsStart",
 					"group": "twee3LanguageToolsContextMenu"
 				}
 			],

@@ -8,6 +8,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.20.0
+
+Adds:
+
+- Editor context menu item: `Set passage as story start` sets the currently focused passage in the editor as the start passage. 
+
+---
+
 ## v0.19.4
 
 Fixes:
