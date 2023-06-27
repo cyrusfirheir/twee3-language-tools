@@ -176,7 +176,7 @@ export function jumpToPassage(passage: Passage | OpenPassageParams) {
 
 export function passageAtCursor(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
 	const passages = context.workspaceState.get("passages") as Passage[];
-	const editorPath = editor?.document.fileName.split("\\").filter((step) => step.length > 0) as [string];
+	const editorPath = editor?.document.uri.path.split("/").filter((step) => step.length > 0) as [string];
 	const editorPosition = editor?.selection.active;
 	return passages.find((passage) => passage.origin.full.split("/")
 		.filter((step) => step.length > 0)
