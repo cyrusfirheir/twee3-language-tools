@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import headsplit from './headsplit';
+import { headsplit } from './utils';
 import { diagnostics as sc2 } from './sugarcube-2/macros';
 import { storyDataPassageHeaderRegex, storyDataPassageNameRegex } from './twee-project';
 

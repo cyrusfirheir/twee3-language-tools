@@ -1,4 +1,6 @@
-export default function headsplit(raw: string, regexp: RegExp, caps: number = 1) {
+import * as vscode from "vscode";
+
+export function headsplit(raw: string, regexp: RegExp, caps: number = 1) {
 	const text = raw.trim().split(/\r?\n/);
 	let retArr = [],
 		_header = "",
@@ -28,4 +30,11 @@ export default function headsplit(raw: string, regexp: RegExp, caps: number = 1)
 	}
 	retArr.shift();
 	return retArr;
+}
+
+export function tabstring() {
+	const editorConfig = vscode.workspace.getConfiguration("editor");
+	return editorConfig.get("insertSpaces") ?? false
+		? editorConfig.get("tabSize") as number ?? 4
+		: "\t";
 }

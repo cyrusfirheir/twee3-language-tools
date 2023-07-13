@@ -143,7 +143,7 @@ The following properties are currently programmed, even though not all of them a
 - **description** `(string)` *optional*: Description of macro. Shown on hover. Supports markdown.
 - **container** `(boolean)` *optional*: If the macro is a container (i.e. requires a closing tag) or not. `false` by default.
 - **selfClose** `(boolean)` *optional*: If the macro is a self-closable. Requires macro to be a container first. `false` by default.
-- **children** `(string|child-definition array)` *optional*: If the macro has children, specify them as an array of strings or child-definition (WIP) objects.
+- **children** `(string|child-definition array)` *optional*: If the macro has children, specify their names as an array (currently unused in code.) _You still need to define the child macros as their own macro definitions._
 - **parents** `(string array)` *optional*: If the macro is a child macro, specify the names of its parents as an array (currently unused in code.)
 - **deprecated** `(boolean)` *optional*: If the macro is deprecated or not. `false` by default.
 - **deprecatedSuggestions** `(string array)` *optional*: If the macro is deprecated, specify any alternatives to the macro as an array.

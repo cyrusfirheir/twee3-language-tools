@@ -22,6 +22,7 @@ import { packer } from './story-map/packer';
 import { passageCounter } from './status-bar'
 import { sbStoryMapConfirmationDialog } from './status-bar';
 import { updateDecorations, updateTextEditorDecorations } from './decorations';
+import { tabstring } from './utils';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -304,11 +305,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 					
 					const data: any = ctx.workspaceState.get("StoryData", {});
 					data["start"] = passage.name;
-					const editorConfig = vscode.workspace.getConfiguration("editor");
-					const tabString = editorConfig.get("insertSpaces") ?? false
-						? editorConfig.get("tabSize") as number ?? 4
-						: "\t";
-					const dataString = JSON.stringify(data, null, tabString) + "\n\n";
+					
+					const dataString = JSON.stringify(data, null, tabstring()) + "\n\n";
 
 					const edit = new vscode.WorkspaceEdit();
 					edit.replace(vscode.Uri.file(storyData.origin.full), range, dataString);

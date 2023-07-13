@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { readFile, writeFile } from '../file-ops';
 import { macroRegex, macroDef, macro, collectCache, macroList, MacroName } from './macros';
+import { tabstring } from '../utils';
 
 export class EndMacro implements vscode.CodeActionProvider {
 	public static readonly providedCodeActionKinds = [
@@ -72,26 +73,30 @@ export const unrecognizedMacroFixCommand = async (name: string, def: macroDef) =
 };
 
 export const addMacrosToFile = async (macros: Record<string, macroDef>) => {
-	const fsPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-	if (!fsPath) return;
+	const path = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+	if (!path) return;
 
-	const files = await vscode.workspace.findFiles("t3lt.twee-config.yml", "**/node_modules/**");
-	if (files.length) {
+	const files = await vscode.workspace.findFiles("**/**/*.twee-config.{yml,yaml,json}", "**/node_modules/**");
+	let written = false;
+	for (const file of files) {
 		try {
-			const yml = yaml.parse(await readFile(files[0].fsPath));
-			yml["sugarcube-2"].macros = Object.assign(yml["sugarcube-2"].macros, macros);
-			const ymlString = yaml.stringify(yml);
-			await writeFile(files[0].path, ymlString);
+			const config = yaml.parse(await readFile(file.fsPath));
+			config["sugarcube-2"].macros = Object.assign(config["sugarcube-2"].macros, macros);
+			const ymlString = /\.json$/i.test(file.fsPath) ? JSON.stringify(config, null, tabstring()) : yaml.stringify(config);
+			await writeFile(file.fsPath, ymlString);
+			written = true;
+			break;
 		} catch (ex) {
-			vscode.window.showErrorMessage(`\nCouldn't parse '${files[0]}'!\n\n${ex}\n\n`);
+			vscode.window.showErrorMessage(`\nCouldn't parse '${file}'!\n\n${ex}\n\n`);
 		}
-	} else {
+	}
+	if (!written) {
 		const ymlString = yaml.stringify({
 			"sugarcube-2": {
 				macros
 			}
 		});
-		await writeFile(fsPath + "/t3lt.twee-config.yml", ymlString);
+		await writeFile(path + "/t3lt.twee-config.yml", ymlString);
 	}
 };
 
