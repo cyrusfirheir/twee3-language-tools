@@ -45,6 +45,7 @@ type ToolbarItem = ToolbarItemToggle;
 })
 export default class ToolBar extends Vue {
   @Prop() unsavedChanges: boolean;
+  @Prop() settings: any;
 
   elements: ToolbarItem[] = [
     {
@@ -55,6 +56,14 @@ export default class ToolBar extends Vue {
       active: true,
     },
   ];
+
+  created() {
+	this.elements.forEach((element) => {
+		if (element.id = 'snap-to-grid') {
+			element.active = this.settings.snapToGrid;
+		}
+	});
+  }
 
   onToggleClick(element: ToolbarItemToggle) {
     element.active = !element.active;

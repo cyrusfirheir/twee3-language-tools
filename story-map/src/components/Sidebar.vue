@@ -448,7 +448,8 @@ export default class Sidebar extends Vue {
         @extend %close;
         width: 30px;
         height: 30px;
-        outline: solid rgba(255, 255, 255, .5) 1px;
+        border: 2px solid rgba(255, 255, 255, .5);
+		border-radius: 4px;
 
         &::before {
             font-size: 40px;
@@ -661,11 +662,11 @@ export default class Sidebar extends Vue {
 
     .size-btn,
     .action {
-        padding: 4px;
-        border-radius: 4px;
-        border: solid #FFF 1px;
-        background-color: transparent;
-        color: #FFF;
+		padding: 4px;
+		border-radius: 4px;
+		border: 2px solid var(--text-color-dark);
+		background-color: transparent;
+		color: var(--text-color-dark);
 
         &.size-some {
             background-color: rgba(255, 255, 255, .5);

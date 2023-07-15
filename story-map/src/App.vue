@@ -1,18 +1,19 @@
 <template>
   <div
     class="layout"
-    :class="{ 'show-sidebar': showSidebar && selectedPassages.length }"
+    :class="{ 'show-sidebar': settings.showSidebar && selectedPassages.length }"
     @mouseup="onMouseUp($event)"
     @mousemove="onMouseMove($event)"
   >
     <ToolBar
       class="toolbar"
       :unsavedChanges="unsavedChanges"
+      :settings="settings"
       @saveChanges="saveChanges()"
       @toggle="toggleSetting($event)"
     />
     <div class="sidebar">
-      <button class="toggle-sidebar" v-if="selectedPassages.length" :class="{ 'sidebar-off': !showSidebar }" @click="showSidebar = !showSidebar">Toggle Sidebar</button>
+      <button class="toggle-sidebar" v-if="selectedPassages.length" :class="{ 'sidebar-off': !settings.showSidebar }" @click="toggleSidebar()">Sidebar</button>
       <Sidebar
         :passages="selectedPassages"
         :allTags="allTags"
@@ -107,6 +108,8 @@ import ToolBar from './components/ToolBar.vue';
 import PassageLinkLine from './components/PassageLinkLine.vue';
 import Sidebar from './components/Sidebar.vue';
 
+const localStorageSettingsKey = "t3lt.story-map.settings";
+
 @Component({
   components: { ToolBar, PassageLinkLine, Sidebar },
 })
@@ -134,8 +137,8 @@ export default class AppComponent extends Vue {
     showDots: true,
     snapToGrid: true,
     gridSize: 25,
+    showSidebar: true,
   };
-  showSidebar: boolean = true;
 
   get allTags(): string[] {
     const { passages, storyData } = this;
@@ -284,6 +287,12 @@ export default class AppComponent extends Vue {
   }
 
   created() {
+    try {
+      const settings = JSON.parse(localStorage.getItem(localStorageSettingsKey));
+      Object.assign(this.settings, settings);
+    } catch (ex) {
+      /* no-op */
+    }
     socket.disconnect();
     socket.connect();
     socket.on('connect', () => {
@@ -408,6 +417,7 @@ export default class AppComponent extends Vue {
     if (id === 'snap-to-grid') {
       this.settings.snapToGrid = value;
     }
+    this.saveSettings();
   }
   
   getSnappedPassagePosition(position: Vector): Vector {
@@ -651,6 +661,15 @@ export default class AppComponent extends Vue {
       })
     })
   }
+
+  saveSettings() {
+    localStorage.setItem(localStorageSettingsKey, JSON.stringify(this.settings));
+  }
+
+  toggleSidebar() {
+    this.settings.showSidebar = !this.settings.showSidebar;
+    this.saveSettings();
+  }
 }
 </script>
 
@@ -778,34 +797,44 @@ html, body {
   position: absolute;
   z-index: 100;
 
-  font-size: 0;
-  color: transparent;
+  font-weight: bold;
+  writing-mode: vertical-lr;
+  text-transform: uppercase;
+  text-align: right;
+
+  padding-bottom: 10px;
+
+  color: #fff;
   background: #101619;
-  border: none;
-  outline: 1px solid hsla(0,0%,100%,.5);
+
+  border: 2px solid hsla(0,0%,100%,.5);
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-left-radius: 4px;
   
-  transform: translate(-100%, 20px);
+  transform: translate(-100%, 0);
   width: 30px;
-  height: 30px;
+  height: 110px;
 
   cursor: pointer;
 
   &::before {
     position: absolute;
-    content: ">";
-    font-weight: bold;
+    content: "▶";
+	writing-mode: initial;
+	line-height: 0;
     
     color: #fff;
     font-size: 30px;
 
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%) rotate(0deg);
-    transition: transform 0.3s ease-in-out;
+    top: 15px; left: 50%;
+    transform: scale(0.5) translate(-85%, -50%) rotate(0deg);
+    transition: transform 0.4s ease-in-out;
   }
 
   &.sidebar-off {
     &::before {
-      transform: translate(-50%, -50%) rotate(180deg);
+      transform: scale(0.5) translate(-100%, -50%) rotate(180deg);
     }
   }
 }
