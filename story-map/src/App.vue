@@ -13,7 +13,7 @@
       @toggle="toggleSetting($event)"
     />
     <div class="sidebar">
-      <button class="toggle-sidebar" v-if="selectedPassages.length" :class="{ 'sidebar-off': !settings.showSidebar }" @click="toggleSidebar()">Sidebar</button>
+      <button class="toggle-sidebar" v-if="selectedPassages.length" :class="{ 'sidebar-off': !settings.showSidebar }" @click="toggleSidebar()"><div class="toggle-label">Sidebar</div></button>
       <Sidebar
         :passages="selectedPassages"
         :allTags="allTags"
@@ -797,13 +797,6 @@ html, body {
   position: absolute;
   z-index: 100;
 
-  font-weight: bold;
-  writing-mode: vertical-lr;
-  text-transform: uppercase;
-  text-align: right;
-
-  padding-bottom: 10px;
-
   color: #fff;
   background: #101619;
 
@@ -818,10 +811,18 @@ html, body {
 
   cursor: pointer;
 
+  .toggle-label {
+    position: absolute;
+    rotate: 90deg;
+    translate: -37% 37%;
+
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
   &::before {
     position: absolute;
     content: "▶";
-	writing-mode: initial;
 	line-height: 0;
     
     color: #fff;
