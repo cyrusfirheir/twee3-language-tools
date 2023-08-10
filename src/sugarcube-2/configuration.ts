@@ -66,14 +66,20 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 
 	for (let v of await vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/node_modules/**")) {
 		let file = await vscode.workspace.openTextDocument(v);
-		let fileConfig: Configuration | null = null;
+		let fileConfig: Configuration = EMPTY_CONFIGURATION;
 		try {
 			fileConfig = yaml.parse(file.getText())["sugarcube-2"] || EMPTY_CONFIGURATION;
+			Object.values(fileConfig.macros).forEach(macro => {
+				if (typeof macro.description === "string") {
+					macro.description = new vscode.MarkdownString(macro.description);
+					macro.description.baseUri = v;
+				}
+			});
 		} catch (ex) {
 			vscode.window.showErrorMessage(`\nCouldn't parse ${file.fileName}!\n\n${ex}\n\n`);
 		}
 
-		if (fileConfig) {
+		if (fileConfig !== EMPTY_CONFIGURATION) {
 			// Merge the two configurations here.
 			Object.assign(configuration.macros, fileConfig.macros);
 		}
