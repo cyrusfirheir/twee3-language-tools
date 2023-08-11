@@ -73,7 +73,7 @@ export function isArrayEqual<T>(left?: T[], right?: T[]): boolean {
 /**
  * Uses `isObjectSimpleEqual` to decide if all the elements in an array are equal
  */
-export function isArraySimpleObjectsEqual<T>(left?: T[], right?: T[]): boolean {
+export function isArraySimpleObjectsEqual(left?: Record<string, any>[], right?: Record<string, any>[]): boolean {
     if (left === right) {
         // They're the same array, or both undefined
         return true;
