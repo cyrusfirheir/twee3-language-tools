@@ -64,12 +64,17 @@ export const macroList = async function (): Promise<Record<string, macroDef>> {
 	return config.macros;
 }
 
+export const enumList = async function (): Promise<Record<string, string>> {
+	const config = await getConfiguration();
+	return config.enums;
+}
+
 /**
  * Helper function to update the macros as needed
  */
-export const onUpdateMacroCache = function (lastMacroCache: Record<string, macroDef> | undefined, list: Record<string, macroDef>) {
+export const onUpdateMacroCache = function (lastMacroCache: Record<string, macroDef> | undefined, list: Record<string, macroDef>, enums: Record<string, string>) {
 	// Before we cache it, we parse the parameters into a more useful format.
-	let errors = parseMacroParameters(list);
+	let errors = parseMacroParameters(list, enums);
 	// We can continue despite errors from parsing the parameters, but we report them.
 	if (errors.length > 0) {
 		// Note: Since this is called early on, these messages might not be displayed.
@@ -90,6 +95,10 @@ export const onUpdateMacroCache = function (lastMacroCache: Record<string, macro
 					};
 				}
 			}
+		}
+
+		if (typeof macro.description?.value === "string") {
+			macro.description.value = parseEnums(macro.description.value, enums);
 		}
 	}
 
@@ -128,6 +137,19 @@ export const onUpdateMacroCache = function (lastMacroCache: Record<string, macro
  */
 const parseMacroList = async function () {
 	return (await parseConfiguration()).macros;
+};
+
+/**
+ * @param baseString The original string.
+ * @param enums The list of enums.
+ * @returns {string} The modified string
+ */
+export function parseEnums(baseString: string, enums: Record<string,string>): string {
+	// Two replaces is currently faster in js
+	let result = baseString.replace(/(?<!\\)%([\w]+)%/g, (_m: string, p1: string) => {
+		return enums[p1] === undefined ? `%${p1} NOT FOUND%` : enums[p1];
+	});
+	return result.replace(/\\(%[\w]+%)/g,"$1");
 };
 
 

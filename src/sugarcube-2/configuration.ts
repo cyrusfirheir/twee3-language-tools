@@ -24,14 +24,21 @@ configFileWatcher.onDidDelete(async (e) => {
 
 export interface Configuration {
 	macros: Record<string, macros.macroDef>,
+	enums: Record<string, string>,
 }
 
 /// Used for when there there is an errored state
 const EMPTY_CONFIGURATION = {
 	macros: {},
+	enums: {},
 };
 
 export let configurationCache: Promise<Configuration> | null = null;
+
+const enumListCore = {
+	// workspaceDir: "${workspaceFolder}"
+	workspaceDir: vscode.workspace.workspaceFolders?.[0].uri ?? ".",
+};
 
 export const getConfiguration = function (): Promise<Configuration> {
 	if (configurationCache === null) {
@@ -48,7 +55,7 @@ export const getConfiguration = function (): Promise<Configuration> {
 
 export const updateConfigurationCache = function () {
 	let configuration = Promise.all([configurationCache, parseConfiguration()]).then(([lastConfiguration, configuration]) => {
-		macros.onUpdateMacroCache(lastConfiguration?.macros, configuration.macros);
+		macros.onUpdateMacroCache(lastConfiguration?.macros, configuration.macros, configuration.enums);
 
 		return configuration;
 	}, () => EMPTY_CONFIGURATION);
@@ -62,6 +69,7 @@ export const updateConfigurationCache = function () {
 export const parseConfiguration = async function (): Promise<Configuration> {
 	var configuration: Configuration = {
 		macros: Object.assign(Object.create(null), macroListCore),
+		enums: Object.assign(Object.create(null), enumListCore),
 	};
 
 	const files = vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/{node_modules,.git}/**");
@@ -73,16 +81,21 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 				let fileConfig: Configuration = EMPTY_CONFIGURATION;
 
 				fileConfig = yamlParse(doc.getText(), "sugarcube-2");
-				if (fileConfig instanceof Error || (!fileConfig.macros)) {
+				if (fileConfig instanceof Error || (!fileConfig.macros && !fileConfig.enums)) {
 					vscode.window.showErrorMessage(`\nCouldn't parse ${file}!\n\n${fileConfig}\n\n`);
 					return EMPTY_CONFIGURATION;
 				}
-				Object.values(fileConfig.macros).forEach(macro => {
+				Object.values(fileConfig.macros ?? []).forEach(macro => {
 					if (typeof macro.description === "string") {
 						macro.description = new vscode.MarkdownString(macro.description);
 						macro.description.baseUri = file;
 					}
 				});
+				const illegalEnums = Object.keys(fileConfig.enums ?? []).filter(enumName => !/^\w+$/.test(enumName));
+				if (illegalEnums.length) {
+					vscode.window.showErrorMessage(`\nEnum(s)\n\n${illegalEnums.join(", ")}\n\ncontain illegal characters and have been omitted`);
+					illegalEnums.forEach(enumName => delete fileConfig.enums[enumName]);
+				}
 
 				return fileConfig;
 			}));
@@ -91,6 +104,7 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 	})
 	.then((configs: Configuration[]) => {
 		Object.assign(configuration.macros, ...configs.map(c => c.macros));
+		Object.assign(configuration.enums, ...configs.map(c => c.enums));
 	});
 
 	return configuration;
