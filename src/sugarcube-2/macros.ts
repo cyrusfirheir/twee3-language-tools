@@ -97,6 +97,8 @@ export const onUpdateMacroCache = function (lastMacroCache: Record<string, macro
 			}
 		}
 
+		if (!macro.name) macro.name = key;
+
 		if (typeof macro.description?.value === "string") {
 			macro.description.value = parseEnums(macro.description.value, enums);
 		}
