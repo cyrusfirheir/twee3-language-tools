@@ -4,6 +4,7 @@
 */
 
 import { Passage } from "../passage";
+import _ from "lodash";
 
 // SugarCube has more complex checks for these, but we're only supporting VSCode and assume its
 // whitespace handling is sane.
@@ -98,43 +99,46 @@ export function isArraySimpleObjectsEqual(left?: Record<string, any>[], right?: 
  * isEqual
  */
 export function isObjectSimpleEqual(left?: Record<string, any>, right?: Record<string, any>): boolean {
-    if (left === right) {
-        // They're the same object
-        return true;
-    } else if (left === undefined || right === undefined) {
-        return false;
-    }
+    return _.isEqual(left, right);
+    // if (left === right) {
+    //     // They're the same object
+    //     return true;
+    // } else if (left === undefined || right === undefined) {
+    //     return false;
+    // }
 
-    let left_keys = Object.keys(left);
-    let right_keys = Object.keys(right);
+    // let left_keys = Object.keys(left);
+    // let right_keys = Object.keys(right);
 
-    if (left_keys.length != right_keys.length) {
-        return false;
-    }
+    
 
-    for (let i = 0; i < left_keys.length; i++) {
-        let key = left_keys[i];
-        if (!(key in right)) {
-            return false;
-        }
+    // if (left_keys.length != right_keys.length) {
+    //     return false;
+    // }
 
-        if (left[key] !== right[key]) {
-            return false;
-        }
-    }
+    // for (let i = 0; i < left_keys.length; i++) {
+    //     let key = left_keys[i];
+    //     if (!(key in right)) {
+    //         return false;
+    //     }
 
-    for (let i = 0; i < right_keys.length; i++) {
-        let key = right_keys[i];
-        if (!(key in left)) {
-            return false;
-        }
+    //     if (left[key] !== right[key]) {
+    //         return false;
+    //     }
+    // }
 
-        if (left[key] !== right[key]) {
-            return false;
-        }
-    }
+    // for (let i = 0; i < right_keys.length; i++) {
+    //     let key = right_keys[i];
+    //     if (!(key in left)) {
+    //         return false;
+    //     }
 
-    return true;
+    //     if (left[key] !== right[key]) {
+    //         return false;
+    //     }
+    // }
+
+    // return true;
 }
 
 

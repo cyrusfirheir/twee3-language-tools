@@ -56,7 +56,7 @@ export async function tweeProjectConfig(context: vscode.ExtensionContext) {
 	}
 };
 
-export async function changeStoryFormat(document: vscode.TextDocument) {
+export async function changeStoryFormat(document: vscode.TextDocument): Promise<vscode.TextDocument> {
 	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
 	const langs = await vscode.languages.getLanguages();
 
@@ -65,6 +65,7 @@ export async function changeStoryFormat(document: vscode.TextDocument) {
 	if (!langs.includes(format)) format = "twee3";
 
 	if (/^twee3.*/.test(document.languageId) && document.languageId !== format) {
-		await vscode.languages.setTextDocumentLanguage(document, format);
+		return vscode.languages.setTextDocumentLanguage(document, format);
 	}
+	return Promise.resolve(document);
 };

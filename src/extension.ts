@@ -48,25 +48,48 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	await start();
 
+	// Long operations are file opening, file saving, workspaceState updates, and updateDiagnostics.
+	// changeStoryFormat *MUST* be finished before prepare can be considered "done"
 	async function prepare() {
 		const fg = fileGlob();
+		let filePromises: Thenable<vscode.TextDocument>[] = [];
+		let allPassages: Thenable<Passage[]>[] = [];
 
 		for (const file of fg) {
-			const doc = await vscode.workspace.openTextDocument(file);
-
-			await parseText(ctx, doc);
-			passageCounter(ctx, sbPassageCounter);
-
-			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+			let doc: vscode.TextDocument;
+			const newPassages: Thenable<Passage[]> = new Promise(resolve => {
+				filePromises.push(vscode.workspace.openTextDocument(file)
+					.then(d => {
+						doc = d;
+						return parseText(ctx, doc, passageListProvider, resolve);
+					}).then(_p => {
+						return doc;
+					})
+				);		
+			});
+			allPassages.push(newPassages);	
 		}
 
-		await tweeProjectConfig(ctx);
+		await Promise.all(allPassages)
+			.then(passages => {
+				return ctx.workspaceState.update("passages", passages.reduce((acc, val) => acc.concat(val), [] as Passage[]));
+			}).then(() => {
+				passageCounter(ctx, sbPassageCounter);
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
+				return tweeProjectConfig(ctx);
+			});
 
-		for (const file of fg) {
-			const doc = await vscode.workspace.openTextDocument(file);
-			await changeStoryFormat(doc);
-			updateDiagnostics(ctx, doc, collection);
+		for (const file in filePromises) {
+			filePromises[file] = Promise.resolve(filePromises[file])
+				.then(doc => {
+					return changeStoryFormat(doc);
+				}).then(doc => {
+					updateDiagnostics(ctx, doc, collection);
+					return doc;
+				});
 		}
+
+		return Promise.all(filePromises);
 	}
 
 	await prepare();
@@ -95,7 +118,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.languages.registerHoverProvider(documentSelector, {
 			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
 				switch (document.languageId) {
-					case "twee3-sugarcube-2": return sc2m.hover(document, position);
+					case "twee3-sugarcube-2": return sc2m.hover(document, position, token);
 					default: return null;
 				}
 			}
@@ -199,7 +222,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.workspace.onDidRenameFiles(async e => {
 			for (let file of e.files) {
 				let doc = await vscode.workspace.openTextDocument(file.newUri);
-				changeStoryFormat(doc);
+				await changeStoryFormat(doc);
 
 				sc2m.collectCache.clearFilename(file.oldUri.fsPath);
 

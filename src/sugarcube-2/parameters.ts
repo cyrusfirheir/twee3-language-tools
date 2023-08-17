@@ -261,7 +261,7 @@ export class Parameters {
      * Checks if two Parameters are loosely equivalent
      */
     compare(other: Parameters): boolean {
-        if (this.variants.length !== other.variants.length) {
+        if (this.variants.length !== other.variants?.length) {
             // Different amount of variants so they cannot be equivalent.
             return false;
         }

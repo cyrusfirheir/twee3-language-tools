@@ -64,26 +64,63 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 		macros: Object.assign(Object.create(null), macroListCore),
 	};
 
-	for (let v of await vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/node_modules/**")) {
-		let file = await vscode.workspace.openTextDocument(v);
-		let fileConfig: Configuration = EMPTY_CONFIGURATION;
-		try {
-			fileConfig = yaml.parse(file.getText())["sugarcube-2"] || EMPTY_CONFIGURATION;
-			Object.values(fileConfig.macros).forEach(macro => {
-				if (typeof macro.description === "string") {
-					macro.description = new vscode.MarkdownString(macro.description);
-					macro.description.baseUri = v;
-				}
-			});
-		} catch (ex) {
-			vscode.window.showErrorMessage(`\nCouldn't parse ${file.fileName}!\n\n${ex}\n\n`);
-		}
+	const files = vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/{node_modules,.git}/**");
 
-		if (fileConfig !== EMPTY_CONFIGURATION) {
-			// Merge the two configurations here.
-			Object.assign(configuration.macros, fileConfig.macros);
+	await files.then((files) => {
+		let configs: Thenable<Configuration>[] = [];
+		for (let file of files) {
+			configs.push(vscode.workspace.openTextDocument(file).then((doc) => {
+				let fileConfig: Configuration = EMPTY_CONFIGURATION;
+
+				fileConfig = yamlParse(doc.getText(), "sugarcube-2");
+				if (fileConfig instanceof Error || (!fileConfig.macros)) {
+					vscode.window.showErrorMessage(`\nCouldn't parse ${file}!\n\n${fileConfig}\n\n`);
+					return EMPTY_CONFIGURATION;
+				}
+				Object.values(fileConfig.macros).forEach(macro => {
+					if (typeof macro.description === "string") {
+						macro.description = new vscode.MarkdownString(macro.description);
+						macro.description.baseUri = file;
+					}
+				});
+
+				return fileConfig;
+			}));
 		}
-	}
+		return Promise.all(configs);
+	})
+	.then((configs: Configuration[]) => {
+		Object.assign(configuration.macros, ...configs.map(c => c.macros));
+	});
 
 	return configuration;
 };
+
+/**
+ * Turns raw text into parsed object using default, language-specific options
+ * @param text Text contents of file
+ * @param header Name of object to return from parsed yaml. Serves as language-specifier as well
+ * @param options yaml.Options. Assigned on top of language defaults
+ * @returns {Object | Error}
+ */
+export const yamlParse = function(text: string, header?: string, options?: yaml.Options): any {
+	const defaults = {
+		maxAliasCount: 1000,
+	};
+
+	options = Object.assign(defaults, options);
+
+	try {
+		let output = yaml.parse(text, options);
+		if (header) {
+			if (!output[header]) return Object.create(null);
+			return output[header];
+		}
+		else {
+			return yaml.parse(text, options);
+		}
+	}
+	catch (ex) {
+		return ex;
+	}
+}

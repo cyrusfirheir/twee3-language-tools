@@ -18,7 +18,7 @@ export interface RawDocument {
 	languageId: vscode.TextDocument["languageId"];
 }
 
-export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
+export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, provider?: PassageListProvider, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
 	const StoryData: any = context.workspaceState.get("StoryData", {});
 	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin.full !== document.uri.path);
 	const newPassages: Passage[] = [];
@@ -183,19 +183,25 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 		newPassages.push(lastPassage);
 	}
 
-	await context.workspaceState.update("passages", passages.concat(newPassages));
-	provider?.refresh();
-	if (document.languageId === "twee3-sugarcube-2") sc2m.argumentCache.clearMacrosUsingPassage();
+	if (!passageStore) {
+		await context.workspaceState.update("passages", passages.concat(newPassages));
+		provider?.refresh();
+		if (document.languageId === "twee3-sugarcube-2") sc2m.argumentCache.clearMacrosUsingPassage();
+	}
+	else if (passageStore instanceof Array)
+		passageStore.push(newPassages);
+	else
+		passageStore(newPassages);
 
 	return Promise.resolve(r);
 }
 
-export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider): Promise<IParsedToken[]> {
+export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
 	return parseRawText(context, {
 		text: document.getText(),
 		uri: document.uri,
 		languageId: document.languageId
-	}, provider);
+	}, provider, passageStore);
 }
 
 const tokenTypes = new Map<string, number>();

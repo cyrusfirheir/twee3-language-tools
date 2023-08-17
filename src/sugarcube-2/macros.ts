@@ -6,6 +6,7 @@ import * as macroListCore from './macros.json';
 import { Passage } from '../passage';
 import { isArrayEqual, isArraySimpleObjectsEqual, isObjectSimpleEqual } from './validation';
 import { configurationCache, getConfiguration, parseConfiguration, updateConfigurationCache } from './configuration';
+import _ from 'lodash';
 
 export type MacroName = string;
 export interface macro {
@@ -58,8 +59,9 @@ export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
 
 export const macroRegex = new RegExp(`<<(/|end)?(${macroNamePattern})(?:\\s*)((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\\\n])*?\`)|(?:"(?:\\\\.|[^"\\\\\\n])*?")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)(/)?>>`, 'gm');
 
-export const macroList = function (): Promise<Record<string, macroDef>> {
-	return getConfiguration().then(config => config.macros);
+export const macroList = async function (): Promise<Record<string, macroDef>> {
+	const config = await getConfiguration();
+	return config.macros;
 }
 
 /**
@@ -131,8 +133,7 @@ const parseMacroList = async function () {
 
 /**
  * Check if two macro definition are functionally equivalent.
- * Essentially a _loose_ check for if they would produce the same behavior. It errs on the side of
- * caution (and performance).
+ * Essentially a _loose_ check for if they would produce the same behavior. Manual checks were replaced with lodash
  */
 function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean {
 	if (left.parameters === undefined || right.parameters === undefined) {
@@ -142,22 +143,12 @@ function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean
 		}
 	} else {
 		// They are both non-undefined
-		if (!left.parameters.compare(right.parameters)) {
+		if (!left.parameters?.compare(right.parameters)) {
 			return false;
 		}
 	}
-	// Both of the above checks fall through in the valid case and we don't have to have ugly 
-	// checks in the boolean expression below
 
-	return left.name === right.name &&
-		left.container === right.container &&
-		left.selfClose === right.selfClose &&
-		isArraySimpleObjectsEqual(left.children, right.children) &&
-		isArrayEqual(left.parents, right.parents) &&
-		left.deprecated === right.deprecated &&
-		isArrayEqual(left.deprecatedSuggestions, right.deprecatedSuggestions) &&
-		left.skipArgs === right.skipArgs &&
-		isObjectSimpleEqual(left.decoration, right.decoration);
+	return _.isEqual(left, right);
 }
 
 interface CollectedMacros {
@@ -798,7 +789,9 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 /**
  * Provides hover information for macros.
  */
-export const hover = async function (document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | null> {
+export const hover = async function (document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null> {
+	if (token.isCancellationRequested) return null;
+
 	// Acquire list of macros in the file.
 	const collected = await collectCache.get(document);
 	const macroDefinitions = await macroList();
