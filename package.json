@@ -166,6 +166,11 @@
 		"configuration": {
 			"title": "Twee 3 Language Tools",
 			"properties": {
+				"twee3LanguageTools.yaml.maxAliasCount": {
+					"type": "integer",
+					"default": 100,
+					"markdownDescription": "Max number of alias substitutions allowed in a single yaml file"
+				},
 				"twee3LanguageTools.storyformat.current": {
 					"type": "string",
 					"default": "",
