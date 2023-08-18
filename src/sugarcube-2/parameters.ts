@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { Passage } from '../passage';
 import { Arg, ArgType, ExpressionArgument, ParsedArguments, SettingsSetupAccessArgument, VariableArgument } from './arguments';
 import { StateInfo, Warning } from './validation';
+import { parseEnums } from './macros';
 
 export type UnparsedFormat = string;
 // Note: This may eventually also be allowed to become an object, for more configuration options.
@@ -178,7 +179,7 @@ interface ArgumentInfo {
  * @param list The list of macros. Modified in-place.
  * @returns {Error[]} A potentially empty list of errors that occurred.
  */
-export function parseMacroParameters(list: Record<string, Record<string, any>>): Error[] {
+export function parseMacroParameters(list: Record<string, Record<string, any>>, enums: Record<string, string>): Error[] {
     let errors: Error[] = [];
     for (let key in list) {
         let macroDefinition = list[key];
@@ -192,6 +193,10 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>):
             delete macroDefinition.parameters;
             continue;
         }
+
+        macroDefinition.parameters = macroDefinition.parameters.map((parameter: string) => {
+            return parseEnums(parameter, enums);
+        });
 
         try {
             // Overwrite the previous parameters with the parsed version
