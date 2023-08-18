@@ -7,6 +7,7 @@ Made possible through contributions from:
 - [@MinusGix](https://github.com/MinusGix)
 - [@rambdev](https://github.com/rambdev)
 - [@togashikokujin](https://github.com/togashikokujin)
+- [@JustNoon](https://github.com/JustNoon)
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 

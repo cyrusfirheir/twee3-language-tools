@@ -5,8 +5,23 @@ Made possible through contributions from:
 - [@MinusGix](https://github.com/MinusGix)
 - [@rambdev](https://github.com/rambdev)
 - [@togashikokujin](https://github.com/togashikokujin)
+- [@JustNoon](https://github.com/JustNoon)
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+
+## v0.21.0
+
+Adds:
+
+- Enums to SugarCube macro definitions ([Issue #139](https://github.com/cyrusfirheir/twee3-language-tools/issues/139) and [PR #141](https://github.com/cyrusfirheir/twee3-language-tools/pull/141)).  
+- Setting to customize number of aliases allowed in a single yaml file ([PR #142](https://github.com/cyrusfirheir/twee3-language-tools/pull/142)).
+
+Fixes:
+
+- Performance improvements for large projects ([PR #140](https://github.com/cyrusfirheir/twee3-language-tools/pull/140)).  
+- SugarCube macro definition handling ([PR #143](https://github.com/cyrusfirheir/twee3-language-tools/pull/143)).
+
+---
 
 ## v0.20.0
 
