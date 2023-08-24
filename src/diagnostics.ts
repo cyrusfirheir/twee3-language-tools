@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { headsplit } from './utils';
 import { diagnostics as sc2 } from './sugarcube-2/macros';
 import { storyDataPassageHeaderRegex, storyDataPassageNameRegex } from './twee-project';
+import { LanguageID } from './sugarcube-2/configuration';
 
 export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 	if (!/^twee3.*/.test(document.languageId)) return;
@@ -42,7 +43,7 @@ export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, d
 		}
 	});
 
-	if (document.languageId === "twee3-sugarcube-2") diagnostics = diagnostics.concat(await sc2(ctx, document));
+	if (document.languageId === LanguageID) diagnostics = diagnostics.concat(await sc2(ctx, document));
 
 	collection.set(document.uri, diagnostics);
 };

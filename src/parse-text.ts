@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Passage, PassageListProvider } from "./passage";
-import * as sc2m from "./sugarcube-2/macros";
+import * as sugarcube2Macros from "./sugarcube-2/macros";
+import * as sugarcube2Language from "./sugarcube-2/configuration";
 
 interface IParsedToken {
 	line: number;
@@ -116,7 +117,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 
 			const specialPassages = ["StoryTitle", "StoryData", "Start"];
 			
-			if (document.languageId === "twee3-sugarcube-2") specialPassages.push("PassageDone", "PassageFooter", "PassageHeader", "PassageReady", "Start", "StoryAuthor", "StoryBanner", "StoryCaption", "StoryDisplayTitle", "StoryInit", "StoryInterface", "StoryMenu", "StorySettings", "StoryShare", "StorySubtitle", "StoryTitle");
+			if (document.languageId === sugarcube2Language.LanguageID) specialPassages.push("PassageDone", "PassageFooter", "PassageHeader", "PassageReady", "Start", "StoryAuthor", "StoryBanner", "StoryCaption", "StoryDisplayTitle", "StoryInit", "StoryInterface", "StoryMenu", "StorySettings", "StoryShare", "StorySubtitle", "StoryTitle");
 
 			const specialName = specialPassages.includes(passageName);
 			
@@ -186,7 +187,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 	if (!passageStore) {
 		await context.workspaceState.update("passages", passages.concat(newPassages));
 		provider?.refresh();
-		if (document.languageId === "twee3-sugarcube-2") sc2m.argumentCache.clearMacrosUsingPassage();
+		if (document.languageId === sugarcube2Language.LanguageID) sugarcube2Macros.argumentCache.clearMacrosUsingPassage();
 	}
 	else if (passageStore instanceof Array)
 		passageStore.push(newPassages);

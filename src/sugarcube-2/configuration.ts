@@ -3,6 +3,8 @@ import * as yaml from 'yaml';
 import * as macros from './macros';
 import * as macroListCore from './macros.json';
 
+export const LanguageID = "twee3-sugarcube-2";
+
 const configFileWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(
 	"**/*.twee-config.{json,yaml,yml}",
 	false,
@@ -21,6 +23,8 @@ configFileWatcher.onDidDelete(async (e) => {
 	await updateConfigurationCache();
 	vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
 });
+
+let languageConfigDisposable: vscode.Disposable | null = null;
 
 export interface Configuration {
 	macros: Record<string, macros.macroDef>,
@@ -105,6 +109,11 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 	.then((configs: Configuration[]) => {
 		Object.assign(configuration.macros, ...configs.map(c => c.macros));
 		Object.assign(configuration.enums, ...configs.map(c => c.enums));
+	});
+
+	if (languageConfigDisposable) languageConfigDisposable.dispose();
+	languageConfigDisposable = vscode.languages.setLanguageConfiguration(LanguageID, {
+		onEnterRules: macros.generateMacroOnEnterRules(configuration.macros)
 	});
 
 	return configuration;

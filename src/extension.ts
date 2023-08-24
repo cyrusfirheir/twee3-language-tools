@@ -15,8 +15,9 @@ import { PassageSymbolProvider, PassageListProvider, Passage, jumpToPassage, Wor
 
 import * as formatting from "./formatting";
 
-import * as sc2m from './sugarcube-2/macros';
-import * as sc2ca from './sugarcube-2/code-actions';
+import * as sugarcube2Language from './sugarcube-2/configuration';
+import * as sugarcube2CodeActions from './sugarcube-2/code-actions';
+import * as sugarcube2Macros from './sugarcube-2/macros';
 import { packer } from './story-map/packer';
 
 import { passageCounter } from './status-bar'
@@ -118,15 +119,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.languages.registerHoverProvider(documentSelector, {
 			provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
 				switch (document.languageId) {
-					case "twee3-sugarcube-2": return sc2m.hover(document, position, token);
+					case sugarcube2Language.LanguageID: return sugarcube2Macros.hover(document, position, token);
 					default: return null;
 				}
 			}
 		})
 		,
 		vscode.window.onDidChangeTextEditorSelection(async e => {
-			if (e.textEditor.document.languageId === "twee3-sugarcube-2" && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.features").get("macroTagMatching")) {
-				let collected = await sc2m.collectCache.get(e.textEditor.document);
+			if (e.textEditor.document.languageId === sugarcube2Language.LanguageID && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.features").get("macroTagMatching")) {
+				let collected = await sugarcube2Macros.collectCache.get(e.textEditor.document);
 				let r: vscode.Range[] = [];
 				e.selections.forEach(sel => {
 					let pos = sel.active;
@@ -147,7 +148,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 						);
 					}
 				});
-				e.textEditor.setDecorations(sc2m.macroTagMatchingDecor, r);
+				e.textEditor.setDecorations(sugarcube2Macros.macroTagMatchingDecor, r);
 			}
 		})
 		,
@@ -188,15 +189,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.cache.argumentInformation") && !vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.cache").get(".argumentInformation")) {
 				// The configuration for this setting has been changed and it is now false, so we
 				// clear the cache.
-				sc2m.argumentCache.clear();
+				sugarcube2Macros.argumentCache.clear();
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.error.parameterValidation")) {
 				// Note: We simply clear the arguments cache to force it to revalidate.
 				// This could be done in a more efficient manner, but this is good enough.
-				sc2m.argumentCache.clear();
+				sugarcube2Macros.argumentCache.clear();
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.warning.barewordLinkPassageChecking")) {
-				sc2m.argumentCache.clearMacrosUsingPassage();
+				sugarcube2Macros.argumentCache.clearMacrosUsingPassage();
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.definedMacroDecorations")) {
 				updateTextEditorDecorations(ctx);
@@ -208,7 +209,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidDeleteFiles(e => {
-			e.files.forEach(file => sc2m.collectCache.clearFilename(file.fsPath));
+			e.files.forEach(file => sugarcube2Macros.collectCache.clearFilename(file.fsPath));
 
 			const removedFilePaths = e.files.map((file) => file.path);
 			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
@@ -224,7 +225,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 				let doc = await vscode.workspace.openTextDocument(file.newUri);
 				await changeStoryFormat(doc);
 
-				sc2m.collectCache.clearFilename(file.oldUri.fsPath);
+				sugarcube2Macros.collectCache.clearFilename(file.oldUri.fsPath);
 
 				let passages: Passage[] = ctx.workspaceState.get("passages", []);
 				passages.forEach(el => {
@@ -297,22 +298,22 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(uuidv4().toUpperCase()));
 		})
 		,
-		vscode.commands.registerCommand("twee3LanguageTools.sc2.defineMacro", sc2ca.unrecognizedMacroFixCommand)
+		vscode.commands.registerCommand("twee3LanguageTools.sc2.defineMacro", sugarcube2CodeActions.unrecognizedMacroFixCommand)
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.clearArgumentCache", () => {
 			// Provide a command to clear the argument cache for if there is ever any bugs with the
 			// implementation, it can tide users over until a fix.
-			sc2m.argumentCache.clear();
+			sugarcube2Macros.argumentCache.clear();
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacros", () => {
-			sc2ca.addAllUnrecognizedMacros();
+			sugarcube2CodeActions.addAllUnrecognizedMacros();
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.sc2.addAllUnrecognizedMacrosInFile", async() => {
 			let editor = vscode.window.activeTextEditor;
 			if (editor) {
-				await sc2ca.addAllUnrecognizedMacrosInCurrentFile(editor.document);
+				await sugarcube2CodeActions.addAllUnrecognizedMacrosInCurrentFile(editor.document);
 			}
 		})
 		,
@@ -343,7 +344,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		// and ** for bold, and // and * for italics
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.toggleItalics", editor => {
 			let languageId = editor.document.languageId;
-			if (languageId === "twee3-sugarcube-2") {
+			if (languageId === sugarcube2Language.LanguageID) {
 				formatting.styleByWrapping(editor, "//");
 			} else if (languageId === "twee3-harlowe-3") {
 				formatting.styleByWrapping(editor, "*");
@@ -353,7 +354,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.toggleBold", (editor, edit) => {
 			let languageId = editor.document.languageId;
-			if (languageId === "twee3-sugarcube-2") {
+			if (languageId === sugarcube2Language.LanguageID) {
 				formatting.styleByWrapping(editor, "''");
 			}  else if (languageId === "twee3-harlowe-3") {
 				formatting.styleByWrapping(editor, "**");
@@ -361,12 +362,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			// TODO: Other story format support
 		})
 		,
-		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.EndMacro(), {
-			providedCodeActionKinds: sc2ca.EndMacro.providedCodeActionKinds
+		vscode.languages.registerCodeActionsProvider(sugarcube2Language.LanguageID, new sugarcube2CodeActions.EndMacro(), {
+			providedCodeActionKinds: sugarcube2CodeActions.EndMacro.providedCodeActionKinds
 		})
 		,
-		vscode.languages.registerCodeActionsProvider("twee3-sugarcube-2", new sc2ca.Unrecognized(), {
-			providedCodeActionKinds: sc2ca.Unrecognized.providedCodeActionKinds
+		vscode.languages.registerCodeActionsProvider(sugarcube2Language.LanguageID, new sugarcube2CodeActions.Unrecognized(), {
+			providedCodeActionKinds: sugarcube2CodeActions.Unrecognized.providedCodeActionKinds
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passageCounter.clickCheck", sbStoryMapConfirmationDialog)

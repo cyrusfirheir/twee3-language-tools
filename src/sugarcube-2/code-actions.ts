@@ -3,6 +3,7 @@ import * as yaml from 'yaml';
 import { readFile, writeFile } from '../file-ops';
 import { macroRegex, macroDef, macro, collectCache, macroList, MacroName } from './macros';
 import { tabstring } from '../utils';
+import { LanguageID } from './configuration';
 
 export class EndMacro implements vscode.CodeActionProvider {
 	public static readonly providedCodeActionKinds = [
@@ -101,7 +102,7 @@ export const addMacrosToFile = async (macros: Record<string, macroDef>) => {
 };
 
 export const addAllUnrecognizedMacrosInCurrentFile = async (document: vscode.TextDocument) => {
-	if (document.languageId !== "twee3-sugarcube-2") {
+	if (document.languageId !== LanguageID) {
 		return;
 	}
 

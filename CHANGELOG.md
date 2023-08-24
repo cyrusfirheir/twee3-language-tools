@@ -9,6 +9,14 @@ Made possible through contributions from:
 
 And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
 
+## v0.22.0
+
+Adds:
+
+- `OnEnterRules` for SugarCube-2, handling indentation for macros. Partially addresses [Issue #144](https://github.com/cyrusfirheir/twee3-language-tools/issues/144).
+
+---
+
 ## v0.21.0
 
 Adds:

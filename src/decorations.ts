@@ -1,15 +1,16 @@
 import * as vscode from 'vscode';
 
 import * as sc2 from './sugarcube-2/macros';
+import { LanguageID } from './sugarcube-2/configuration';
 
 export const updateDecorations = async function(ctx: vscode.ExtensionContext, editor: vscode.TextEditor) {
-	if (editor.document.languageId === "twee3-sugarcube-2") {
+	if (editor.document.languageId === LanguageID) {
 		await sc2.updateDecorations(ctx, editor);
 	}
 }
 
 export const clearDecorations = async function(ctx: vscode.ExtensionContext, editor: vscode.TextEditor) {
-    if (editor.document.languageId === "twee3-sugarcube-2") {
+    if (editor.document.languageId === LanguageID) {
         await sc2.clearDecorations(ctx, editor);
     }
 }

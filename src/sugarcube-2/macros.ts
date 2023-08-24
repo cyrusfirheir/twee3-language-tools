@@ -1,11 +1,8 @@
 import * as vscode from 'vscode';
-import * as yaml from 'yaml';
-import { Arg, ArgType, ArgumentParseError, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
+import { Arg, ArgType, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
 import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
-import * as macroListCore from './macros.json';
 import { Passage } from '../passage';
-import { isArrayEqual, isArraySimpleObjectsEqual, isObjectSimpleEqual } from './validation';
-import { configurationCache, getConfiguration, parseConfiguration, updateConfigurationCache } from './configuration';
+import { getConfiguration, parseConfiguration } from './configuration';
 import _ from 'lodash';
 
 export type MacroName = string;
@@ -55,10 +52,6 @@ export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationTyp
 	rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
 });
 
-export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
-
-export const macroRegex = new RegExp(`<<(/|end)?(${macroNamePattern})(?:\\s*)((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\\\n])*?\`)|(?:"(?:\\\\.|[^"\\\\\\n])*?")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)(/)?>>`, 'gm');
-
 export const macroList = async function (): Promise<Record<string, macroDef>> {
 	const config = await getConfiguration();
 	return config.macros;
@@ -67,6 +60,65 @@ export const macroList = async function (): Promise<Record<string, macroDef>> {
 export const enumList = async function (): Promise<Record<string, string>> {
 	const config = await getConfiguration();
 	return config.enums;
+}
+
+export enum MacroRegexType {
+	Full, End, Start
+}
+
+export const macroRegexFactory = (pattern: string, regexType = MacroRegexType.Full) => {
+	const body = `((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\\\n])*?\`)|(?:"(?:\\\\.|[^"\\\\\\n])*?")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)`;
+	const selfClose = `(/)`;
+	const end = `(/|end)`;
+
+	if (regexType === MacroRegexType.Start) {
+		return new RegExp(`<<(${pattern})(?:\\s+${body})?>>`, "gm");
+	} else if (regexType === MacroRegexType.End) {
+		return new RegExp(`(?:<<(${pattern})(?:\\s*)${body}${selfClose}>>)|(?:<<${end}(${pattern})>>)`, "gm");
+	}
+	return new RegExp(`<<${end}?(${pattern})(?:\\s*)${body}${selfClose}?>>`, "gm");
+}
+
+export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
+export const macroRegex = macroRegexFactory(macroNamePattern);
+
+export const generateMacroOnEnterRules = function (macros: Record<string, macroDef>): vscode.OnEnterRule[] {
+	const rules = [];
+	for (const name in macros) {
+		const def = macros[name];
+		if (def.container) {
+			rules.push(
+				{
+					beforeText: macroRegexFactory(name, MacroRegexType.Start),
+					afterText: macroRegexFactory(name, MacroRegexType.End),
+					action: {
+						indentAction: vscode.IndentAction.IndentOutdent
+					}
+				},
+				{
+					beforeText: macroRegexFactory(name, MacroRegexType.End),
+					action: {
+						indentAction: vscode.IndentAction.None
+					}
+				},
+				{
+					beforeText: macroRegexFactory(name, MacroRegexType.Start),
+					action: {
+						indentAction: vscode.IndentAction.Indent
+					}
+				}
+			);
+			if (def.children?.length) def.children.forEach((child) => rules.push(
+				{
+					beforeText: macroRegexFactory(child.name, MacroRegexType.Start),
+					action: {
+						indentAction: vscode.IndentAction.Indent
+					}
+				}
+			));
+		}
+	}
+	return rules;
 }
 
 /**
