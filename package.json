@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.22.0",
+	"version": "0.23.0",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -315,10 +315,15 @@
 					"default": "VSCode",
 					"markdownDescription": "Type of window to launch the Story Map in."
 				},
+				"twee3LanguageTools.storyMap.restoreStoryMapOnLaunch": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Reopen the Story Map on launch if it was open the last time?"
+				},
 				"twee3LanguageTools.passageCounter.openStoryMapWithoutConfirmation": {
 					"type": "boolean",
 					"default": false,
-					"markdownDescription": "Disables prompt for opening Story Map by clicking the passage counter in the status bar."
+					"markdownDescription": "Disable prompt for opening Story Map by clicking the passage counter in the status bar?"
 				}
 			}
 		},

@@ -98,10 +98,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	const storyMap: storyMapIO = { client: undefined, server: undefined, disconnectTimeout: undefined };
 
 	const startUIWrapper = () => startUI(ctx, storyMap);
-	const stopUIWrapper = () => stopUI(storyMap);
+	const stopUIWrapper = () => stopUI(ctx, storyMap);
 
 	const mapShowCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.show", startUIWrapper);
 	const mapStopCommand = vscode.commands.registerCommand("twee3LanguageTools.storyMap.stop", stopUIWrapper);
+
+	if (
+		vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("restoreStoryMapOnLaunch") &&
+		ctx.workspaceState.get("story-map.open", false)
+	) {
+		startUIWrapper();
+	}
 
 	const passageList = vscode.window.createTreeView("t3lt-passages-list", {
 		showCollapseAll: true,

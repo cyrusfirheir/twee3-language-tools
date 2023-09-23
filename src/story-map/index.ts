@@ -47,7 +47,7 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 				sendPassageDataToClient(ctx, client);
 			})
 			.on('disconnect', () => {
-				if (!inVSC) disconnectHandler(storyMap);
+				if (!inVSC) disconnectHandler(ctx, storyMap);
 			})
 			.on('move-to-file', async (moveData: MoveData) => {
 				await moveToFile(ctx, moveData);
@@ -59,16 +59,22 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 			});
 	});
 	
+	ctx.workspaceState.update("story-map.open", true);
+
 	if (inVSC) {
-		const panel = vscode.window.createWebviewPanel("t3lt.storyMap", "Story Map", vscode.ViewColumn.Beside, {
-			enableScripts: true
+		const panel = vscode.window.createWebviewPanel("t3lt.storyMap", "Story Map", {
+			viewColumn: ctx.workspaceState.get("story-map.viewColumn", vscode.ViewColumn.Beside),
+		}, {
+			enableScripts: true,
 		});
 		
 		panel.webview.html = `<!DOCTYPE html><html lang="en"><body style="height: 100vh; padding: 0;"><iframe style="height: 100%; width: 100%; border: none;" src="${hostUrl}"></iframe></body></html>`;
-
-		panel.onDidDispose(e => stopUI(storyMap));
+		
+		panel.onDidDispose(e => stopUI(ctx, storyMap));
 
 		const firstLaunchLock = panel.onDidChangeViewState(() => {
+			ctx.workspaceState.update("story-map.viewColumn", panel.viewColumn);
+			panel.reveal();
 			vscode.commands.executeCommand("workbench.action.lockEditorGroup");
 			firstLaunchLock.dispose();
 		});
@@ -79,15 +85,16 @@ export function startUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 	vscode.commands.executeCommand('setContext', 't3lt.storyMap', true);
 }
 
-function disconnectHandler(storyMap: storyMapIO) {
+function disconnectHandler(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
 	console.log('client disconnected');
 	storyMap.client = undefined;
 	storyMap.disconnectTimeout = setTimeout(() => {
-		if (!storyMap.client) stopUI(storyMap);
+		if (!storyMap.client) stopUI(ctx, storyMap);
 	}, vscode.workspace.getConfiguration("twee3LanguageTools.storyMap").get("unusedPortClosingDelay", 5000));
 }
 
-export function stopUI(storyMap: storyMapIO) {
+export function stopUI(ctx: vscode.ExtensionContext, storyMap: storyMapIO) {
+	ctx.workspaceState.update("story-map.open", false);
 	storyMap.client?.disconnect(true);
 	storyMap.server?.close(() => vscode.commands.executeCommand('setContext', 't3lt.storyMap', false));
 }
