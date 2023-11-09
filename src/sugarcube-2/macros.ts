@@ -24,7 +24,7 @@ export interface macro {
 
 export interface macroDef {
 	name?: MacroName;
-	description?: vscode.MarkdownString,
+	description?: vscode.MarkdownString | string,
 	parameters?: Parameters,
 	container?: boolean;
 	selfClose?: boolean;
@@ -151,7 +151,7 @@ export const onUpdateMacroCache = function (lastMacroCache: Record<string, macro
 
 		if (!macro.name) macro.name = key;
 
-		if (typeof macro.description?.value === "string") {
+		if (macro.description instanceof vscode.MarkdownString && typeof macro.description.value === "string") {
 			macro.description.value = parseEnums(macro.description.value, enums);
 		}
 	}
@@ -907,7 +907,7 @@ export const hover = async function (document: vscode.TextDocument, position: vs
 		// with a null prototype.
 		if (contained_in && Object.prototype.hasOwnProperty.call(macroDefinitions, macro.name)) {
 			let macroDefinition = macroDefinitions[macro.name];
-			if (macroDefinition.description instanceof vscode.MarkdownString) {
+			if (macroDefinition.description instanceof vscode.MarkdownString || typeof macroDefinition.description === "string") {
 				return new vscode.Hover(macroDefinition.description);
 			} else {
 				// We found the macro the user is hovering over, but there is no description.
