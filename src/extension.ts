@@ -24,6 +24,8 @@ import { passageCounter } from './status-bar'
 import { sbStoryMapConfirmationDialog } from './status-bar';
 import { updateDecorations, updateTextEditorDecorations } from './decorations';
 import { tabstring } from './utils';
+
+import { activateFolding } from './folding/folding';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -382,4 +384,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	// This is needed so that on first load, the active file will get colors.
 	updateTextEditorDecorations(ctx);
+
+	activateFolding(ctx);
 };
