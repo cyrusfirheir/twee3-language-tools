@@ -46,6 +46,6 @@ export default class Save extends Vue {
 
 <style lang="scss" scoped>
 .fillColor {
-  fill: var(--text-color-light);
+  fill: var(--color-light);
 }
 </style>

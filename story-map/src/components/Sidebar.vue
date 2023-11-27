@@ -370,7 +370,7 @@ export default class Sidebar extends Vue {
         height: 100%;
         width: 450px;
         overflow: auto;
-        color: #FFF;
+        color: var(--text-color-dark);
         padding: 20px;
         position: relative;
 
@@ -436,7 +436,7 @@ export default class Sidebar extends Vue {
 
         &::before {
             content: '+';
-            color: #FFF;
+            color: var(--text-color-dark);
             position: absolute;
             left: 50%;
             top: 50%;
@@ -448,7 +448,7 @@ export default class Sidebar extends Vue {
         @extend %close;
         width: 30px;
         height: 30px;
-        border: 2px solid rgba(255, 255, 255, .5);
+        border: 2px solid var(--text-color-dark);
 		border-radius: 4px;
 
         &::before {
@@ -469,12 +469,12 @@ export default class Sidebar extends Vue {
         a {
             display: block;
             text-decoration: none;
-            color: rgba(255, 255, 255, .75);
+            color: var(--text-color-dark);
             font-size: 12px;
             line-height: 1.35;
 
             &:hover {
-                color: #FFF;
+                color: var(--text-color-dark);
                 text-decoration: underline;
             }
         }
@@ -494,7 +494,7 @@ export default class Sidebar extends Vue {
             left: 0;
             width: 100%;
             height: 15px;
-            background: linear-gradient(transparent, rgb(16, 22, 25));
+            background: linear-gradient(transparent, var(--text-color-light));
             transition: opacity .2s ease-in-out;
         }
 
@@ -542,7 +542,7 @@ export default class Sidebar extends Vue {
         border-left: solid rgba(255, 255, 255, .5) 1px;
 
         &::before {
-            color: rgba(255, 255, 255, .5);
+            color: var(--text-color-dark);
             font-size: 20px;
             transition: color .1s ease-in-out;
         }
@@ -558,32 +558,26 @@ export default class Sidebar extends Vue {
 
     .add-tag-wrapper {
         display: inline-flex;
-        border: solid #FFF 1px;
+        border: solid var(--text-color-dark) 2px;
         border-radius: 3px;
         height: 25px;
     }
 
     .add-tag-wrapper input {
         background-color: transparent;
-        border: solid transparent 1px;
-        border-bottom-color: rgba(255, 255, 255, .5);
-        border-radius: 4px;
         margin-right: .5em;
         padding: 2px 4px;
-        color:  #FFF;
+        color: var(--text-color-dark);
         width: 100px;
         outline: 0;
-
-        &:focus {
-            background-color: rgba(255, 255, 255, .15);
-        }
+		border: none;
     }
 
     .add-tag-btn {
         position: relative;
         padding: 4px;
         background-color: transparent;
-        border-left: solid rgba(255, 255, 255, .35) 1px;
+        border-left: solid var(--text-color-dark) 1px;
         color: transparent;
         font-size: 0;
         overflow: hidden;
@@ -595,15 +589,13 @@ export default class Sidebar extends Vue {
             content: '+';
             position: absolute;
             font-size: 20px;
-            color: rgba(255, 255, 255, .5);
+            color: var(--text-color-dark);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-indent: 0;
         }
 
-
-        :focus + &,
         &:hover {
             background-color: #FFF;
 
@@ -618,8 +610,8 @@ export default class Sidebar extends Vue {
         width: 96%;
         left: 2%;
         z-index: 1;
-        background-color: #000;
-        border: solid #FFF 2px;
+        background-color: var(--text-color-light);
+        border: solid var(--text-color-dark) 2px;
         border-radius: 4px;
         padding: 5px;
         margin-top: 5px;
@@ -641,8 +633,8 @@ export default class Sidebar extends Vue {
         &:hover {
             margin: 0 -5px;
             padding: 0 5px;
-            background-color: rgba(255, 255, 255, .7);
-            color: #000;
+            background-color: var(--text-color-dark);
+            color: var(--text-color-light);
         }
 
         .suggestion-color {

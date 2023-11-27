@@ -110,12 +110,12 @@ import Sidebar from './components/Sidebar.vue';
 
 const localStorageSettingsKey = "t3lt.story-map.settings";
 
+
 @Component({
   components: { ToolBar, PassageLinkLine, Sidebar },
 })
 export default class AppComponent extends Vue {
   connected = false;
-  theme = 'cydark';
   passages: LinkedPassage[] = [];
   storyData: { [key: string]: any } = {};
   tagColors: { [tag: string]: string } = {};
@@ -136,9 +136,14 @@ export default class AppComponent extends Vue {
     showGrid: true,
     showDots: true,
     snapToGrid: true,
+	darkTheme: true,
     gridSize: 25,
     showSidebar: true,
   };
+
+  get theme() {
+    return this.settings.darkTheme ? "dark" : "";
+  }
 
   get allTags(): string[] {
     const { passages, storyData } = this;
@@ -385,9 +390,9 @@ export default class AppComponent extends Vue {
     this.linkedPassages = linkedPassages;
   }
 
-  @Watch('theme', { immediate: true })
-  updateThemeAttribute(theme) {
-    document.body.setAttribute('data-theme', theme);
+  @Watch('settings.darkTheme', { immediate: true })
+  updateThemeAttribute() {
+    document.body.setAttribute('data-theme', this.theme);
   }
 
   initMapSize() {
@@ -414,8 +419,15 @@ export default class AppComponent extends Vue {
   }
 
   toggleSetting({ id, value }: { id: string; value: any }) {
-    if (id === 'snap-to-grid') {
-      this.settings.snapToGrid = value;
+    switch(id) {
+      case 'snap-to-grid': {
+        this.settings.snapToGrid = value;
+        break;
+      }
+      case 'dark-theme': {
+        this.settings.darkTheme = value;
+        break;
+      }
     }
     this.saveSettings();
   }
@@ -691,62 +703,41 @@ html, body {
 }
 
 :root {
-  // Normal light theme
-  --text-color-light: #FFF;
-  --text-color-dark: #000;
-  --primary-100: hsl(55deg 60% 100%); // passage hover
-  --primary-200: hsl(55deg 15% 95%); // passage
-  --primary-300: hsl(55deg 15% 90%); // passage highlight
-  --primary-400: hsl(55deg 60% 96%); // map background
-  --primary-500: hsl(53deg 20% 75%); // layout background (around map)
-  --primary-600: hsl(55deg 50% 70%); // arrow-highlight inner
-  --primary-700: hsl(55deg 30% 50%); // arrow inner
-  --primary-800: hsl(55deg 50% 30%); // arrow-highlight outer
+  --color-light: #d9e5e9;
+  --color-dark: #00131b;
 
-  --gray-100: #FFF; // outline for toolbar button when .active
-  --gray-500: #CCC; // passage outline 
-  --gray-600: #999; // passage-border (hover & highlight)
+  --text-color-light: #d9e5e9;
+  --text-color-dark: #00131b;
+  --primary-100: #eef7fc; /* passage hover */
+  --primary-200: #abceda; /* passage */
+  --primary-300: #def1fe; /* passage highlight  */
+  --primary-400: #d5e1e6; /* map background */
+  --primary-500: #e4ecef; /* layout background (around map) */
+  --primary-600: #ff0060; /* arrow-highlight inner */
+  --primary-700: #33000a; /* arrow inner */
+  --primary-800: #ffd5da; /* arrow-highlight outer */
 
-  --accent-800: #082030; // toolbar button background
-  --accent-500: #245; // toolbar button hover
-  --accent-400: #356; // toolbar background
+  --start-passage-rocket-back: #33000a;
+  --start-passage-rocket-color: #ffd5da;
 
-  --highlight: #F00; // the drop location for a passage when dragging with snap to grid enabled
+  --gray-100: #8ecafa; /* outline for toolbar button when .active */
+  --gray-500: #647682; /* passage outline  */
+  --gray-600: #8ea3b4; /* passage-border (hover & highlight) */
 
-  --shadow-rgb: 0, 0, 0;
-  --grid-lines: rgba(0, 0, 0, .25);
+  --accent-800: #172024;  /* toolbar button background */
+  --accent-500: #222d33; /* toolbar button hover */
+  --accent-400: #4c606b; /* toolbar background */
+
+  --highlight: #a00030; /* the drop location for a passage when dragging with snap to grid enabled */
+
+  --shadow-rgb: 23, 32, 36;
+  --grid-lines: #5c778a;
 }
 
 [data-theme="dark"] {
-  --text-color-light: #FFF;
-  --text-color-dark: #DDD;
-  --primary-100: #000; /* passage hover */
-  --primary-200: #151515; /* passage */
-  --primary-300: #202029; /* passage highlight  */
-  --primary-400: #070919; /* map background */
-  --primary-500: #2b2b2b; /* layout background (around map) */
-  --primary-600: #8C93D9; /* arrow-highlight inner */
-  --primary-700: #5960A6; /* arrow inner */
-  --primary-800: #262D73; /* arrow-highlight outer */
-
-  --gray-100: #FFF; /* outline for toolbar button when .active */
-  --gray-500: #444; /* passage outline  */
-  --gray-600: #777; /* passage-border (hover & highlight) */
-
-  --accent-800: #082030;  /* toolbar button background */
-  --accent-500: #245; /* toolbar button hover */
-  --accent-400: #356; /* toolbar background */
-
-  --highlight: #F00; /* the drop location for a passage when dragging with snap to grid enabled */
-
-  --shadow-rgb: 0, 0, 0;
-  --grid-lines: #444466;
-}
-
-[data-theme="cydark"] {
-  --text-color-light: #d9e5e9;
   --text-color-dark: #d9e5e9;
-  --primary-100: #7591a1; /* passage hover */
+  --text-color-light: #00131b;
+  --primary-100: #607e90; /* passage hover */
   --primary-200: #354852; /* passage */
   --primary-300: #465c68; /* passage highlight  */
   --primary-400: #222d33; /* map background */
@@ -797,13 +788,12 @@ html, body {
   position: absolute;
   z-index: 100;
 
-  color: #fff;
-  background: #101619;
+  color: var(--text-color-light);
+  background: var(--text-color-dark);
 
-  border: 2px solid hsla(0,0%,100%,.5);
-  border-top-color: transparent;
-  border-right-color: transparent;
+  border: 2px solid var(--text-color-dark);
   border-bottom-left-radius: 4px;
+  border-top: none;
   
   transform: translate(-100%, 0);
   width: 30px;
@@ -825,7 +815,7 @@ html, body {
     content: "▶";
 	line-height: 0;
     
-    color: #fff;
+    color: var(--text-color-light);
     font-size: 30px;
 
     top: 15px; left: 50%;
@@ -842,12 +832,13 @@ html, body {
 
 .sidebar {
   grid-area: sidebar;
-  background: rgb(16, 22, 25);
-  border-left: solid rgba(255, 255, 255, .2) 1px;
+  background: var(--text-color-light);
+  border-left: solid var(--text-color-dark) 2px;
   box-shadow: 0 10px 20px rgba(var(--shadow-rgb),0.19), 0 6px 6px rgba(var(--shadow-rgb),0.23);
   width: 0;
   transition: width .3s ease-in-out;
   overflow: hidden;
+  z-index: 100;
 
   .show-sidebar & {
     width: 450px;
@@ -876,11 +867,12 @@ html, body {
   position: absolute;
   overflow: visible;
   background-color: var(--primary-200);
-  border: 1px solid var(--gray-500);
-  border-radius: 3px;
+  border: 2px solid var(--gray-500);
+  border-radius: 2px;
   color: var(--text-color-dark);
-  padding: 5px;
+  padding: 6px;
   font-size: 12px;
+  font-weight: bold;
   overflow-wrap: anywhere;
   cursor: grab;
   transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
@@ -901,20 +893,12 @@ html, body {
   &.highlight {
     background-color: var(--primary-300);
     border-color: var(--gray-600);
-    border-width: 2px;
-    padding: 4px;
   }
 
   &:hover,
   &.selected {
     background-color: var(--primary-100);
     border-color: var(--gray-600);
-    border-width: 2px;
-    padding: 4px;
-
-    svg {
-      margin: 4px;
-    }
   }
 
   .passage-shadow {
@@ -944,7 +928,33 @@ html, body {
 
 .drag-area {
   position: absolute;
-  border: dashed #FFF 1px;
-  background-color: rgba(255, 255, 255, .1);
+  border: dashed var(--text-color-light) 2px;
+  background-color: var(--text-color-dark);
+  opacity: 0.25;
+}
+</style>
+
+<style>
+/* fallback */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src: url("/material-symbols.woff2") format('woff2');
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
 }
 </style>

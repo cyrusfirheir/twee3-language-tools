@@ -4,7 +4,7 @@
       <button
         v-if="element.tag === 'button' && element.type === 'toggle'"
         type="button"
-        class="tb-button"
+        class="tb-button material-symbols-outlined"
         :data-action="element.id"
         :key="`toolbar-id-${element.id}`"
         :class="{ active: element.active }"
@@ -55,14 +55,28 @@ export default class ToolBar extends Vue {
       text: 'Snap to grid',
       active: true,
     },
+    {
+      id: 'dark-theme',
+      tag: 'button',
+      type: 'toggle',
+      text: 'Dark theme',
+      active: true
+    }
   ];
 
   created() {
-	this.elements.forEach((element) => {
-		if (element.id = 'snap-to-grid') {
-			element.active = this.settings.snapToGrid;
-		}
-	});
+    this.elements.forEach((element) => {
+      switch(element.id) {
+        case 'snap-to-grid': {
+          element.active = this.settings.snapToGrid;
+          break;
+        }
+        case 'dark-theme': {
+          element.active = this.settings.darkTheme;
+          break;
+        }
+      }
+    });
   }
 
   onToggleClick(element: ToolbarItemToggle) {
@@ -93,9 +107,7 @@ export default class ToolBar extends Vue {
     outline: 0;
     padding: 0;
 
-    &.active {
-      outline: solid var(--gray-100) 1px;
-    }
+    margin: 0 4px;
 
     .icon {
       position: relative;
@@ -105,33 +117,32 @@ export default class ToolBar extends Vue {
       &::before,
       &::after {
         content: "";
+        color: var(--color-light);
         display: block;
         position: absolute;
       }
 
       &.snap-to-grid {
-        opacity: .75;
-        transition: opacity .2s ease-in-out;
         &::before {
-          left: 6px;
-          right: 6px;
-          top: 0;
-          bottom: 0;
-          border-left: solid var(--text-color-light) 2px;
-          border-right: solid var(--text-color-light) 2px;
+          content: "grid_3x3"
         }
+      }
 
-        &::after {
-          top: 6px;
-          bottom: 6px;
-          left: 0;
-          right: 0;
-          border-top: solid var(--text-color-light) 2px;
-          border-bottom: solid var(--text-color-light) 2px;
+      &.dark-theme {
+        &::before {
+          content: "light_mode";
         }
+      }
+    }
 
-        &:hover {
-          opacity: 1;
+    &.active {
+      outline: solid var(--gray-100) 2px;
+
+      .icon {
+        &.dark-theme {
+          &::before {
+            content: "dark_mode";
+          }
         }
       }
     }
@@ -145,7 +156,7 @@ export default class ToolBar extends Vue {
     padding: 5px 8px 5px 8px;
     font-size: 24px;
     background-color: var(--accent-800);
-    color: var(--text-color-light);
+    color: var(--color-light);
     cursor: pointer;
     border-radius: 4px;
     border: 0;
