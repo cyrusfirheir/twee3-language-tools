@@ -1,4 +1,5 @@
 //#region Imports
+import { contributes as PackageContributions } from "../package.json";
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -7,7 +8,7 @@ import { updateDiagnostics } from './diagnostics';
 import { tweeProjectConfig, changeStoryFormat } from './twee-project';
 
 import { sendPassageDataToClient, toUpdatePassage, updatePassages, focusPassage } from "./story-map/socket";
-import { startUI, stopUI, storyMapIO } from "./story-map/index";
+import { startUI, stopUI, storyMapIO } from "./story-map";
 
 import { fileGlob } from './file-ops';
 
@@ -25,12 +26,14 @@ import { sbStoryMapConfirmationDialog } from './status-bar';
 import { updateDecorations, updateTextEditorDecorations } from './decorations';
 import { tabstring } from './utils';
 
-import { activateFolding } from './folding/folding';
+import { activateFolding } from './folding';
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
 };
+
+export const PackageLanguages = PackageContributions.languages.map(el => el.id);
 
 export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);

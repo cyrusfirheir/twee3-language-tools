@@ -55,9 +55,10 @@ import {
 	Flavor,
 	TokenType
 } from '@daiyam/regexp';
+import { PackageLanguages } from "../extension";
 
-// LEAH: Self-explanatory, really.
-const TWINE_LANGUAGES = ["twee3", "twee3-chapbook-1", "twee3-harlowe-3", "twee3-sugarcube-2"];
+const getProjectLanguages = () => PackageLanguages;
+
 // LEAH: This is the amount of miliseconds before the MainProvider.
 const DELAY = 40;
 
@@ -229,7 +230,7 @@ function setupProviders() {
 
 	void vscode.languages.getLanguages().then((languages) => {
 		for (const language of languages) {
-			if (TWINE_LANGUAGES.includes(language)) {
+			if (getProjectLanguages().includes(language)) {
 				for (const scheme of SCHEMES) {
 					const disposable = vscode.languages.registerFoldingRangeProvider({
 						language,

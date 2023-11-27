@@ -4,7 +4,7 @@
 		"module": "commonjs",
 		"target": "es2017",
 		"outDir": "out",
-		"rootDir": "src",
+		"rootDir": ".",
 		"esModuleInterop": true,
 		"lib": [
 			"es2017"
@@ -12,7 +12,8 @@
 		"sourceMap": true
 	},
 	"include": [
-		"src"
+		"src",
+		"package.json"
 	],
 	"exclude": [
 		"node_modules"
