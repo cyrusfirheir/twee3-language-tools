@@ -129,6 +129,7 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 export const yamlParse = function(text: string, header?: string, options?: yaml.Options): any {
 	const yamlDefaults = vscode.workspace.getConfiguration("twee3LanguageTools.yaml");
 	const defaults = {
+		merge: true,
 		maxAliasCount: yamlDefaults.get("maxAliasCount"),
 	};
 

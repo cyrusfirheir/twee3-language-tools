@@ -33,6 +33,10 @@ const documentSelector: vscode.DocumentSelector = {
 	pattern: "**/*.{tw,twee}",
 };
 
+const configurationSelector: vscode.DocumentSelector = {
+	pattern: "**/*twee-config.{yml,json}",
+};
+
 export const PackageLanguages = PackageContributions.languages.map(el => el.id);
 
 export async function activate(ctx: vscode.ExtensionContext) {
@@ -135,6 +139,18 @@ export async function activate(ctx: vscode.ExtensionContext) {
 					default: return null;
 				}
 			}
+		})
+		,
+		vscode.languages.registerDefinitionProvider(documentSelector, {
+			provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition|vscode.LocationLink[]> {
+					return sugarcube2Macros.definition(ctx, document, position, token);
+			},
+		})
+		,
+		vscode.languages.registerDefinitionProvider(configurationSelector, {
+			provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition|vscode.LocationLink[]> {
+					return sugarcube2Macros.definitionConfig(ctx, document, position, token);
+			},
 		})
 		,
 		vscode.window.onDidChangeTextEditorSelection(async e => {

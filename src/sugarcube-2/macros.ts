@@ -219,7 +219,7 @@ function isMacroFunctionallyEquivalent(left: macroDef, right: macroDef): boolean
 		}
 	} else {
 		// They are both non-undefined
-		if (!left.parameters?.compare(right.parameters)) {
+		if (!left.parameters.compare?.(right.parameters)) {
 			return false;
 		}
 	}
@@ -919,6 +919,73 @@ export const hover = async function (document: vscode.TextDocument, position: vs
 
 	// There was no macro intersecting, thus we have no hover result.
 	return null;
+}
+
+export const definition = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null> {
+	if (token.isCancellationRequested) return null;
+
+
+	const collected = await collectUncached(document.getText());
+
+	const selectedMacro: any = collected.macros.filter(m => {
+		return (m.open && new vscode.Range(m.range.start, collected.macros[m.pair].range.end).contains(position)) || 
+			m.range.contains(position);
+	})?.pop();
+
+	if (selectedMacro == null)
+		return null;
+	
+	return findMacro(selectedMacro.name, token);
+}
+
+export const definitionConfig = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null> {
+	if (token.isCancellationRequested) return null;
+
+	const currentLine = document.getText(new vscode.Range(position.line, 0, position.line+1,0));
+	const search = /\w+/g;
+	let foundWord;
+	while ((foundWord = search.exec(currentLine)) !== null) {
+		if (search.lastIndex < position.character || search.lastIndex - foundWord[0].length > position.character)
+			foundWord = null;
+		else break;
+	}
+	if (foundWord == null) return null;
+
+	return findMacro(foundWord[0], token);
+}
+
+export const findMacro = async function (macro: string, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null> {
+	if (!macro)
+		return null;
+
+	let files = await vscode.workspace.findFiles("**/*.{js,twee,tw}", "**/{node_modules,.git}/**");
+	const config = vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2");
+	const regex = new RegExp(`(?:${config.widgetAliases.join("|")})["']${macro}["'](?:, )?`);
+	return new Promise(searchDone => {
+		files.map(file => {
+			return vscode.workspace.fs.readFile(file)
+				.then((c: Uint8Array) => {
+					if (token.isCancellationRequested) return null;
+					const s = Buffer.from(c).toString("utf-8");
+					const pos = s.match(regex);
+					if (pos == null) return null;
+					const lines = s.substring(0, pos.index).match(/\n/g)?.length ?? 0;
+
+					if (file.path.substring(file.path.length - 3) === ".js") {
+						const secondaryLookup = vscode.commands.executeCommand<vscode.Definition | vscode.LocationLink[] | null>(
+							"vscode.executeDefinitionProvider",
+							file, new vscode.Position(lines, pos[0].length + 1)
+						).then<vscode.Definition | vscode.Location | vscode.LocationLink[] | null>((result) => {
+							if (!result || Array.isArray(result) && !result.length) return new vscode.Location(file, new vscode.Position(lines, pos[0].length));
+							else return result;
+						});
+						return searchDone(secondaryLookup);
+					}
+
+					return searchDone(new vscode.Location(file, new vscode.Position(lines + 1, 0)));
+			});
+		});
+	});
 }
 
 export const updateDecorations = async function (ctx: vscode.ExtensionContext, editor: vscode.TextEditor) {
