@@ -2,14 +2,13 @@
 
 Syntax highlighting for HTML and select storyformats (see [Features](#features)) on top of Twee 3 code.
 
-Made possible through contributions from:
-- [@Goctionni](https://github.com/Goctionni)
-- [@MinusGix](https://github.com/MinusGix)
-- [@rambdev](https://github.com/rambdev)
-- [@togashikokujin](https://github.com/togashikokujin)
-- [@JustNoon](https://github.com/JustNoon)
+Made possible feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp) and through contributions from:
 
-And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+<a href="https://github.com/cyrusfirheir/twee3-language-tools/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cyrusfirheir/twee3-language-tools" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ---
 

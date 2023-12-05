@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 export function headsplit(raw: string, regexp: RegExp, caps: number = 1) {
 	const text = raw.trim().split(/\r?\n/);
-	let retArr = [],
+	let retArr: { header: string; content: string }[] = [],
 		_header = "",
 		_content = "",
 		_caps = "";

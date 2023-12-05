@@ -1,13 +1,17 @@
 # Changelog
 
-Made possible through contributions from:
-- [@Goctionni](https://github.com/Goctionni)
-- [@MinusGix](https://github.com/MinusGix)
-- [@rambdev](https://github.com/rambdev)
-- [@togashikokujin](https://github.com/togashikokujin)
-- [@JustNoon](https://github.com/JustNoon)
+## v0.25.0
 
-And feedback from the folks over at the Twine Games [Discord Server](https://discord.com/invite/n5dJvPp).
+Adds:
+
+- Basic definition support for SugarCube 2 macros and widgets (<kbd>Ctrl</kbd> + <kbd>Click</kbd> to go to definition) - [PR #150](https://github.com/cyrusfirheir/twee3-language-tools/pull/150).
+
+## v0.24.0
+
+Adds:
+
+- Light mode for Storymap.
+- Passage folding (Thanks to @leahiel - [PR #148](https://github.com/cyrusfirheir/twee3-language-tools/pull/148)).
 
 ## v0.23.0
 
@@ -15,15 +19,11 @@ Adds:
 
 - `twee3LanguageTools.storyMap.restoreStoryMapOnLaunch`: Reopens the Story Map on launch if it was open during the last session. Resolves [Issue #145](https://github.com/cyrusfirheir/twee3-language-tools/issues/145).
 
----
-
 ## v0.22.0
 
 Adds:
 
 - `OnEnterRules` for SugarCube-2, handling indentation for macros. Partially addresses [Issue #144](https://github.com/cyrusfirheir/twee3-language-tools/issues/144).
-
----
 
 ## v0.21.0
 
@@ -37,15 +37,11 @@ Fixes:
 - Performance improvements for large projects ([PR #140](https://github.com/cyrusfirheir/twee3-language-tools/pull/140)).  
 - SugarCube macro definition handling ([PR #143](https://github.com/cyrusfirheir/twee3-language-tools/pull/143)).
 
----
-
 ## v0.20.0
 
 Adds:
 
 - Editor context menu item: `Set passage as story start` sets the currently focused passage in the editor as the start passage. 
-
----
 
 ## v0.19.4
 
@@ -53,15 +49,11 @@ Fixes:
 
 - Bracket pair definition for angle brackets removed. No more rogue pair coloring for SugarCube 2 macro syntax highlights.
 
----
-
 ## v0.19.0
 
 Fixes:
 
 - Harlowe 3 syntax highlighting ([PR #120](https://github.com/cyrusfirheir/twee3-language-tools/pull/120)).
-
----
 
 ## v0.18.3
 
@@ -71,21 +63,15 @@ Fixes:
 - Sanitizes tags when added from the story map. Resolves [Issue #115](https://github.com/cyrusfirheir/twee3-language-tools/issues/115).
 - Fixes saving of changes to tags array from story map.
 
----
-
 ## v0.18.0
 
 Adds:
 
 - Symbol provider for passages. Resolves [Issue #106](https://github.com/cyrusfirheir/twee3-language-tools/issues/106).
 
----
-
 ## v0.17.1
 
 - Webview Story Map now auto opens to a side in a locked editor group. Resolves [Issue #103](https://github.com/cyrusfirheir/twee3-language-tools/issues/103).
-
----
 
 ## v0.17.0
 
@@ -93,25 +79,17 @@ Adds:
 
 - Webview version of Story Map, which is now the default mode. Change using the `twee3LanguageTools.storyMap.windowType` setting.
 
----
-
 ## v0.16.3
 
 Merges [PR #96](https://github.com/cyrusfirheir/twee3-language-tools/pull/96).
-
----
 
 ## v0.16.2
 
 Merges [PR #94](https://github.com/cyrusfirheir/twee3-language-tools/pull/94).
 
----
-
 ## v0.16.1
 
 Merges [PR #93](https://github.com/cyrusfirheir/twee3-language-tools/pull/93).
-
----
 
 ## v0.16.0
 
@@ -119,13 +97,9 @@ Adds:
 
 - Focus current passage in the Story Map ([PR #92](https://github.com/cyrusfirheir/twee3-language-tools/pull/92).) It is both available from right-click context menu in the editor, as well as from the command palette as `Focus passage in Story Map`.
 
----
-
 ## v0.15.4
 
 Merges [PR #91](https://github.com/cyrusfirheir/twee3-language-tools/pull/91).
-
----
 
 ## v0.15.3
 
@@ -136,8 +110,6 @@ Adds:
 Fixes:
 
 - SugarCube 2: Background color of matched macro opening/closing tags was the same as that of editor selections, make it impossible to see how much of the text was actually selected. Removed background color so it works like other text.
-
----
 
 ## v0.15.2
 
@@ -151,8 +123,6 @@ Fixes ([PR #82](https://github.com/cyrusfirheir/twee3-language-tools/pull/82)):
 - `updateDecorations` code which wasn't guarding against undefined properly, so it'd spit out errors.  
 - Improves the existing 'add all unrecognized macros' command to have a progress bar which informs the user of what it is doing, and allows cancelling it if it is taking too long. Especially helpful in large projects where that might take a while.
 
----
-
 ## v0.15.0
 
 Adds:
@@ -165,15 +135,11 @@ Fixes:
 
 - Parameter documentation improvements.
 
----
-
 ## v0.14.3
 
 Fixes:
 
 - Initial workspace diagnostics running in parallel with initial passage discovery, which resulted in nonexistent passage references.
-
----
 
 ## v0.14.0
 
@@ -181,15 +147,11 @@ Adds:
 
 - Workspace statistics Status bar item (thanks to @rambdev).
 
----
-
 ## v0.13.15
 
 Changes:
 
 - StoryData snippet now populates the IFID field on its own. 
-
----
 
 ## v0.13.14
 
@@ -205,15 +167,11 @@ Changes:
 - SugarCube 2 Snippets:
 	- Added missing quotation marks to Audio and DOM macros
 
----
-
 ## v0.13.0
 
 Adds:
 
 - SugarCube 2 macro snippets (thanks to @rambdev).
-
----
 
 ## v0.12.2
 
@@ -226,15 +184,11 @@ Updates:
 
 - (Experimental) [Example passage pre-processor](README.md#sugarcube-2-self-closing-macros) for the SugarCube 2 self-closing macro syntax.
 
----
-
 ## v0.12.0
 
 Adds:
 
 - (Experimental) Passage Auto-packer.
-
----
 
 ## v0.11.2
 
@@ -243,8 +197,6 @@ Fixes:
 - Broken `Add to definitions` quickfix for `end...` *named* macros.
 
 - Broken Passage header updates when saving position/size/tags from Story map to file.
-
----
 
 ## v0.11.0
 
@@ -256,8 +208,6 @@ Adds:
 
 	![move-to-file](docs/images/twee-storymap-move2file.png)
 
----
-
 ## v0.10.1
 
 Fixes:
@@ -268,23 +218,17 @@ Adds:
 
 - Icon for `Jump-to-Passage` in the passage list.
 
----
-
 ## v0.10.0
 
 Adds:
 
 - An icon indicating the start passage in the Story Map.
 
----
-
 ## v0.9.2
 
 Removes:
 
 - Custom style markup highlighting which overwrote syntax highlighting for higher priority elements.
-
----
 
 ## v0.9.0
 
@@ -298,15 +242,11 @@ Adds:
 	
 	![Sidebar](docs/images/twee-storymap-sidebar.png)
 
----
-
 ## v0.8.1
 
 Adds:
 
 - Caching functions to improve performance for large files (thanks to @Goctionni and @MinusGix).
-
----
 
 ## v0.8.0
 
@@ -317,8 +257,6 @@ Adds:
 - SugarCube 2:
 	- Macro argument validation (thanks to @MinusGix).
 
----
-
 ## v0.7.0
 
 Adds:
@@ -327,16 +265,12 @@ Adds:
 	- Macro documentation on hover.  
 	- Diagnostics for invalid argument syntax in macros.
 
----
-
 ## v0.6.5
 
 Adds:
 
 - Setting:
 	- `twee3LanguageTools.sugarcube-2.features.macroTagMatching`: Highlight opening and closing tags of container macros? (`true` by default.)
-
----
 
 ## v0.6.4
 
@@ -345,16 +279,12 @@ Adds:
 - Experimental:
 	- Self-closing macro syntax detection for SugarCube 2.
 
----
-
 ## v0.6.2
 
 Adds:
 
 - Passage grouping strategy:
 	- Group by folder: Groups passages by the folders they originate from.
-
----
 
 ## v0.6.1
 
@@ -367,8 +297,6 @@ Fixes:
 
 - [Issue #3](https://github.com/cyrusfirheir/twee3-language-tools/issues/3) - False positives of SugarCube diagnostics in `script` and `stylesheet` tagged passages.
 
----
-
 ## v0.6.0
 
 Adds:
@@ -377,15 +305,11 @@ Adds:
 	- Deprecated `<<end...>>` SC macros can be converted to the `<</...>>` form.
 	- Unrecognized macros can now be defined and added to a local file (`t3lt.twee-config.yml`) with a quick fix. If the macro has been closed anywhere within the source file, the extension assumes the macro is a container and sets that property to `true`.
 
----
-
 ## v0.5.8
 
 Adds:
 
 - Settings to include/exclude directories from the search for twee files. See [Readme](README.md#extension-settings) for more details.
-
----
 
 ## v0.5.0
 
@@ -396,8 +320,6 @@ Adds:
 Fixes:
 
 - Passage list not getting updated properly when files are renamed.
-
----
 
 ## v0.4.0
 
@@ -410,8 +332,6 @@ Adds:
 		- *`Warning`* Deprecated `<<end...>>` macros,
 		- *`Warning`* Unrecognized macros. This warning can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting.
 
----
-
 ## v0.3.8
 
 Adds:
@@ -420,15 +340,11 @@ Adds:
     - JS syntax highlighting inside the `<<run>>` and `<<print>>` macros.
 	- Container macros now have decorators for their closing tag. See [Readme](README.md#sugarcube) for more details.
 
----
-
 ## v0.3.3
 
 Removes:
 
 - Parsing of JSDoc comments to provide code suggestions. This was causing basic plaintext suggestions to stop working, and is a limitation of the code completion features VSCode facilitates. Going forward, suggestions will be left to code snippets defined in JSON files.
-
----
 
 ## v0.3.0
 
@@ -439,8 +355,6 @@ Adds:
 Fixes:
 
 - > ~~If JSDoc comments containing widget/macro documentations are removed, older definitions still stay in memory, and cause the editor to provide suggestions for macros that are no longer documented. To fix, restart VSCode, or reload the window (type "Reload Window" into the command palette (<kbd>Ctrl/Cmd + Shift + P</kbd> by default)).~~
-
----
 
 ## v0.2.0
 
@@ -453,8 +367,6 @@ Adds:
 Fixes:
 
 - SugarCube block comments (`/* */`) not getting tokenized.
-
----
 
 ## v0.1.0
 

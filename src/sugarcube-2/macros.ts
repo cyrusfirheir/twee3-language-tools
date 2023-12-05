@@ -83,7 +83,7 @@ export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
 export const macroRegex = macroRegexFactory(macroNamePattern);
 
 export const generateMacroOnEnterRules = function (macros: Record<string, macroDef>): vscode.OnEnterRule[] {
-	const rules = [];
+	const rules: vscode.OnEnterRule[] = [];
 	for (const name in macros) {
 		const def = macros[name];
 		if (def.container) {
@@ -285,7 +285,7 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 			name = ex[2],
 			selfClosed = false;
 
-		let selfCloseMacro = undefined;
+		let selfCloseMacro: macro | undefined = undefined;
 
 		if (ex[1] === "end") {
 			const defInList = list[ex[2]];
@@ -1020,12 +1020,12 @@ export const updateDecorations = async function (ctx: vscode.ExtensionContext, e
 	// This could be cleaner
 	let hasEntries = entries.length !== 0;
 	while (hasEntries) {
-		let active = [];
-		let target = null;
-		let dec_type = null;
+		let active: vscode.Range[] = [];
+		let target: string | undefined = undefined;
+		let dec_type: vscode.TextEditorDecorationType | undefined = undefined;
 		for (let i = 0; i < entries.length; i++) {
 			let entry = entries[i];
-			if (target === null) {
+			if (target === undefined) {
 				if (entry !== null) {
 					target = entry.def.name;
 					dec_type = entry.def.decoration_type;
