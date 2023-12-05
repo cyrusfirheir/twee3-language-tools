@@ -189,20 +189,19 @@ export function parseMacroParameters(list: Record<string, Record<string, any>>, 
             // Ignore parameters that have already been parsed.
             continue;
         } else if (!Array.isArray(macroDefinition.parameters)) {
-            errors.push(new Error(`Error while checking parameters of '${macroDefinition.name}': The parameters were not an array of strings.`));
+            errors.push(new Error(`Error while checking parameters of '${macroDefinition.name || key}': The parameters were not an array of strings.`));
             delete macroDefinition.parameters;
             continue;
         }
 
-        macroDefinition.parameters = macroDefinition.parameters.map((parameter: string) => {
-            return parseEnums(parameter, enums);
-        });
-
         try {
+            macroDefinition.parameters = macroDefinition.parameters.map((parameter: string) => {
+                return parseEnums(parameter || "", enums);
+            });
             // Overwrite the previous parameters with the parsed version
             macroDefinition.parameters = new Parameters(macroDefinition.parameters);
         } catch (err) {
-            errors.push(new Error(`Error while parsing parameters of '${macroDefinition.name}': ${(err as Error).message || "Failed to get error message, please report this."}`));
+            errors.push(new Error(`Error while parsing parameters of '${macroDefinition.name || key}': ${(err as Error).message || "Failed to get error message, please report this."}`));
         }
     }
     return errors;

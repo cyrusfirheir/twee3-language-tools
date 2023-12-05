@@ -252,6 +252,14 @@
 					"default": true,
 					"markdownDescription": "Highlight opening and closing tags of container macros?"
 				},
+				"twee3LanguageTools.sugarcube-2.widgetAliases": {
+					"type": "array",
+					"default": [
+						"<<widget ",
+						"Macro\\.add\\("
+					],
+					"markdownDescription": "Regex alternatives when searching for macro definitions"
+				},
 				"twee3LanguageTools.sugarcube-2.warning.undefinedMacro": {
 					"type": "boolean",
 					"default": true,
