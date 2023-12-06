@@ -982,7 +982,7 @@ export const findMacro = async function (macro: string, token: vscode.Cancellati
 						return searchDone(secondaryLookup);
 					}
 
-					return searchDone(new vscode.Location(file, new vscode.Position(lines + 1, 0)));
+					return searchDone(new vscode.Location(file, new vscode.Position(lines, 0)));
 			});
 		});
 	});
@@ -1046,7 +1046,7 @@ export const updateDecorations = async function (ctx: vscode.ExtensionContext, e
 			editor.setDecorations(dec_type, active)
 		}
 
-		if (target === null) {
+		if (target === undefined) {
 			hasEntries = false;
 		}
 	}
