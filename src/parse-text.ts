@@ -113,6 +113,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				continue;
 			}
 
+			const originalPassageName = passageName;
 			passageName = passageName.replace(/\\(.)/g, "$1");
 
 			const specialPassages = ["StoryTitle", "StoryData", "Start"];
@@ -124,7 +125,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 			r.push({
 				line: i, startCharacter: 0, length: 2, tokenType: "startToken", tokenModifiers: []
 			}, {
-				line: i, startCharacter: reStartToken.length, length: passageName.length,
+				line: i, startCharacter: reStartToken.length, length: originalPassageName.length,
 				tokenType: specialName ? "special" : "passageName",
 				tokenModifiers: []
 			});
@@ -147,7 +148,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				newPassages.push(previous);
 			}
 
-			passage.tags = passageTags;
+			passage.tags = passageTags.filter(t => t.trim().length);
 			passage.description = passage.tags.join(", ");
 
 			passage.meta = passageMeta;

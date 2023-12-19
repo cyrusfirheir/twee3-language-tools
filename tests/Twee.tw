@@ -19,6 +19,7 @@ Twee 3 Language Tools tests
 :: Passage -\ this i$ a va(l)iD_ name\{ [tags multiple] {"position":"1350,25"}
 :: Pass\[age Name [tags tag lol] {"position":"1350,150"}
 :: Pass\}age N\{ame {"position":"1350,400"}
+:: Passage no tags [] {}
 
 
 <!--

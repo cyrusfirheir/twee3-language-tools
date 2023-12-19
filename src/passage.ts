@@ -83,7 +83,8 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				});
 				let ungrouped = new Passage("", new vscode.Range(0,0,0,0), { start: 0, endHeader: 0, end: 0 }, { root: "", path: "", full: "" }, vscode.TreeItemCollapsibleState.Expanded);
 				ungrouped.description = "Untagged";
-				groups.sort((a, b) => a.name.localeCompare(b.name)).push(ungrouped);
+				groups.sort((a, b) => a.name.localeCompare(b.name));
+				groups.push(ungrouped);
 
 				if (element) {
 					if (element.name) {
