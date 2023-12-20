@@ -67,16 +67,26 @@ export enum MacroRegexType {
 }
 
 export const macroRegexFactory = (pattern: string, regexType = MacroRegexType.Full) => {
-	const body = `((?:(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|(?://.*\\n)|(?:\`(?:\\\\.|[^\`\\\\\\n])*?\`)|(?:"(?:\\\\.|[^"\\\\\\n])*?")|(?:'(?:\\\\.|[^'\\\\\\n])*?')|(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|(?:>(?!>)))*?)`;
-	const selfClose = `(/)`;
-	const end = `(/|end)`;
+	const body = [
+		`(?<macroBody>(?:`,
+			`(?:/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/)|`,
+			`(?://.*\\n)|`,
+			`(?:\`(?:\\\\.|[^\`\\\\])*?\`)|`,
+			`(?:"(?:\\\\.|[^"\\\\\\n])*?")|`,
+			`(?:'(?:\\\\.|[^'\\\\\\n])*?')|`,
+			`(?:\\[(?:[<>]?[Ii][Mm][Gg])?\\[[^\\r\\n]*?\\]\\]+)|[^>]|`,
+			`(?:>(?!>))`,
+		`)*?)`,
+	].join("");
+	const selfClose = `(?<macroSelfClose>/)`;
+	const end = `(?<macroEnd>/|end)`;
 
 	if (regexType === MacroRegexType.Start) {
 		return new RegExp(`<<(${pattern})(?:\\s+${body})?>>`, "gm");
 	} else if (regexType === MacroRegexType.End) {
 		return new RegExp(`(?:<<(${pattern})(?:\\s*)${body}${selfClose}>>)|(?:<<${end}(${pattern})>>)`, "gm");
 	}
-	return new RegExp(`<<${end}?(${pattern})(?:\\s*)${body}${selfClose}?>>`, "gm");
+	return new RegExp(`<<${end}?(?<macroName>${pattern})(?:\\s*)${body}${selfClose}?>>`, "gm");
 }
 
 export const macroNamePattern = `[A-Za-z][\\w-]*|[=-]`;
@@ -279,17 +289,20 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 	// Keep track of the last line end to make so we only search from that index
 	let lineEnd = 0;
 	while ((ex = re.exec(cleaned)) !== null) {
+		const { macroName, macroBody, macroEnd, macroSelfClose } = ex.groups as {
+			[key: string]: string;
+		};
 		let open = true,
 			endVariant = false,
 			pair = id,
-			name = ex[2],
+			name = macroName,
 			selfClosed = false;
 
 		let selfCloseMacro: macro | undefined = undefined;
 
-		if (ex[1] === "end") {
-			const defInList = list[ex[2]];
-			const endAddedName = ex[1] + ex[2];
+		if (macroEnd === "end") {
+			const defInList = list[macroName];
+			const endAddedName = macroEnd + macroName;
 			if (defInList) {
 				if (defInList.container) endVariant = true;
 				else if (!list[endAddedName]) name = endAddedName;
@@ -298,7 +311,7 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 			}
 		}
 
-		if (ex[1] === "/" || endVariant) open = false;
+		if (macroEnd === "/" || endVariant) open = false;
 
 		const exIndex = ex.index;
 		const lineStart = lineIndices
@@ -316,7 +329,7 @@ const collectUncached = async function (raw: string): Promise<CollectedMacros> {
 		
 		let range = new vscode.Range(lineStart, charStart, lineEnd, charEnd);
 
-		if (selfClosingMacrosEnabled && ex[4] === "/") {
+		if (selfClosingMacrosEnabled && macroSelfClose === "/") {
 			selfClosed = true;
 			selfCloseMacro = {
 				id: id + 1, pair: pair++,

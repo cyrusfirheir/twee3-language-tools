@@ -7,6 +7,9 @@
 	<!-- Stuff -->
 <</macroName>>
 
+<<set _text = `Some nice text with a <<macroName 'A1'>><</macroName>>
+That goes on on a second line`>>
+
 /* self closed test */
 /* needs twee3LanguageTools.experimental.sugarcube-2.selfClosingMacros.enable = true */
 <<macroName "String Args" keywords and stuff />>
