@@ -40,6 +40,7 @@
 	},
 	"do": {
 		"name": "do",
+		"container": true,
 		"description": "Displays its contents. Listens for `<<redo>>` macro commands upon which it updates its contents.\n\nUsage:\n\n```\n<<set $money to 10>>\n\n''Money:'' <<do>>$money<</do>>\n\n<<link \"Update money display\">>\n\t<<set $money += 10>>\n\t<<redo>>\n<</link>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-do)",
 		"parameters": [
 			"|+ ('tag' &+ string) |+ ('element' &+ text)"
@@ -74,6 +75,12 @@
 		"name": "silent",
 		"container": true,
 		"description": "Causes any output generated within its body to be discarded, except for errors (which will be displayed). Generally, only really useful for formatting blocks of macros for ease of use/readability, while ensuring that no output is generated, from spacing or whatnot.\n\nUsage:\n\n```\n<<silent>> … <</silent>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-silent)",
+		"parameters": []
+	},
+	"silently": {
+		"name": "silently",
+		"container": true,
+		"description": "Causes any output generated within its body to be discarded, except for errors (which will be displayed). Generally, only really useful for formatting blocks of macros for ease of use/readability, while ensuring that no output is generated, from spacing or whatnot.\n\nUsage:\n\n```\n<<silently>> … <</silently>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-silent)",
 		"parameters": []
 	},
 	"type": {
@@ -502,7 +509,6 @@
 	
 	"actions": {
 		"name": "actions",
-		"deprecated": true,
 		"description": "Creates a list of single-use passage links. Each link removes itself and all other `<<actions>>` links to the same passage after being activated. May be called either with a list of passages, with a list of link markup, or with a list of image markup. Probably most useful when paired with `<<include>>`.\n\nUsage:\n\n```\n<<actions passageList>>\n<<actions linkMarkupList>>\n<<actions imageMarkupList>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-actions)",
 		"parameters": [
 			"passage &+ ...passage",
@@ -512,7 +518,6 @@
 	},
 	"choice": {
 		"name": "choice",
-		"deprecated": true,
 		"description": "Creates a single-use passage link that deactivates itself and all other `<<choice>>` links within the originating passage when activated. May be called either with the passage name and link text as separate arguments, with a link markup, or with a image markup.\n\nUsage:\n\n```\n<<choice passageName [linkText]>>\n<<choice linkMarkup>>\n<<choice imageMarkup>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-choice)",
 		"parameters": [
 			"passage |+ text",
@@ -567,15 +572,6 @@
 		"deprecatedSuggestions": [
 			"macro: <<createplaylist>>"
 		]
-	},
-	"silently": {
-		"name": "silently",
-		"container": true,
-		"deprecated": true,
-		"deprecatedSuggestions": [
-			"macro: <<silent>>"
-		],
-		"parameters": []
 	},
 	"stopallaudio": {
 		"name": "stopallaudio",
