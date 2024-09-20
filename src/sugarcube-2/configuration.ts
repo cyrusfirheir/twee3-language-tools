@@ -126,7 +126,7 @@ export const parseConfiguration = async function (): Promise<Configuration> {
  * @param options yaml.Options. Assigned on top of language defaults
  * @returns {Object | Error}
  */
-export const yamlParse = function(text: string, header?: string, options?: yaml.Options): any {
+export const yamlParse = function(text: string, header?: string, options?: yaml.ParseOptions): any {
 	const yamlDefaults = vscode.workspace.getConfiguration("twee3LanguageTools.yaml");
 	const defaults = {
 		merge: true,

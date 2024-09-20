@@ -148,13 +148,13 @@ export class Passage extends vscode.TreeItem {
 		super(name, collapsibleState);
 	}
 
-	async getHeader() {
-		const docText = await readFile(this.origin.full);
+	async getHeader(document?: vscode.TextDocument) {
+		const docText = document ? document.getText() : await readFile(this.origin.full);
 		return docText.slice(this.stringRange.start, this.stringRange.endHeader);
 	}
 
-	async getContent(includeHeader=false) {
-		const docText = await readFile(this.origin.full);
+	async getContent(document?: vscode.TextDocument, includeHeader=false) {
+		const docText = document ? document.getText() : await readFile(this.origin.full);
 		return this.getContentFromText(docText, includeHeader)
 	}
 

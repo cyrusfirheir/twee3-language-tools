@@ -2,6 +2,7 @@
 import { contributes as PackageContributions } from "../package.json";
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
+import { debounce } from "ts-debounce";
 
 import { parseText, DocumentSemanticTokensProvider, legend } from './parse-text';
 import { updateDiagnostics } from './diagnostics';
@@ -27,6 +28,7 @@ import { updateDecorations, updateTextEditorDecorations } from './decorations';
 import { tabstring } from './utils';
 
 import { activateFolding } from './folding';
+import { performance } from "perf_hooks";
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -124,6 +126,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		treeDataProvider: passageListProvider
 	});
 
+	const createDebouncedParseTextAndDiagnostics = () => {
+		const parseTextConfig = vscode.workspace.getConfiguration("twee3LanguageTools.parseText");
+		return debounce(async (document: vscode.TextDocument) => {
+			await parseText(ctx, document);
+			updateDiagnostics(ctx, document, collection); 
+		}, parseTextConfig.get("wait", 500), { maxWait: parseTextConfig.get("maxWait", 2000) });
+	}
+	let debouncedParseTextAndDiagnostics = createDebouncedParseTextAndDiagnostics();
+
 	ctx.subscriptions.push(
 		mapShowCommand, mapStopCommand, sbPassageCounter,
 		vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new DocumentSemanticTokensProvider(ctx), legend)
@@ -153,7 +164,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			},
 		})
 		,
-		vscode.window.onDidChangeTextEditorSelection(async e => {
+		vscode.window.onDidChangeTextEditorSelection(async (e) => {
 			if (e.textEditor.document.languageId === sugarcube2Language.LanguageID && vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.features").get("macroTagMatching")) {
 				let collected = await sugarcube2Macros.collectCache.get(e.textEditor.document);
 				let r: vscode.Range[] = [];
@@ -196,7 +207,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
 			if (!/^twee3.*/.test(e.document.languageId)) return;
-			updateDiagnostics(ctx, e.document, collection);
+			debouncedParseTextAndDiagnostics(e.document);
 			updateTextEditorDecorations(ctx);
 		})
 		,
@@ -229,6 +240,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.definedMacroDecorations")) {
 				updateTextEditorDecorations(ctx);
+			}
+			if (e.affectsConfiguration("twee3LanguageTools.parseText")) {
+				debouncedParseTextAndDiagnostics = createDebouncedParseTextAndDiagnostics();
 			}
 		})
 		,

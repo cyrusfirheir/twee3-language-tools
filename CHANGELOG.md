@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.27.0
+
+Adds:
+
+- Debouncing for passage text parsing and diagnostic updates in the `onDidChangeTextDocument` handler. Should hopefully reduce CPU usage when making large edits.
+- `twee3LanguageTools.parseText.wait` and `twee3LanguageTools.parseText.maxWait`: Configurations to modify the debounce wait durations.
+
+Changes:
+
+- Diagnostics updater doesn't comb through a document line-by-line anymore. Since that is already done by passage text parsers, results from that are leveraged instead. Should hopefully reduce CPU usage for larger projects.
+
+Updates:
+
+- Engine to Node 20
+- Most dependencies have been updated to latest versions
+
 ## v0.25.0
 
 Adds:

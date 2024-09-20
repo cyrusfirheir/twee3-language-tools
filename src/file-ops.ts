@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import * as glob from "glob";
-import minimatch from "minimatch";
+import { minimatch } from "minimatch";
 
 import { Passage, PassageOrigin, PassageRange, PassageStringRange } from "./passage";
 import { parseRawText } from "./parse-text";
@@ -52,7 +52,7 @@ export async function moveToFile(context: vscode.ExtensionContext, moveData: Mov
 			), { 
 				start: passage.stringRange.start, endHeader: passage.stringRange.endHeader, end: passage.stringRange.end
 			}, passage.origin, vscode.TreeItemCollapsibleState.None);
-			const content = await p.getContent(true);
+			const content = await p.getContent(undefined, true);
 
 			text[sortedPassages.indexOf(passage)] = content;
 			passage.content = content;
