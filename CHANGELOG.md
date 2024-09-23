@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.27.4
+
+Changes:
+
+- Glob matcher now returns absolute paths instead of relative paths to files in workspace. Fixing [Issue #163](https://github.com/cyrusfirheir/twee3-language-tools/issues/163).
+
 ## v0.27.3
 
 Adds:

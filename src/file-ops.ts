@@ -94,10 +94,13 @@ export function fileGlob() {
 	const include = includeDirs();
 	const exclude = excludeDirs();
 	if (!include.length) include.push("**");
-	let files: string[] = [];
+	const files: string[] = [];
 	vscode.workspace.workspaceFolders?.forEach(el => {
 		include.forEach(elem => {
-			files = [...files, ...globSync(el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}", { ignore: exclude, dot: true })];
+			const inPath = el.uri.fsPath + "/" + elem + "/**/*.{tw,twee}";
+			files.push(
+				...globSync(inPath, { ignore: exclude, dot: true, absolute: true })
+			);
 		});
 	});
 	return files;

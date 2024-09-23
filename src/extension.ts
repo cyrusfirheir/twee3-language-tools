@@ -112,10 +112,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			return results
 				.filter(e => e.status === "fulfilled")
 				.map(async ({ value: document }) => {
-					log.trace(`[Startup] Updating storyformat "${document.uri.path}"`);
-					await changeStoryFormat(document);
-					log.trace(`[Startup] Updating diagnostics "${document.uri.path}"`);
-					updateDiagnostics(ctx, document, collection);
+					if (document) {
+						log.trace(`[Startup] Updating storyformat "${document.uri.path}"`);
+						await changeStoryFormat(document);
+						log.trace(`[Startup] Updating diagnostics "${document.uri.path}"`);
+						updateDiagnostics(ctx, document, collection);
+					}
 					return document;
 				});
 		});
