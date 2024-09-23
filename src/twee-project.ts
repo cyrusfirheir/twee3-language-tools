@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { validate } from "uuid";
 import { Passage } from "./passage";
+import { log } from "./extension";
 
 export interface StoryData {
 	ifid: string;
@@ -50,8 +51,10 @@ export async function tweeProjectConfig(context: vscode.ExtensionContext) {
 
 		const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
 		if (config.get("current") !== format) {
-			await config.update("current", format)
-			vscode.window.showInformationMessage("Storyformat set to " + format);
+			await config.update("current", format);
+			const formatMessage = `Storyformat set to ${format}`;
+			log.info(formatMessage);
+			vscode.window.showInformationMessage(formatMessage);
 		}
 	}
 };

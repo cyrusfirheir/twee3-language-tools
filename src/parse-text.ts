@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { Passage, PassageListProvider } from "./passage";
 import * as sugarcube2Macros from "./sugarcube-2/macros";
 import * as sugarcube2Language from "./sugarcube-2/configuration";
+import { log } from "./extension";
 
 interface IParsedToken {
 	line: number;

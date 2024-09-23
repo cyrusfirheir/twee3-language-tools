@@ -28,7 +28,6 @@ import { updateDecorations, updateTextEditorDecorations } from './decorations';
 import { tabstring } from './utils';
 
 import { activateFolding } from './folding';
-import { performance } from "perf_hooks";
 //#endregion
 
 const documentSelector: vscode.DocumentSelector = {
@@ -41,8 +40,13 @@ const configurationSelector: vscode.DocumentSelector = {
 
 export const PackageLanguages = PackageContributions.languages.map(el => el.id);
 
+export const log = vscode.window.createOutputChannel("Twee3 Language Tools (Log)", { log: true });
+
 export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
+	
+	ctx.subscriptions.push(log);
+	log.info(`[Startup]\n\t\tTwee3 Language Tools active`);
 
 	const sbPassageCounter = passageCounter(ctx);
 
@@ -67,41 +71,54 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		let filePromises: Thenable<vscode.TextDocument>[] = [];
 		let allPassages: Thenable<Passage[]>[] = [];
 
+		log.info(`[Startup] Parsing documents`);
 		for (const file of fg) {
-			let doc: vscode.TextDocument;
+			let document: vscode.TextDocument;
+			log.trace(`[Startup] Opening document: "${file}"`);
 			const newPassages: Thenable<Passage[]> = new Promise(resolve => {
 				filePromises.push(vscode.workspace.openTextDocument(file)
-					.then(d => {
-						doc = d;
-						return parseText(ctx, doc, passageListProvider, resolve);
-					}).then(_p => {
-						return doc;
+					.then(
+						(doc) => {
+							document = doc;
+							log.trace(`[Startup] Parsing document: "${document.uri.path}"`);
+							return parseText(ctx, document, passageListProvider, resolve);
+						},
+						(reason) => {
+							log.error(`[Startup] ${reason}`);
+							return resolve([]);
+						}
+					)
+					.then(_p => {
+						return document;
 					})
-				);		
+				);
 			});
-			allPassages.push(newPassages);	
+			allPassages.push(newPassages);
 		}
-
+		
 		await Promise.all(allPassages)
-			.then(passages => {
-				return ctx.workspaceState.update("passages", passages.reduce((acc, val) => acc.concat(val), [] as Passage[]));
+			.then(passageArr => {
+				const passages = passageArr.flat();
+				log.info(`[Startup] Updating passage store with ${passages.length} passage(s) from ${passageArr.filter(f => f.length).length} file(s)`);
+				return ctx.workspaceState.update("passages", passages);
 			}).then(() => {
 				passageCounter(ctx, sbPassageCounter);
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 				return tweeProjectConfig(ctx);
 			});
-
-		for (const file in filePromises) {
-			filePromises[file] = Promise.resolve(filePromises[file])
-				.then(doc => {
-					return changeStoryFormat(doc);
-				}).then(doc => {
-					updateDiagnostics(ctx, doc, collection);
-					return doc;
+		
+		log.info(`[Startup] Updating storyformat and diagnostics`);
+		return Promise.allSettled(filePromises).then((results) => {
+			return results
+				.filter(e => e.status === "fulfilled")
+				.map(async ({ value: document }) => {
+					log.trace(`[Startup] Updating storyformat "${document.uri.path}"`);
+					await changeStoryFormat(document);
+					log.trace(`[Startup] Updating diagnostics "${document.uri.path}"`);
+					updateDiagnostics(ctx, document, collection);
+					return document;
 				});
-		}
-
-		return Promise.all(filePromises);
+		});
 	}
 
 	await prepare();
@@ -129,7 +146,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	const createDebouncedParseTextAndDiagnostics = () => {
 		const parseTextConfig = vscode.workspace.getConfiguration("twee3LanguageTools.parseText");
 		return debounce(async (document: vscode.TextDocument) => {
+			log.trace(`[Document changed] Parsing text: "${document.uri.path}"`);
 			await parseText(ctx, document);
+			log.trace(`[Document changed] Updating diagnostics: "${document.uri.path}"`);
 			updateDiagnostics(ctx, document, collection); 
 		}, parseTextConfig.get("wait", 500), { maxWait: parseTextConfig.get("maxWait", 2000) });
 	}
@@ -286,12 +305,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.workspace.onDidSaveTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
 
+			log.trace(`[Document saved] Parsing text: "${document.uri.path}"`);
 			await parseText(ctx, document);
 			passageCounter(ctx, sbPassageCounter);
-
+			
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
-
+			
 			tweeProjectConfig(ctx);
 		})
 		,

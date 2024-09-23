@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.27.0",
+	"version": "0.27.3",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -24,8 +24,7 @@
 	},
 	"license": "MIT",
 	"engines": {
-		"vscode": "^1.67.0",
-		"node": "^20"
+		"vscode": "^1.90.0"
 	},
 	"categories": [
 		"Language Packs",
@@ -543,9 +542,8 @@
 	"dependencies": {
 		"@daiyam/regexp": "^0.2.3",
 		"@types/express": "^4.17.21",
-		"@types/glob": "^8.1.0",
 		"@types/lodash": "^4.17.7",
-		"@types/node": "^22.5.5",
+		"@types/node": "^20.0.0",
 		"@types/uuid": "^10.0.0",
 		"@types/vscode": "^1.93.0",
 		"@vue/cli-plugin-babel": "^5.0.8",

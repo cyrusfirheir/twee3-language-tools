@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.27.3
+
+Adds:
+
+- Extension process logging under "T3LT (Log)".
+- Error handling for file opening during startup which caused it never resolve and move on with further startup functions leading to infinite loading and broken features [Issue #163](https://github.com/cyrusfirheir/twee3-language-tools/issues/163).
+
 ## v0.27.0
 
 Adds:
