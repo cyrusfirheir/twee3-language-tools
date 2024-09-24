@@ -81,7 +81,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 						(doc) => {
 							document = doc;
 							log.trace(`[Startup] Parsing document: "${document.uri.path}"`);
-							return parseText(ctx, document, passageListProvider, resolve);
+							return parseText(ctx, document, resolve);
 						},
 						(reason) => {
 							log.error(`[Startup] ${reason}`);
@@ -113,10 +113,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 				.filter(e => e.status === "fulfilled")
 				.map(async ({ value: document }) => {
 					if (document) {
-						log.trace(`[Startup] Updating storyformat "${document.uri.path}"`);
+						log.trace(`[Startup] Updating storyformat and diagnostics "${document.uri.path}"`);
 						await changeStoryFormat(document);
-						log.trace(`[Startup] Updating diagnostics "${document.uri.path}"`);
-						updateDiagnostics(ctx, document, collection);
 					}
 					return document;
 				});
@@ -152,6 +150,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			await parseText(ctx, document);
 			log.trace(`[Document changed] Updating diagnostics: "${document.uri.path}"`);
 			updateDiagnostics(ctx, document, collection); 
+			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 		}, parseTextConfig.get("wait", 500), { maxWait: parseTextConfig.get("maxWait", 2000) });
 	}
 	let debouncedParseTextAndDiagnostics = createDebouncedParseTextAndDiagnostics();
@@ -221,7 +220,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidOpenTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
-			await changeStoryFormat(document);
 			updateDiagnostics(ctx, document, collection);
 			updateTextEditorDecorations(ctx);
 		})
@@ -279,7 +277,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
 				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
-				passageListProvider.refresh();
+				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			});
 		})
 		,

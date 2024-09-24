@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.27.5
+
+Changes:
+
+- `onDidOpenTextDocument` handler no longer tries to change the language of the document, potentially fixing [Issue #162](https://github.com/cyrusfirheir/twee3-language-tools/issues/162). Changing the language of a text document triggers the `onDidOpenTextDocument` event. In projects with a large number of files, despite there being a check for whether the language of the document is already set to the target, the event can trigger before the language is actually set. This causes the event and language change function to be called one after the other ad infinitum. 
+
 ## v0.27.4
 
 Changes:

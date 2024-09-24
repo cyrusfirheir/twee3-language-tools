@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { Passage, PassageListProvider } from "./passage";
 import * as sugarcube2Macros from "./sugarcube-2/macros";
 import * as sugarcube2Language from "./sugarcube-2/configuration";
-import { log } from "./extension";
 
 interface IParsedToken {
 	line: number;
@@ -20,7 +19,7 @@ export interface RawDocument {
 	languageId: vscode.TextDocument["languageId"];
 }
 
-export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, provider?: PassageListProvider, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
+export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
 	const StoryData: any = context.workspaceState.get("StoryData", {});
 	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin.full !== document.uri.path);
 	const newPassages: Passage[] = [];
@@ -188,7 +187,6 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 
 	if (!passageStore) {
 		await context.workspaceState.update("passages", passages.concat(newPassages));
-		provider?.refresh();
 		if (document.languageId === sugarcube2Language.LanguageID) sugarcube2Macros.argumentCache.clearMacrosUsingPassage();
 	}
 	else if (passageStore instanceof Array)
@@ -199,12 +197,12 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 	return Promise.resolve(r);
 }
 
-export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, provider?: PassageListProvider, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
+export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
 	return parseRawText(context, {
 		text: document.getText(),
 		uri: document.uri,
 		languageId: document.languageId
-	}, provider, passageStore);
+	}, passageStore);
 }
 
 const tokenTypes = new Map<string, number>();
