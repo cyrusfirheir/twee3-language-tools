@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.27.7
+
+Changes:
+
+- Reverts change done in v0.27.5, as the root cause for the infinite triggers was fixed in v0.27.6.
+
+## v0.27.6
+
+Changes:
+
+- Fixes handling of asynchronous startup sequence, eliminating cases where language for documents are not set by the time the startup sequence ends.
+
 ## v0.27.5
 
 Changes:

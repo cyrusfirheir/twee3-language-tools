@@ -210,6 +210,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor && /^twee3.*/.test(editor.document.languageId)) {
+				log.trace(`[ActiveTextEditor changed] Updating diagnostics: "${editor.document.uri.path}"`);
 				updateDiagnostics(ctx, editor.document, collection);
 				updateDecorations(ctx, editor);
 			}
@@ -217,6 +218,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidOpenTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
+			log.trace(`[Document opened] Updating diagnostics: "${document.uri.path}"`);
+			await changeStoryFormat(document);
 			updateDiagnostics(ctx, document, collection);
 			updateTextEditorDecorations(ctx);
 		})
