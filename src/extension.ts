@@ -108,17 +108,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			});
 		
 		log.info(`[Startup] Updating storyformat and diagnostics`);
-		return Promise.allSettled(filePromises).then((results) => {
-			return results
-				.filter(e => e.status === "fulfilled")
-				.map(async ({ value: document }) => {
-					if (document) {
-						log.trace(`[Startup] Updating storyformat and diagnostics "${document.uri.path}"`);
-						await changeStoryFormat(document);
-					}
-					return document;
-				});
-		});
+		const results = (await Promise.allSettled(filePromises)).filter(e => e.status === "fulfilled").map(e => e.value);
+		await Promise.all(results.map(document => {
+			if (document) {
+				log.trace(`[Startup] Updating storyformat and diagnostics "${document.uri.path}"`);
+				return changeStoryFormat(document);
+			}
+			return null;
+		}));
 	}
 
 	await prepare();
