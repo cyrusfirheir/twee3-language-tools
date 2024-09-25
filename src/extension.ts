@@ -22,7 +22,8 @@ import * as sugarcube2CodeActions from './sugarcube-2/code-actions';
 import * as sugarcube2Macros from './sugarcube-2/macros';
 import { packer } from './story-map/packer';
 
-import { passageCounter } from './status-bar'
+import { passageCounter } from './status-bar';
+import { wordCounter } from './status-bar';
 import { sbStoryMapConfirmationDialog } from './status-bar';
 import { updateDecorations, updateTextEditorDecorations } from './decorations';
 import { tabstring } from './utils';
@@ -49,6 +50,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	log.info(`[Startup]\n\t\tTwee3 Language Tools active`);
 
 	const sbPassageCounter = passageCounter(ctx);
+	const sbWordCounter = await wordCounter(ctx);
 
 	const passageListProvider = new PassageListProvider(ctx);
 	const collection = vscode.languages.createDiagnosticCollection();
@@ -116,6 +118,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			}
 			return null;
 		}));
+		
+		wordCounter(ctx, sbWordCounter);
 	}
 
 	await prepare();
@@ -308,6 +312,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			log.trace(`[Document saved] Parsing text: "${document.uri.path}"`);
 			await parseText(ctx, document);
 			passageCounter(ctx, sbPassageCounter);
+			wordCounter(ctx, sbWordCounter);
 			
 			if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
 			if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
