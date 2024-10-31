@@ -1,0 +1,14 @@
+{
+	"StoryData": {
+		"prefix": "StoryData",
+		"body": [
+			":: StoryData",
+			"{",
+			"\t\"ifid\": \"${UUID/(.*)/${1:/upcase}/}\",",
+			"\t\"format\": \"$1\",",
+			"\t\"format-version\": \"$2\"",
+			"}"
+		],
+		"description": "StoryData JSON chunk."
+	}
+}
