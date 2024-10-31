@@ -51,8 +51,8 @@
 				"configuration": "./defs/language-configuration.json"
 			},
 			{
-				"id": "twee3-chapbook-1",
-				"configuration": "./defs/chapbook-1/language-configuration.json"
+				"id": "twee3-chapbook-2",
+				"configuration": "./defs/chapbook-2/language-configuration.json"
 			},
 			{
 				"id": "twee3-harlowe-3",
@@ -76,9 +76,9 @@
 				}
 			},
 			{
-				"language": "twee3-chapbook-1",
-				"scopeName": "source.chapbook-1.twee3",
-				"path": "./defs/chapbook-1/grammar.json",
+				"language": "twee3-chapbook-2",
+				"scopeName": "source.chapbook-2.twee3",
+				"path": "./defs/chapbook-2/grammar.json",
 				"embeddedLanguages": {
 					"source.json.twee3": "json",
 					"source.js.twee3": "javascript",
@@ -115,8 +115,8 @@
 				"path": "./defs/snippets.json"
 			},
 			{
-				"language": "twee3-chapbook-1",
-				"path": "./defs/chapbook-1/snippets.json"
+				"language": "twee3-chapbook-2",
+				"path": "./defs/chapbook-2/snippets.json"
 			},
 			{
 				"language": "twee3-harlowe-3",
@@ -152,7 +152,7 @@
 			"[twee3]": {
 				"editor.semanticHighlighting.enabled": true
 			},
-			"[twee3-chapbook-1]": {
+			"[twee3-chapbook-2]": {
 				"editor.semanticHighlighting.enabled": true
 			},
 			"[twee3-harlowe-3]": {
@@ -189,7 +189,7 @@
 					"type": "string",
 					"enum": [
 						"",
-						"chapbook-1",
+						"chapbook-2",
 						"harlowe-3",
 						"sugarcube-2"
 					],
@@ -465,12 +465,12 @@
 		"menus": {
 			"editor/context": [
 				{
-					"when": "editorLangId == twee3 || editorLangId == twee3-chapbook-1 || editorLangId == twee3-harlowe-3 || editorLangId == twee3-sugarcube-2",
+					"when": "editorLangId == twee3 || editorLangId == twee3-chapbook-2 || editorLangId == twee3-harlowe-3 || editorLangId == twee3-sugarcube-2",
 					"command": "twee3LanguageTools.storyMap.focusPassage",
 					"group": "twee3LanguageToolsContextMenu"
 				},
 				{
-					"when": "editorLangId == twee3 || editorLangId == twee3-chapbook-1 || editorLangId == twee3-harlowe-3 || editorLangId == twee3-sugarcube-2",
+					"when": "editorLangId == twee3 || editorLangId == twee3-chapbook-2 || editorLangId == twee3-harlowe-3 || editorLangId == twee3-sugarcube-2",
 					"command": "twee3LanguageTools.passage.setAsStart",
 					"group": "twee3LanguageToolsContextMenu"
 				}

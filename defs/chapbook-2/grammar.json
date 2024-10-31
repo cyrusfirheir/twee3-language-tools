@@ -1,0 +1,602 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "twee3-chapbook-2",
+	"scopeName": "source.chapbook-2.twee3",
+	"patterns": [
+		{
+			"include": "#storydata"
+		},
+		{
+			"include": "#scriptpassage"
+		},
+		{
+			"include": "#stylesheetpassage"
+		},
+		{
+			"include": "#passage"
+		}
+	],
+	"repository": {
+		"chapbook-2-passage": {
+			"comment": "A Chapbook-specific passage",
+			"patterns": [
+				{
+					"include": "#chapbook-2-vars-section"
+				},
+				{
+					"include": "#chapbook-2-javascript-modifier"
+				},
+				{
+					"include": "#chapbook-2-css-modifier"
+				},
+				{
+					"include": "#chapbook-2-note-modifier"
+				},
+				{
+					"include": "#chapbook-2-modifier-entire"
+				},
+				{
+					"include": "#script-tag"
+				},
+				{
+					"include": "#style-tag"
+				},
+				{
+					"include": "#chapbook-2-variable-insert"
+				},
+				{
+					"include": "#chapbook-2-insert"
+				},
+				{
+					"include": "#twee-link"
+				},
+				{
+					"include": "#html-tag"
+				}
+			]
+		},
+		"chapbook-2-vars-section": {
+			"begin": "^\\s*([A-Za-z_$][A-Za-z0-9_$\\.]*)(?:\\s+\\((.*?)\\))?\\s*:\\s*(.*)$",
+			"end": "^--$|(?=::)",
+			"name": "meta.varsSection.twee3.chapbook-2",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.other"
+				},
+				"2": {
+					"name": "source.js.twee3",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				},
+				"3": {
+					"name": "source.js.twee3",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				}
+			},
+			"patterns": [
+				{
+					"include": "#chapbook-2-vars-line"
+				}
+			]
+		},
+		"chapbook-2-vars-line": {
+			"match": "^\\s*([A-Za-z_$][A-Za-z0-9_$\\.]*)(?:\\s+\\((.*?)\\))?\\s*:\\s*(.*)$",
+			"captures": {
+				"1": {
+					"name": "variable.other"
+				},
+				"2": {
+					"name": "source.js.twee3",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				},
+				"3": {
+					"name": "source.js.twee3",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				}
+			}
+		},
+		"chapbook-2-javascript-modifier": {
+			"begin": "(?i)^\\s*\\[\\s*(?:(\\w*?);\\s*)?(JavaScript)(?:\\s*;(.*?))?\\s*\\]",
+			"end": "^(?=\\s*\\[.*?\\]|::)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				},
+				"2": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				},
+				"3": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				}
+			},
+			"name": "source.js.twee3",
+			"patterns": [
+				{
+					"include": "source.js"
+				}
+			]
+		},
+		"chapbook-2-css-modifier": {
+			"begin": "(?i)^\\s*\\[\\s*(?:(\\w*?);\\s*)?(CSS)(?:\\s*;(.*?))?\\s*\\]",
+			"end": "^(?=\\s*\\[.*?\\]|::)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				},
+				"2": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				},
+				"3": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				}
+			},
+			"name": "source.css.twee3",
+			"patterns": [
+				{
+					"include": "source.css"
+				}
+			]
+		},
+		"chapbook-2-note-modifier": {
+			"begin": "(?i)^\\s*\\[\\s*(?:(\\w*?);\\s*)?(note(\\s+to\\s+myself)?|n.b.|fixme|todo)(?:\\s*;(.*?))?\\s*\\]",
+			"end": "^(?=\\s*\\[.*?\\]|::)",
+			"name": "comment.block.twee3.chapbook-2"
+		},
+		"chapbook-2-modifier-entire": {
+			"match": "^\\[([^\\[].+[^\\]])\\]$",
+			"name": "source.modifier.twee3",
+			"captures": {
+				"1": {
+					"patterns": [
+						{
+							"include": "#chapbook-2-single-modifier"
+						}
+					]
+				}
+			}
+		},
+		"chapbook-2-single-modifier": {
+			"match": "([^;\\s]+)(?:\\s+([^;]+))?",
+			"captures": {
+				"1": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				},
+				"2": {
+					"name": "variable.parameter.twee3.chapbook-2"
+				}
+			}
+		},
+		"chapbook-2-variable-insert": {
+			"match": "{\\s*(\\S+)\\s*}",
+			"name": "meta.variableInsert.twee3.chapbook-2",
+			"captures": {
+				"1": {
+					"name": "variable.other"
+				}
+			}
+		},
+		"chapbook-2-insert": {
+			"match": "{\\s*(.*?)(?:\\s*:(.*?))?(?:\\s*,(.*?))?\\s*}",
+			"name": "meta.insert.twee3.chapbook-2",
+			"captures": {
+				"1": {
+					"name": "entity.name.function.twee3.chapbook-2"
+				},
+				"2": {
+					"name": "variable.parameter.twee3.chapbook-2"
+				},
+				"3": {
+					"name": "meta.insert.parameters.twee3.chapbook-2",
+					"patterns": [
+						{
+							"include": "#chapbook-2-insert-parameters"
+						}
+					]
+				}
+			}
+		},
+		"chapbook-2-insert-parameters": {
+			"match": "(\\w+)\\s*:\\s*({.*?}|\\[.*?\\]|'.*?'|\".*?\"|[^,]*)\\s*(?:,|$)",
+			"captures": {
+				"1": {
+					"name": "variable.other.property.twee3"
+				},
+				"2": {
+					"name": "source.js.twee3",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				}
+			}
+		},
+		"twee-link": {
+			"match": "\\[\\[[^\\]]*?(?:(->)[^\\]]*)?\\]\\]",
+			"name": "meta.link.twee3",
+			"captures": {
+				"0": {
+					"name": "keyword.control.twee3"
+				},
+				"1": {
+					"name": "keyword.other.arrow.twee3"
+				}
+			}
+		},
+		"storydata": {
+			"comment": "Twee 3 StoryData passage",
+			"begin": "^::\\s*(StoryData)\\s*?(?:(?<!\\\\)\\[(.*?)(?<!\\\\)\\]\\s*?)?((?<!\\\\)\\{.*?(?<!\\\\)\\}\\s*?)?$",
+			"end": "^(?=::)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.type.class.twee3"
+				},
+				"2": {
+					"name": "variable.other.property.twee3"
+				},
+				"3": {
+					"name": "source.json.twee3",
+					"patterns": [
+						{
+							"include": "source.json"
+						}
+					]
+				}
+			},
+			"name": "source.json.twee3",
+			"patterns": [
+				{
+					"include": "source.json"
+				}
+			]
+		},
+		"scriptpassage": {
+			"comment": "Twee 3 passage with the [script] tag",
+			"begin": "^::\\s*((?!=:).*?)\\s*?(?:(?<!\\\\)\\[(.*?\\bscript\\b.*?)(?<!\\\\)\\]\\s*?)((?<!\\\\)\\{.*?(?<!\\\\)\\}\\s*?)?$",
+			"end": "^(?=::)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.type.class.twee3"
+				},
+				"2": {
+					"name": "variable.other.property.twee3"
+				},
+				"3": {
+					"name": "source.json.twee3",
+					"patterns": [
+						{
+							"include": "source.json"
+						}
+					]
+				}
+			},
+			"name": "source.js.twee3",
+			"patterns": [
+				{
+					"include": "source.js"
+				}
+			]
+		},
+		"stylesheetpassage": {
+			"comment": "Twee 3 passage with the [stylesheet] tag",
+			"begin": "^::\\s*((?!=:).*?)\\s*?(?:(?<!\\\\)\\[(.*?\\bstylesheet\\b.*?)(?<!\\\\)\\]\\s*?)((?<!\\\\)\\{.*?(?<!\\\\)\\}\\s*?)?$",
+			"end": "^(?=::)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.type.class.twee3"
+				},
+				"2": {
+					"name": "variable.other.property.twee3"
+				},
+				"3": {
+					"name": "source.json.twee3",
+					"patterns": [
+						{
+							"include": "source.json"
+						}
+					]
+				}
+			},
+			"name": "source.css.twee3",
+			"patterns": [
+				{
+					"include": "source.css"
+				}
+			]
+		},
+		"passage": {
+			"comment": "Twee 3 passage",
+			"begin": "^::\\s*((?!=:).*?)\\s*?(?:(?<!\\\\)\\[(.*?)(?<!\\\\)\\]\\s*?)?((?<!\\\\)\\{.*?(?<!\\\\)\\}\\s*?)?$",
+			"end": "^(?=::)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.type.class.twee3"
+				},
+				"2": {
+					"name": "variable.other.property.twee3"
+				},
+				"3": {
+					"name": "source.json.twee3",
+					"patterns": [
+						{
+							"include": "source.json"
+						}
+					]
+				}
+			},
+			"patterns": [
+				{
+					"include": "#chapbook-2-passage"
+				}
+			],
+			"name": "source.passagedata.twee3"
+		},
+		"script-tag": {
+			"comment": "HTML Javascript script tag",
+			"begin": "(?i)(<)(script)\\b(?=[^>]*(?:(?:type=('text/javascript'|\"text/javascript\")|lang=(javascript|'javascript'|\"javascript\")))?)(?![^/>]*/>\\s*$)",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.begin.html"
+				},
+				"2": {
+					"name": "entity.name.tag.html"
+				}
+			},
+			"end": "(?i)(</)(script)(>)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.begin.html"
+				},
+				"2": {
+					"name": "entity.name.tag.html"
+				},
+				"3": {
+					"name": "punctuation.definition.tag.end.html"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#tag-internals"
+				},
+				{
+					"name": "source.js.twee3",
+					"begin": "(>)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.tag.end.html"
+						}
+					},
+					"end": "(?i)(?=</script>)",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				}
+			]
+		},
+		"style-tag": {
+			"comment": "HTML CSS style tag",
+			"begin": "(?i)(<)(style)\\b(?=[^>]*(?:(?:type=('text/css'|\"text/css\")|lang=(css|'css'|\"css\")))?)(?![^/>]*/>\\s*$)",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.begin.html"
+				},
+				"2": {
+					"name": "entity.name.tag.html"
+				}
+			},
+			"end": "(?i)(</)(style)(>)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.begin.html"
+				},
+				"2": {
+					"name": "entity.name.tag.html"
+				},
+				"3": {
+					"name": "punctuation.definition.tag.end.html"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#tag-internals"
+				},
+				{
+					"name": "source.css.twee3",
+					"begin": "(>)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.tag.end.html"
+						}
+					},
+					"end": "(?i)(?=</style>)",
+					"patterns": [
+						{
+							"include": "source.css"
+						}
+					]
+				}
+			]
+		},
+		"html-tag": {
+			"comment": "Non-specific HTML tag",
+			"begin": "(?i)(</?)([a-z][a-zA-Z0-9:-]*)",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.begin.html"
+				},
+				"2": {
+					"name": "entity.name.tag.other.html"
+				}
+			},
+			"end": "(/?>)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.end.html"
+				}
+			},
+			"name": "meta.tag.other.html",
+			"patterns": [
+				{
+					"include": "#tag-internals"
+				}
+			]
+		},
+		"tag-internals": {
+			"comment": "The internals of an HTML tag",
+			"patterns": [
+				{
+					"include": "#tag-id-attribute"
+				},
+				{
+					"include": "#tag-generic-attribute"
+				},
+				{
+					"include": "#string-double-quoted"
+				},
+				{
+					"include": "#string-single-quoted"
+				}
+			]
+		},
+		"tag-id-attribute": {
+			"name": "meta.attribute-with-value.id.html",
+			"begin": "(@?id)\\b\\s*(=)",
+			"end": "(?<='|\")",
+			"captures": {
+				"1": {
+					"name": "entity.other.attribute-name.id.html"
+				},
+				"2": {
+					"name": "punctuation.separator.key-value.html"
+				}
+			},
+			"patterns": [
+				{
+					"name": "string.quoted.double.html",
+					"begin": "\"",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.html"
+						}
+					},
+					"end": "\"",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.end.html"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#entities"
+						}
+					]
+				},
+				{
+					"name": "string.quoted.single.html",
+					"begin": "'",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.html"
+						}
+					},
+					"end": "'",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.end.html"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#entities"
+						}
+					]
+				}
+			]
+		},
+		"tag-generic-attribute": {
+			"comment": "Generic attribute within an HTML tag",
+			"name": "entity.other.attribute-name.html",
+			"match": "(@?[a-zA-Z\\-:]+)"
+		},
+		"string-double-quoted": {
+			"comment": "Double-quoted string within an HTML tag",
+			"name": "string.quoted.double.html",
+			"begin": "\"",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.html"
+				}
+			},
+			"end": "\"",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.end.html"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#entities"
+				}
+			]
+		},
+		"string-single-quoted": {
+			"comment": "Single-quoted string within an HTML tag",
+			"name": "string.quoted.single.html",
+			"begin": "'",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.html"
+				}
+			},
+			"end": "'",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.end.html"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#entities"
+				}
+			]
+		},
+		"entities": {
+			"comment": "HTML entities within an HTML tag",
+			"patterns": [
+				{
+					"name": "constant.character.entity.html",
+					"match": "(&)([a-zA-Z0-9]+|#[0-9]+|#x[0-9a-fA-F]+)(;)",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.entity.html"
+						},
+						"3": {
+							"name": "punctuation.definition.entity.html"
+						}
+					}
+				},
+				{
+					"name": "invalid.illegal.bad-ampersand.html",
+					"match": "&"
+				}
+			]
+		}
+	}
+}
