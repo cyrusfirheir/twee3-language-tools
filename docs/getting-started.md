@@ -177,7 +177,7 @@ If you want to use SugarCube (T3LT has the most support for it!):
 Chapbook:
 ```json
 	"format": "Chapbook",
-	"format-version": "1.0.0"
+	"format-version": "2.2.0"
 ```
 
 TweeGo also has support for other formats, and they can be added to it as well.  
@@ -310,7 +310,7 @@ Thankfully updating is pretty easy.
 First, you have to download the Story Format from wherever the creator of it uploads it.
  - SugarCube: https://www.motoslave.net/sugarcube/2/ (the 'For Twine >= 2.1 & Tweego (local/offline)' option)
  - Harlowe: (unsure)
- - Chapbook: https://klembot.github.io/chapbook/use/1.2.1/format.js (You'll have to save this page, if it doesn't automatically download)  
+ - Chapbook: https://klembot.github.io/chapbook/use/2.2.0/format.js (You'll have to save this page, if it doesn't automatically download)  
 
 Once you have that, go to your TweeGo folder and find the folder for the Story Format you want to update.
 You can simply replace the `format.js` file (some file managers only show `format` without the extension) with the one you downloaded.

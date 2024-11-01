@@ -95,7 +95,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 	- Argument validation: [Read here](docs/parameters.md) for more information.
 
 ### Chapbook
-*(id: `chapbook-1`)*
+*(id: `chapbook-2`)*
 - Syntax highlighting.  
     ![Chapbook syntax](docs/images/hl-cb1.png)
 
