@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.28.0
+
+Adds:
+
+- Syntax highlighting for Chapbook-2. Thanks to [@sgranade](https://github.com/sgranade) for the contribution ([PR #166](https://github.com/cyrusfirheir/twee3-language-tools/pull/166)).
+
 ## v0.27.7
 
 Changes:
