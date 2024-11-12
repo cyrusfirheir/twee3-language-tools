@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.29.0
+
+Adds:
+
+- `<<silent>>` macro snippets for SugarCube-2 ([Issue #167](https://github.com/cyrusfirheir/twee3-language-tools/issues/167))
+
+Changes:
+
+- Fixes `<<createplaylist>>` macro snippet ([Issue #168](https://github.com/cyrusfirheir/twee3-language-tools/issues/168))
+
 ## v0.28.0
 
 Adds:

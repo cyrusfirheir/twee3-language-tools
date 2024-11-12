@@ -129,6 +129,18 @@
 			"<<print \"$TM_SELECTED_TEXT\">>"
 		]
 	},
+	"Macro: silent": {
+		"prefix": ":silent",
+		"body": [
+			"<<silent>>\n\t${1:contents}\n<</silent>>"
+		]
+	},
+	"Macro: silent (wrap)": {
+		"prefix": ":silentwrap",
+		"body": [
+			"<<silent>>\n\t$TM_SELECTED_TEXT\n<</silent>>"
+		]
+	},
 	"Macro: silently": {
 		"prefix": ":silently",
 		"body": [
@@ -408,7 +420,7 @@
 	"Macro: createplaylist": {
 		"prefix": ":createplaylist",
 		"body": [
-			"<<createplaylist \"${1:listId}\">>\n\t$0\n<</createaudiogroup>>"
+			"<<createplaylist \"${1:listId}\">>\n\t$0\n<</createplaylist>>"
 		]
 	},
 	"Macro: playlist": {
