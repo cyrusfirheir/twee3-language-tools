@@ -80,12 +80,12 @@
 			"end": "\\}{3}"
 		},
 		"sc-comments": {
-			"begin": "\\/\\*",
+			"begin": "(?<!\\/)\\/\\*",
 			"end": "\\*\\/",
 			"name": "comment.block"
 		},
 		"sc-comments-tiddly": {
-			"begin": "\\/%",
+			"begin": "(?<!\\/)\\/%",
 			"end": "%\\/",
 			"name": "comment.block"
 		},

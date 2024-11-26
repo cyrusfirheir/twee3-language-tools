@@ -17,6 +17,18 @@ That goes on on a second line`>>
 /* should throw unrecognized macro error */
 <<widgetName "lol">>
 
+//test//
+
+//* word *//
+//* word */
+/* word *//
+//*
+word
+*//
+//*
+word
+*/
+
 /* jump to custom macro definition (Ctrl + Click) - TwineScript */
 <<MyOtherSpecialWidget>>
 
