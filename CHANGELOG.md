@@ -1,14 +1,24 @@
 # Changelog
 
+## v0.30.0
+
+Adds:
+
+- Word Count in the status bar. Thanks too [@SjoerdHekking](https://github.com/SjoerdHekking) for the contribution ([PR #165](https://github.com/cyrusfirheir/twee3-language-tools/pull/165)).
+
+Changes:
+
+- Fixes incorrect comment block highlighting for SugarCube style markup syntax ([Issue #169](https://github.com/cyrusfirheir/twee3-language-tools/issues/169)).
+
 ## v0.29.0
 
 Adds:
 
-- `<<silent>>` macro snippets for SugarCube-2 ([Issue #167](https://github.com/cyrusfirheir/twee3-language-tools/issues/167))
+- `<<silent>>` macro snippets for SugarCube-2 ([Issue #167](https://github.com/cyrusfirheir/twee3-language-tools/issues/167)).
 
 Changes:
 
-- Fixes `<<createplaylist>>` macro snippet ([Issue #168](https://github.com/cyrusfirheir/twee3-language-tools/issues/168))
+- Fixes `<<createplaylist>>` macro snippet ([Issue #168](https://github.com/cyrusfirheir/twee3-language-tools/issues/168)).
 
 ## v0.28.0
 
