@@ -90,39 +90,51 @@ export async function wordCounter(ctx: vscode.ExtensionContext, StatusBarItem?: 
         return words;
     }
 
-    await Promise.all(rawPassages.map(async (rawPassage) => {
-        const passage = new Passage(
-            rawPassage.name,
-            rawPassage.range,
-            rawPassage.stringRange,
-            rawPassage.origin,
-            rawPassage.collapsibleState,
-            rawPassage.tags,
-            rawPassage.meta
-        );
-
-        if (
-            passage.tags?.includes("script") || 
-            passage.tags?.includes("stylesheet") ||
-            passage.tags?.includes("init") || 
-            [
-                "PassageDone", "PassageReady", "StoryAuthor", 
-                "StoryInit", "StoryInterface", "StoryMenu", 
-                "StorySettings", "StoryShare", "StoryData"
-            ].includes(passage.name)
-        ) {
-            return;
-        }
-
-        const passageText = await passage.getContent();
-
-        if (languageId === sugarcube2Language.LanguageID) {
-            wordCount += countWords(passageText);
-            macroCount += countMacro(passageText);
-        } else {
-            wordCount += genericCountWords(passageText);
-        }
-        
+    // Only open each file once
+    const groupedPassages = rawPassages.reduce((acc, cur) => {
+        acc[cur.origin.full] ??= [];
+        acc[cur.origin.full].push(cur);
+        return acc;
+    },[]);
+    await Promise.all(Object.entries(groupedPassages).map((file: [string, any]) => {
+        const filePath: string = file[0];
+        const groups = file[1]
+        return vscode.workspace.openTextDocument(filePath)
+            .then(async doc => {
+                for (const rawPassage of groups) {
+                    const passage = new Passage(
+                        rawPassage.name,
+                        rawPassage.range,
+                        rawPassage.stringRange,
+                        rawPassage.origin,
+                        rawPassage.collapsibleState,
+                        rawPassage.tags,
+                        rawPassage.meta
+                    );
+            
+                    if (
+                        passage.tags?.includes("script") || 
+                        passage.tags?.includes("stylesheet") ||
+                        passage.tags?.includes("init") || 
+                        [
+                            "PassageDone", "PassageReady", "StoryAuthor", 
+                            "StoryInit", "StoryInterface", "StoryMenu", 
+                            "StorySettings", "StoryShare", "StoryData"
+                        ].includes(passage.name)
+                    ) {
+                        return;
+                    }
+            
+                    const passageText = await passage.getContent(doc);
+            
+                    if (languageId === sugarcube2Language.LanguageID) {
+                        wordCount += countWords(passageText);
+                        macroCount += countMacro(passageText);
+                    } else {
+                        wordCount += genericCountWords(passageText);
+                    }
+                }
+            });
     }));
 
     if (!StatusBarItem) {
