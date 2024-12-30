@@ -114,7 +114,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		await Promise.all(results.map(document => {
 			if (document) {
 				log.trace(`[Startup] Updating storyformat and diagnostics "${document.uri.path}"`);
-				return changeStoryFormat(document);
+				return changeStoryFormat(document).then(d => updateDiagnostics(ctx, d, collection));
 			}
 			return null;
 		}));
