@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.31.0
+
+Merges [PR #174](https://github.com/cyrusfirheir/twee3-language-tools/pull/174), thanks to [@JustNoon](https://github.com/JustNoon):
+
+> Adds:
+> 
+> - Word and passage counter now displays number with locale aware thousands separator
+> 
+> Changes:
+> 
+> - Word and macro word counts are cached in passage meta object  
+> - Word counts are done when each individual file is parsed
+> 
+> Fixes:
+> 
+> - Diagnostics not being updated on initial load  
+> - Saving a file would cause every file to be reparsed  
+> - Parse text could not safely be done before story format was set
+
 ## v0.30.0
 
 Adds:
