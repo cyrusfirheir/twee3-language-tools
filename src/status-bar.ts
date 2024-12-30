@@ -13,8 +13,8 @@ export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vsc
 	if (!StatusBarItem) {
 		StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 	};
-	StatusBarItem.text = `Passage Count: ${passages.length}`;
-	StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length}\nNumber of Story Passages: ${passages.length - specCount}\nClick to open Story Map`;
+	StatusBarItem.text = `Passage Count: ${passages.length.toLocaleString()}`;
+	StatusBarItem.tooltip = `Total Number of Passages in Twee files: ${passages.length.toLocaleString()}\nNumber of Story Passages: ${(passages.length - specCount).toLocaleString()}\nClick to open Story Map`;
 	StatusBarItem.command = "twee3LanguageTools.passageCounter.clickCheck"
 	if (passages.length != 0) {
 		StatusBarItem.show();
@@ -27,126 +27,25 @@ export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vsc
 export async function wordCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vscode.StatusBarItem) {
     const languageId = vscode.window.activeTextEditor?.document.languageId;
     
-    const rawPassages: any[] = ctx.workspaceState.get("passages", []); // Retrieve as plain objects
+    const passages = ctx.workspaceState.get("passages", []) as Passage[];
     let wordCount = 0;
     let macroCount = 0;
 
-    const commentRegex = /\/%.*?%\/|\/\*.*?\*\/|<!--.*?-->/gs;
-    const htmlTagRegex = /<[^>]+>/g;
-    const macroRegex = /<<([^>]+)>>/g;
-    const quoteRegex = /["']([^"']+)["']/g;
-    const wordRegex = /[a-zA-Z0-9]+(?:[-–—'’][a-zA-Z0-9]+)*/g;
-    
-    function countWords(text: string): number {
-        text = text.replace(/<<.*?>>/gs, ''); // Remove macros
-        text = text.replace(/\[[^\]]*\]/g, ''); // Remove content inside [] because Link/Text/Setter is low volume
-        text = text.replace(commentRegex, ''); // Remove comments
-        text = text.replace(htmlTagRegex, ' '); // Remove HTML tags
-        text = text.replace(/\s+/g, ' ').trim(); // Normalize spaces
-    
-        const words = text.match(wordRegex) || [];
-        return words.length;
+    for (let i = 0; i < passages.length; i++) {
+        wordCount += passages[i].meta?.wordCount ?? 0;
+        macroCount += passages[i].meta?.macroCount ?? 0;
     }
-
-    function countMacro(text: string): number {
-        let totalWordCount = 0;
-        let match;
-
-        while ((match = macroRegex.exec(text)) !== null) {
-            const macroContent = match[1];
-            const quotedWords = macroContent.match(quoteRegex);
-            
-            if (quotedWords) {
-                for (const quote of quotedWords) {
-                    const wordString = quote.slice(1, -1);
-                    const words = wordString.split(/\s+/).filter(word => word.length > 0);
-                    totalWordCount += words.length;
-                }
-            }
-        }
-
-        return totalWordCount;
-    }
-
-    function genericCountWords(text: string): number {
-        text = text.normalize('NFKD');
-        text = text.replace(/\n/g, '');
-        const commentRegex = /\/%.*?%\/|\/\*.*?\*\/|<!--.*?-->/gs;
-        text = text.replace(commentRegex, '');
-
-        let charCount = 0;
-    
-        for (const char of text) {
-            if (char.trim()) {
-                charCount++;
-            }
-        }
-    
-        let words = Math.floor(charCount / 5);
-        if (charCount % 5 > 0) {
-            words++;
-        }
-    
-        return words;
-    }
-
-    // Only open each file once
-    const groupedPassages = rawPassages.reduce((acc, cur) => {
-        acc[cur.origin.full] ??= [];
-        acc[cur.origin.full].push(cur);
-        return acc;
-    },[]);
-    await Promise.all(Object.entries(groupedPassages).map((file: [string, any]) => {
-        const filePath: string = file[0];
-        const groups = file[1]
-        return vscode.workspace.openTextDocument(filePath)
-            .then(async doc => {
-                for (const rawPassage of groups) {
-                    const passage = new Passage(
-                        rawPassage.name,
-                        rawPassage.range,
-                        rawPassage.stringRange,
-                        rawPassage.origin,
-                        rawPassage.collapsibleState,
-                        rawPassage.tags,
-                        rawPassage.meta
-                    );
-            
-                    if (
-                        passage.tags?.includes("script") || 
-                        passage.tags?.includes("stylesheet") ||
-                        passage.tags?.includes("init") || 
-                        [
-                            "PassageDone", "PassageReady", "StoryAuthor", 
-                            "StoryInit", "StoryInterface", "StoryMenu", 
-                            "StorySettings", "StoryShare", "StoryData"
-                        ].includes(passage.name)
-                    ) {
-                        return;
-                    }
-            
-                    const passageText = await passage.getContent(doc);
-            
-                    if (languageId === sugarcube2Language.LanguageID) {
-                        wordCount += countWords(passageText);
-                        macroCount += countMacro(passageText);
-                    } else {
-                        wordCount += genericCountWords(passageText);
-                    }
-                }
-            });
-    }));
 
     if (!StatusBarItem) {
         StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     }
 
     if (languageId === sugarcube2Language.LanguageID) {
-        StatusBarItem.text = `Word Count: ${wordCount}, Macro Word Count: ${macroCount}`;
-        StatusBarItem.tooltip = `Total words in Twee files: ${wordCount}\nTotal words inside macro(s) in Twee files: ${macroCount}`;
+        StatusBarItem.text = `Word Count: ${wordCount.toLocaleString()}, Macro Word Count: ${macroCount.toLocaleString()}`;
+        StatusBarItem.tooltip = `Total words in Twee files: ${wordCount.toLocaleString()}\nTotal words inside macro(s) in Twee files: ${macroCount.toLocaleString()}`;
     } else {
-        StatusBarItem.text = `Word Count: ${wordCount}`;
-        StatusBarItem.tooltip = `Total words in Twee files: ${wordCount}`;
+        StatusBarItem.text = `Word Count: ${wordCount.toLocaleString()}`;
+        StatusBarItem.tooltip = `Total words in Twee files: ${wordCount.toLocaleString()}`;
     }
 
     if (wordCount > 0 || macroCount > 0) {
