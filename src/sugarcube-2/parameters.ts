@@ -958,7 +958,15 @@ export class Variant {
                     });
                 } else if (next === undefined) {
                     throw new Error("Lex: Expected input to continue after `|`, did you mean to use `|+` or `|`? Content is still required after both.");
-                } else if (Variant.IdentifierStart.test(next) || Variant.Quote.test(next)) {
+                } else if (Variant.Whitespace.test(next)) {
+					// |
+					// Consume " "
+					position++;
+                    lexed.push({
+                        kind: FormatKind.Or,
+                        range: makeRange(start, position),
+                    });
+				} else if (Variant.IdentifierStart.test(next) || Variant.Quote.test(next)) {
                     // |
                     lexed.push({
                         kind: FormatKind.Or,
