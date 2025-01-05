@@ -248,7 +248,7 @@ const collectCleanList = [
 	["{{3}", "}{3}"],
 	["\"{3}", "\"{3}"],
 	["<nowiki>", "</nowiki>"],
-	["<script>", "</script>"],
+	["<script(?:\\s+(?:(?:Twine)|(?:Java))Script)?>", "</script>"],
 	["<style>", "</style>"],
 	["^::.*?\\[\\s*script\\s*\\]", "^(?=::)"],
 	["^::.*?\\[\\s*stylesheet\\s*\\]", "^(?=::)"],

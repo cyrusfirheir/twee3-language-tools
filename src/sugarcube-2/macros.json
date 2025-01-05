@@ -25,7 +25,10 @@
 		"name": "script",
 		"container": true,
 		"description": "Silently executes its contents as *pure* JavaScript code—i.e., it performs no story or temporary variable substitution or TwineScript operator processing. For instances where you need to run some pure JavaScript and don't want to waste time performing extra processing on code that has no story or temporary variables or TwineScript operators in it and/or worry about the parser possibly clobbering the code.\n\nUsage:\n\n```\n<<script>> … <</script>>\n```\n\nREAD: [Documentation](https://www.motoslave.net/sugarcube/2/docs/#macros-macro-script)",
-		"parameters": []
+		"parameters": [
+			"",
+			"('TwineScript'|'JavaScript')"
+		]
 	},
 
 	"=": {

@@ -79,7 +79,7 @@ word
 <nOwIkI> <<if>> </NoWiKi> /* case-insensitive */
 
 /* inside quotes */
-<<script>>
+<<script JavaScript>>
 	let x = 2;
 	"<<if>>"
 <</script>>
