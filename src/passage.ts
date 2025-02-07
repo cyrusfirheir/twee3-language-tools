@@ -17,7 +17,7 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 	}
 
 	getChildren(element?: Passage): Thenable<Passage[]> {
-		const passages: Passage[] = this.context.workspaceState.get("passages", []);
+		const passages: Passage[] = getWorkspacePassages(this.context);
 
 		if (!vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) return Promise.resolve([]);
 
@@ -164,7 +164,23 @@ export class Passage extends vscode.TreeItem {
 }
 
 export function passageFromRaw(passage: Passage) {
-	return new Passage(passage.name, passage.range, passage.stringRange, passage.origin, passage.collapsibleState, passage.tags, passage.meta);
+	const pRange: { line: number; character: number; }[] = passage.range as any;
+	return new Passage(
+		passage.name,
+		new vscode.Range(
+			pRange[0].line, pRange[0].character,
+			pRange[1].line, pRange[1].character,
+		),
+		passage.stringRange,
+		passage.origin,
+		passage.collapsibleState,
+		passage.tags,
+		passage.meta
+	);
+}
+
+export function getWorkspacePassages(ctx: vscode.ExtensionContext) {
+	return ctx.workspaceState.get("passages", []).map(e => passageFromRaw(e));
 }
 
 export function jumpToPassage(passage: Passage | OpenPassageParams) {
@@ -180,7 +196,7 @@ export function jumpToPassage(passage: Passage | OpenPassageParams) {
 }
 
 export function passageAtCursor(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
-	const passages = context.workspaceState.get("passages") as Passage[];
+	const passages = getWorkspacePassages(context);
 	const editorPath = editor?.document.uri.path.split("/").filter((step) => step.length > 0) as [string];
 	const editorPosition = editor?.selection.active;
 	return passages.find((passage) => passage.origin.full.split("/")
@@ -205,7 +221,7 @@ export class PassageSymbolProvider implements vscode.DocumentSymbolProvider {
 	
 	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
 		const symbols: vscode.SymbolInformation[] = [];
-		(this.context.workspaceState.get("passages", []) as Passage[]).forEach(passage => {
+		getWorkspacePassages(this.context).forEach(passage => {
 			if (passage.origin.full === document.uri.path) {
 				symbols.push(createPassageSymbol(passage));
 			}
@@ -221,7 +237,7 @@ export class WorkspacePassageSymbolProvider implements vscode.WorkspaceSymbolPro
 		const symbols: vscode.SymbolInformation[] = [];
 		if (query.length) {
 			const queryRegex = new RegExp(query.split("").join(".*") + ".*", "i");
-			(this.context.workspaceState.get("passages", []) as Passage[]).forEach(passage => {
+			getWorkspacePassages(this.context).forEach(passage => {
 				if (queryRegex.test(passage.name)) {
 					symbols.push(createPassageSymbol(passage));
 				}

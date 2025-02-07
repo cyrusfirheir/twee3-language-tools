@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { Passage } from "./passage";
+import { getWorkspacePassages, Passage } from "./passage";
 import * as sugarcube2Language from "./sugarcube-2/configuration";
 
 export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vscode.StatusBarItem) {
-	const passages = ctx.workspaceState.get("passages", []) as Passage[];
+	const passages = getWorkspacePassages(ctx);
 	let specCount = 0;
 	for (let i = 0; i < passages.length; i++) {
 		if (passages[i].tags?.includes("script") || passages[i].tags?.includes("stylesheet") || ["PassageDone", "PassageFooter", "PassageHeader", "PassageReady", "StoryAuthor", "StoryBanner", "StoryCaption", "StoryDisplayTitle", "StoryInit", "StoryInterface", "StoryMenu", "StorySettings", "StoryShare", "StorySubtitle", "StoryTitle", "StoryData",].includes(passages[i].name)) {
@@ -27,7 +27,7 @@ export function passageCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vsc
 export async function wordCounter(ctx: vscode.ExtensionContext, StatusBarItem?: vscode.StatusBarItem) {
     const languageId = vscode.window.activeTextEditor?.document.languageId;
     
-    const passages = ctx.workspaceState.get("passages", []) as Passage[];
+    const passages = getWorkspacePassages(ctx);
     let wordCount = 0;
     let macroCount = 0;
 

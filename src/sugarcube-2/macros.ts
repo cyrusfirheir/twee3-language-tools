@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Arg, ArgType, makeMacroArgumentsRange, parseArguments, ParsedArguments, UnparsedMacroArguments } from './arguments';
 import { ArgumentError, ArgumentWarning, ChosenVariantInformation, findParameterType, Parameters, ParameterType, parseMacroParameters } from './parameters';
-import { Passage } from '../passage';
+import { getWorkspacePassages, Passage } from '../passage';
 import { getConfiguration, parseConfiguration } from './configuration';
 import _ from 'lodash';
 
@@ -560,7 +560,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 
 	let collected = await collectCache.get(document);
 	let macroDefinitions = await macroList();
-	const passages: Passage[] = ctx.workspaceState.get("passages", []);
+	const passages: Passage[] = getWorkspacePassages(ctx);
 
 	collected.macros.forEach((el, cur_index) => {
 		let cur: macroDef;

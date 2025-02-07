@@ -13,7 +13,7 @@ import { startUI, stopUI, storyMapIO } from "./story-map";
 
 import { fileGlob } from './file-ops';
 
-import { PassageSymbolProvider, PassageListProvider, Passage, jumpToPassage, WorkspacePassageSymbolProvider, passageAtCursor } from './passage';
+import { PassageSymbolProvider, PassageListProvider, Passage, jumpToPassage, WorkspacePassageSymbolProvider, passageAtCursor, getWorkspacePassages } from './passage';
 
 import * as formatting from "./formatting";
 
@@ -277,7 +277,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			e.files.forEach(file => sugarcube2Macros.collectCache.clearFilename(file.fsPath));
 
 			const removedFilePaths = e.files.map((file) => file.path);
-			const oldPassages: Passage[] = ctx.workspaceState.get("passages", []);
+			const oldPassages: Passage[] = getWorkspacePassages(ctx);
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
 				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
@@ -292,7 +292,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 				sugarcube2Macros.collectCache.clearFilename(file.oldUri.fsPath);
 
-				let passages: Passage[] = ctx.workspaceState.get("passages", []);
+				let passages: Passage[] = getWorkspacePassages(ctx);
 				passages.forEach(el => {
 					if (el.origin.full === file.oldUri.path) {
 						el.origin.root = vscode.workspace.getWorkspaceFolder(file.newUri)?.uri.path || "";
@@ -331,7 +331,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 				"Proceed"
 			);
 			if (proceed === "Proceed") {
-				const passages = ctx.workspaceState.get("passages") as Passage[];
+				const passages = getWorkspacePassages(ctx);
 				updatePassages(ctx, packer(passages).map((p: Passage) => toUpdatePassage(p)));
 			}
 		})
@@ -389,7 +389,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.passage.setAsStart", async (editor) => {
 			const passage = passageAtCursor(ctx, editor);
 			if (passage) {
-				const passages = ctx.workspaceState.get("passages", []) as Passage[];
+				const passages = getWorkspacePassages(ctx);
 				const storyData = passages.find((passage) => passage.name === "StoryData");
 				if (storyData) {
 					const range = new vscode.Range(storyData.range.start.translate(1), storyData.range.end);

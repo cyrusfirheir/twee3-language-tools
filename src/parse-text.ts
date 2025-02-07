@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Passage, PassageListProvider } from "./passage";
+import { getWorkspacePassages, Passage, PassageListProvider } from "./passage";
 import * as sugarcube2Macros from "./sugarcube-2/macros";
 import * as sugarcube2Language from "./sugarcube-2/configuration";
 
@@ -21,7 +21,7 @@ export interface RawDocument {
 
 export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
 	const StoryData: any = context.workspaceState.get("StoryData", {});
-	const passages = (context.workspaceState.get("passages", []) as Passage[]).filter(el => el.origin.full !== document.uri.path);
+	const passages = getWorkspacePassages(context).filter(el => el.origin.full !== document.uri.path);
 	const newPassages: Passage[] = [];
 
 	const r: IParsedToken[] = [];
