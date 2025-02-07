@@ -163,6 +163,10 @@ export class Passage extends vscode.TreeItem {
 	}
 }
 
+export function passageFromRaw(passage: Passage) {
+	return new Passage(passage.name, passage.range, passage.stringRange, passage.origin, passage.collapsibleState, passage.tags, passage.meta);
+}
+
 export function jumpToPassage(passage: Passage | OpenPassageParams) {
 	vscode.window.showTextDocument(vscode.Uri.file(passage.origin.full)).then(editor => {
 		const range = (passage.range instanceof vscode.Range) ? passage.range : new vscode.Range(

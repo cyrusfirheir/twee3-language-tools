@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { validate } from "uuid";
-import { Passage } from "./passage";
+import { Passage, passageFromRaw } from "./passage";
 import { log } from "./extension";
 
 export interface StoryData {
@@ -14,9 +14,10 @@ export const storyDataPassageNameRegex = /StoryData\b.*/;
 
 export async function tweeProjectConfig(context: vscode.ExtensionContext) {
 	const passages = (context.workspaceState.get("passages", []) as Passage[]);
-	const storyDataPassage = passages.find(p => p.name === "StoryData");
-
-	if (storyDataPassage) {
+	const storyDataPassageRaw = passages.find(p => p.name === "StoryData");
+	
+	if (storyDataPassageRaw) {
+		const storyDataPassage = passageFromRaw(storyDataPassageRaw);
 		let data: StoryData;
 		try {
 			data = JSON.parse(await storyDataPassage.getContent());

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import * as socketio from "socket.io";
 
-import { Passage, PassageRange, PassageStringRange, passageAtCursor } from "../passage";
+import { Passage, PassageRange, PassageStringRange, passageAtCursor, passageFromRaw } from "../passage";
 import { readFile, writeFile } from "../file-ops";
 import { parseRawText } from "../parse-text";
 import { storyMapIO } from "./index";
@@ -28,6 +28,7 @@ export async function sendPassageDataToClient(context: vscode.ExtensionContext, 
 	await Promise.all(fullOrigins.map(async full => fileContents.set(full, await readFile(full))))
 
 	const passagePromises = rawPassages.map(async (passage) => {
+		passage = passageFromRaw(passage);
 		const passageContent = passage.getContentFromText(fileContents.get(passage.origin.full))
 		let linksToNames: string[] = [];
 		if (passage.name === 'StoryData') {
