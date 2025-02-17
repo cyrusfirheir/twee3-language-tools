@@ -89,7 +89,7 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 					vscode.window.showErrorMessage(`\nCouldn't parse ${file}!\n\n${fileConfig}\n\n`);
 					return EMPTY_CONFIGURATION;
 				}
-				Object.values(fileConfig.macros ?? []).forEach(macro => {
+				Object.entries(fileConfig.macros ?? []).forEach(([ macroName, macro ]) => {
 					if (typeof macro.description === "string") {
 						macro.description = new vscode.MarkdownString(macro.description);
 						macro.description.baseUri = file;
@@ -99,6 +99,12 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 				if (illegalEnums.length) {
 					vscode.window.showErrorMessage(`\nEnum(s)\n\n${illegalEnums.join(", ")}\n\ncontain illegal characters and have been omitted`);
 					illegalEnums.forEach(enumName => delete fileConfig.enums[enumName]);
+				}
+
+				const illegalMacros = Object.keys(fileConfig.macros ?? []).filter(macroName => typeof fileConfig.macros[macroName] !== "object");
+				if (illegalMacros.length) {
+					vscode.window.showErrorMessage(`\nMacro(s)\n\n${illegalMacros.join(", ")}\n\nhave invalid definitions and have been omitted`);
+					illegalMacros.forEach(macroName => delete fileConfig.macros[macroName]);
 				}
 
 				return fileConfig;
