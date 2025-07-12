@@ -43,6 +43,31 @@ export const PackageLanguages = PackageContributions.languages.map(el => el.id);
 
 export const log = vscode.window.createOutputChannel("Twee3 Language Tools (Log)", { log: true });
 
+// Helper function to retry opening a document with exponential backoff
+async function openTextDocumentWithRetry(file: vscode.Uri, maxAttempts: number = 4, baseDelay: number = 100): Promise<vscode.TextDocument> {
+	let lastError: any;
+	
+	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+		try {
+			return await vscode.workspace.openTextDocument(file);
+		} catch (error) {
+			lastError = error;
+			
+			if (attempt === maxAttempts) {
+				throw error;
+			}
+			
+			// Exponential backoff: 100ms, 200ms, 400ms, etc.
+			const delay = baseDelay * Math.pow(2, attempt - 1);
+			log.debug(`[Startup] Attempt ${attempt}/${maxAttempts} failed to open "${file}": ${error}. Retrying in ${delay}ms...`);
+			
+			await new Promise(resolve => setTimeout(resolve, delay));
+		}
+	}
+	
+	throw lastError;
+}
+
 export async function activate(ctx: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 't3lt.extensionActive', true);
 	
@@ -69,6 +94,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 	// Long operations are file opening, file saving, workspaceState updates, and updateDiagnostics.
 	// changeStoryFormat *MUST* be finished before prepare can be considered "done"
 	async function prepare() {
+		const settings = vscode.workspace.getConfiguration("twee3LanguageTools.loadDocument");
+		const maxRetries: number = settings.get("maxRetries") || 4;
+		const baseWait: number = settings.get("baseWait") || 100;
 		const fg = fileGlob();
 		let filePromises: Thenable<vscode.TextDocument>[] = [];
 		let allPassages: Thenable<Passage[]>[] = [];
@@ -78,7 +106,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			let document: vscode.TextDocument;
 			log.trace(`[Startup] Opening document: "${file}"`);
 			const newPassages: Thenable<Passage[]> = new Promise(resolve => {
-				filePromises.push(vscode.workspace.openTextDocument(file)
+				filePromises.push(openTextDocumentWithRetry(vscode.Uri.file(file), maxRetries, baseWait)
 					.then(
 						(doc) => {
 							document = doc;
@@ -86,7 +114,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 							return parseText(ctx, document, resolve);
 						},
 						(reason) => {
-							log.error(`[Startup] ${reason}`);
+							log.error(`[Startup] Error parsing ${file}: ${reason}`);
 							return resolve([]);
 						}
 					)
@@ -237,7 +265,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
 				fileGlob().forEach(async file => {
-					const doc = await vscode.workspace.openTextDocument(file);
+					const doc = await openTextDocumentWithRetry(vscode.Uri.file(file));
 					await changeStoryFormat(doc);
 					updateDiagnostics(ctx, doc, collection);
 				});
@@ -270,7 +298,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		})
 		,
 		vscode.workspace.onDidCreateFiles(e => {
-			e.files.forEach(file => vscode.workspace.openTextDocument(file).then((doc) => changeStoryFormat(doc)));
+			e.files.forEach(file => openTextDocumentWithRetry(file).then((doc) => changeStoryFormat(doc)));
 		})
 		,
 		vscode.workspace.onDidDeleteFiles(e => {
@@ -287,7 +315,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidRenameFiles(async e => {
 			for (let file of e.files) {
-				let doc = await vscode.workspace.openTextDocument(file.newUri);
+				let doc = await openTextDocumentWithRetry(file.newUri);
 				await changeStoryFormat(doc);
 
 				sugarcube2Macros.collectCache.clearFilename(file.oldUri.fsPath);

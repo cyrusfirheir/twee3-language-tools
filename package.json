@@ -11,7 +11,7 @@
 	"name": "twee3-language-tools",
 	"displayName": "Twee 3 Language Tools",
 	"description": "Syntax highlighting and programmatic language tools for Twee 3.",
-	"version": "0.32.0",
+	"version": "0.32.2",
 	"author": "Cyrus Firheir",
 	"publisher": "cyrusfirheir",
 	"icon": "res/icon.png",
@@ -201,6 +201,16 @@
 					"type": "integer",
 					"default": 2000,
 					"markdownDescription": "Max time (in milliseconds) to wait for document edits to pause to parse document text again. Once this time has passed, document text is reparsed anyway."
+				},
+				"twee3LanguageTools.loadDocument.maxRetries": {
+					"type": "integer",
+					"default": 4,
+					"markdownDescription": "Max number of times to retry opening a document with exponential backoff."
+				},
+				"twee3LanguageTools.loadDocument.baseWait": {
+					"type": "integer",
+					"default": 100,
+					"markdownDescription": "Time (in milliseconds) to wait before retrying to open a document. Exponential backoff is used."
 				},
 				"twee3LanguageTools.storyformat.current": {
 					"type": "string",
