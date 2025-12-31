@@ -19,6 +19,7 @@ import * as formatting from "./formatting";
 
 import * as sugarcube2Language from './sugarcube-2/configuration';
 import * as sugarcube2CodeActions from './sugarcube-2/code-actions';
+import { ExtractPassage, extractPassageCommand } from './extract-passage';
 import * as sugarcube2Macros from './sugarcube-2/macros';
 import { packer } from './story-map/packer';
 
@@ -412,6 +413,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			}
 		})
 		,
+		vscode.commands.registerCommand("twee3LanguageTools.extractPassage", (passage) => extractPassageCommand(ctx, passage))
+		,
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.storyMap.focusPassage", (editor) => focusPassage(ctx, storyMap, editor))
 		,
 		vscode.commands.registerTextEditorCommand("twee3LanguageTools.passage.setAsStart", async (editor) => {
@@ -463,6 +466,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.languages.registerCodeActionsProvider(sugarcube2Language.LanguageID, new sugarcube2CodeActions.Unrecognized(), {
 			providedCodeActionKinds: sugarcube2CodeActions.Unrecognized.providedCodeActionKinds
+		})
+		,
+		vscode.languages.registerCodeActionsProvider(documentSelector, new ExtractPassage(ctx), {
+			providedCodeActionKinds: ExtractPassage.providedCodeActionKinds
 		})
 		,
 		vscode.commands.registerCommand("twee3LanguageTools.passageCounter.clickCheck", sbStoryMapConfirmationDialog)
