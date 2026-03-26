@@ -98,7 +98,8 @@
 		"children": [
 			{
 				"name": "else",
-				"max": 1
+				"max": 1,
+				"after": ["elseif"]
 			},
 			"elseif"
 		],
@@ -152,7 +153,8 @@
 			"case",
 			{
 				"name": "default",
-				"max": 1
+				"max": 1,
+				"after": ["case"]
 			}
 		],
 		"container": true,

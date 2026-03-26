@@ -42,6 +42,7 @@ export interface ChildDefObj {
 	name: string;
 	max?: number;
 	min?: number;
+	after?: string[];
 }
 
 export const macroTagMatchingDecor = vscode.window.createTextEditorDecorationType({
@@ -606,6 +607,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 					// Get the macros that appear after the current index
 					// and filter them for ones which are contained within the macro's range
 					const macros = collected.macros.slice(start_index, el.pair);
+					const processed_macros = [];
 					for (let i = 0; i < macros.length; i++) {
 						const macro = macros[i];
 						// Get the macro definition
@@ -628,6 +630,10 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 							continue;
 						}
 
+						processed_macros.push(macro);
+					}
+					
+					for (const macro of processed_macros) {
 						for (let j = 0; j < cur.children.length; j++) {
 							if (cur.children[j].name === macro.name) {
 								if (!children[macro.name]) {
@@ -635,6 +641,30 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 								} else {
 									children[macro.name]++;
 								}
+							}
+						}
+					}
+
+					for (let i = 0; i < processed_macros.length; i++) {
+						const macro = processed_macros[i]
+
+						const after = cur.children.find(v => v.name === macro.name)?.after;
+
+						if (!after) {
+							continue;
+						}
+
+						for (let j = i+1; j < processed_macros.length; j++) {
+							const macro_2 = processed_macros[j]
+
+							if (after.includes(macro_2.name)) {
+								d.push({
+									severity: vscode.DiagnosticSeverity.Error,
+									range: macro.range,
+									message: `\nChild macro, <<${macro.name}>>, of <<${el.name}>> cannot be used after <<${macro_2.name}>>\n\n`,
+									source: 'sc2-ex',
+									code: 1708
+								})
 							}
 						}
 					}
@@ -648,7 +678,7 @@ export const diagnostics = async function (ctx: vscode.ExtensionContext, documen
 								d.push({
 									severity: vscode.DiagnosticSeverity.Error,
 									range: el.range,
-									message: `\nChild macro, <<${child.name}>>, of <<${el.name}> was used more than the maximumum number of times: ${childCount} > ${max}\n\n`,
+									message: `\nChild macro, <<${child.name}>>, of <<${el.name}>> was used more than the maximumum number of times: ${childCount} > ${max}\n\n`,
 									code: 114,
 								});
 							}
