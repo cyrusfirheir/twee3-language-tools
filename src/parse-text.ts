@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { getWorkspacePassages, Passage, PassageListProvider } from "./passage";
 import * as sugarcube2Macros from "./sugarcube-2/macros";
 import * as sugarcube2Language from "./sugarcube-2/configuration";
+import { normalizePath } from "./utils";
 
 interface IParsedToken {
 	line: number;
@@ -21,7 +22,8 @@ export interface RawDocument {
 
 export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
 	const StoryData: any = context.workspaceState.get("StoryData", {});
-	const passages = getWorkspacePassages(context).filter(el => el.origin.full !== document.uri.path);
+	const docPath = normalizePath(document.uri.path);
+	const passages = getWorkspacePassages(context).filter(el => normalizePath(el.origin.full) !== docPath);
 	const newPassages: Passage[] = [];
 
 	const r: IParsedToken[] = [];
@@ -130,14 +132,14 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 				tokenModifiers: []
 			});
 
-			const root = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path || "";
-			const path = document.uri.path.replace(root, "");
+			const root = normalizePath(vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path || "");
+			const path = docPath.replace(root, "");
 
 			let passage = new Passage(
 				passageName,
 				new vscode.Range(i, 0, i + 1, 0),
 				{ start: curStart, endHeader: curEnd, end: curEnd },
-				{ root, path, full: document.uri.path },
+				{ root, path, full: docPath },
 				vscode.TreeItemCollapsibleState.None
 			);
 

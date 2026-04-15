@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { getWorkspacePassages, Passage } from "./passage";
 import { moveToFile, MoveData } from "./file-ops";
+import { normalizePath } from "./utils";
 
 export class ExtractPassage implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [
@@ -17,15 +18,11 @@ export class ExtractPassage implements vscode.CodeActionProvider {
   ): vscode.CodeAction[] | undefined {
     const passages = getWorkspacePassages(this.context);
 
-    // Use fsPath for comparison if available, or normalize
-    const docPath = document.uri.fsPath;
+    const docPath = normalizePath(document.uri.path);
 
     const passage = passages.find((p) => {
-      // p.origin.full might be path or fsPath depending on how it was created
-      // Try to match both or normalize
       return (
-        (p.origin.full === docPath ||
-          vscode.Uri.file(p.origin.full).fsPath === docPath) &&
+        normalizePath(p.origin.full) === docPath &&
         p.range.start.line === range.start.line
       );
     });

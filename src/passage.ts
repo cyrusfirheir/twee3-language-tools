@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 import { readFile } from "./file-ops";
+import { normalizePath } from "./utils";
 
 export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 	private _onDidChangeTreeData: vscode.EventEmitter<Passage | undefined | void> = new vscode.EventEmitter<Passage | undefined | void>();
@@ -36,8 +37,9 @@ export class PassageListProvider implements vscode.TreeDataProvider<Passage> {
 				});
 
 				if (element) {
+					const target = normalizePath(element.origin.full);
 					return Promise.resolve(passages
-						.filter(el => el.origin.full === element.origin.full)
+						.filter(el => normalizePath(el.origin.full) === target)
 						.sort((a, b) => a.name.localeCompare(b.name))
 					);
 				} else return Promise.resolve(files.sort((a, b) => a.name.localeCompare(b.name)));
@@ -197,11 +199,9 @@ export function jumpToPassage(passage: Passage | OpenPassageParams) {
 
 export function passageAtCursor(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
 	const passages = getWorkspacePassages(context);
-	const editorPath = editor?.document.uri.path.split("/").filter((step) => step.length > 0) as [string];
+	const editorPath = normalizePath(editor?.document.uri.path);
 	const editorPosition = editor?.selection.active;
-	return passages.find((passage) => passage.origin.full.split("/")
-		.filter((step) => step.length > 0)
-		.every((step, index) => step === editorPath[index])
+	return passages.find((passage) => normalizePath(passage.origin.full) === editorPath
 		&& editorPosition && passage.range.start.line <= editorPosition.line && passage.range.end.line - 1 >= editorPosition.line
 		/* double check to appease typeerror */
 	);
@@ -221,8 +221,9 @@ export class PassageSymbolProvider implements vscode.DocumentSymbolProvider {
 	
 	provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
 		const symbols: vscode.SymbolInformation[] = [];
+		const docPath = normalizePath(document.uri.path);
 		getWorkspacePassages(this.context).forEach(passage => {
-			if (passage.origin.full === document.uri.path) {
+			if (normalizePath(passage.origin.full) === docPath) {
 				symbols.push(createPassageSymbol(passage));
 			}
 		});

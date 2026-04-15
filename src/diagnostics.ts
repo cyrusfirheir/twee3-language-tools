@@ -2,11 +2,13 @@ import * as vscode from 'vscode';
 import { diagnostics as sc2 } from './sugarcube-2/macros';
 import { LanguageID as SC2LanguageID } from './sugarcube-2/configuration';
 import { getWorkspacePassages, Passage } from './passage';
+import { normalizePath } from './utils';
 
 export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 	if (!/^twee3.*/.test(document.languageId)) return;
 
-	const passages: Passage[] = getWorkspacePassages(ctx).filter(passage => passage.origin.full === document.uri.path);
+	const docPath = normalizePath(document.uri.path);
+	const passages: Passage[] = getWorkspacePassages(ctx).filter(passage => normalizePath(passage.origin.full) === docPath);
 
 	const diagnostics = (await Promise.all(
 		passages.map(async (passage) => {
