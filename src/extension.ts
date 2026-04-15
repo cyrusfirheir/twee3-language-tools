@@ -27,7 +27,7 @@ import { passageCounter } from './status-bar';
 import { wordCounter } from './status-bar';
 import { sbStoryMapConfirmationDialog } from './status-bar';
 import { updateDecorations, updateTextEditorDecorations } from './decorations';
-import { tabstring } from './utils';
+import { tabstring, normalizePath } from './utils';
 
 import { activateFolding } from './folding';
 //#endregion
@@ -173,6 +173,16 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		treeDataProvider: passageListProvider
 	});
 
+	// Reentrancy guard for onDidOpenTextDocument.
+	//
+	// `changeStoryFormat` may call `vscode.languages.setTextDocumentLanguage`, which closes and
+	// reopens the document, triggering another `onDidOpenTextDocument`. With concurrent callers
+	// (rename handler + open handler) and Windows drive-letter case drift, this can cascade into
+	// the high-CPU loop reported in https://github.com/cyrusfirheir/twee3-language-tools — see the
+	// "lowercase d:/" traces in the bug thread. Guard by normalized URI so only one update runs
+	// per document at a time.
+	const openDocumentsInFlight = new Set<string>();
+
 	const createDebouncedParseTextAndDiagnostics = () => {
 		const parseTextConfig = vscode.workspace.getConfiguration("twee3LanguageTools.parseText");
 		return debounce(async (document: vscode.TextDocument) => {
@@ -251,10 +261,20 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		,
 		vscode.workspace.onDidOpenTextDocument(async document => {
 			if (!/^twee3.*/.test(document.languageId)) return;
-			log.trace(`[Document opened] Updating diagnostics: "${document.uri.path}"`);
-			await changeStoryFormat(document);
-			updateDiagnostics(ctx, document, collection);
-			updateTextEditorDecorations(ctx);
+			const key = normalizePath(document.uri.path);
+			if (openDocumentsInFlight.has(key)) {
+				log.trace(`[Document opened] Skipping reentrant update: "${document.uri.path}"`);
+				return;
+			}
+			openDocumentsInFlight.add(key);
+			try {
+				log.trace(`[Document opened] Updating diagnostics: "${document.uri.path}"`);
+				await changeStoryFormat(document);
+				updateDiagnostics(ctx, document, collection);
+				updateTextEditorDecorations(ctx);
+			} finally {
+				openDocumentsInFlight.delete(key);
+			}
 		})
 		,
 		vscode.workspace.onDidChangeTextDocument(e => {
@@ -305,9 +325,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.workspace.onDidDeleteFiles(e => {
 			e.files.forEach(file => sugarcube2Macros.collectCache.clearFilename(file.fsPath));
 
-			const removedFilePaths = e.files.map((file) => file.path);
+			const removedFilePaths = new Set(e.files.map((file) => normalizePath(file.path)));
 			const oldPassages: Passage[] = getWorkspacePassages(ctx);
-			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.includes(passage.origin.full));
+			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.has(normalizePath(passage.origin.full)));
 			ctx.workspaceState.update("passages", newPassages).then(() => {
 				if (storyMap.client) sendPassageDataToClient(ctx, storyMap.client);
 				if (vscode.workspace.getConfiguration("twee3LanguageTools.passage").get("list")) passageListProvider.refresh();
@@ -321,12 +341,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 				sugarcube2Macros.collectCache.clearFilename(file.oldUri.fsPath);
 
+				const oldPath = normalizePath(file.oldUri.path);
+				const newPath = normalizePath(file.newUri.path);
 				let passages: Passage[] = getWorkspacePassages(ctx);
 				passages.forEach(el => {
-					if (el.origin.full === file.oldUri.path) {
-						el.origin.root = vscode.workspace.getWorkspaceFolder(file.newUri)?.uri.path || "";
-						el.origin.path = file.newUri.path.replace(el.origin.root, "");
-						el.origin.full = file.newUri.path;
+					if (normalizePath(el.origin.full) === oldPath) {
+						el.origin.root = normalizePath(vscode.workspace.getWorkspaceFolder(file.newUri)?.uri.path || "");
+						el.origin.path = newPath.replace(el.origin.root, "");
+						el.origin.full = newPath;
 					}
 				});
 				await ctx.workspaceState.update("passages", passages);

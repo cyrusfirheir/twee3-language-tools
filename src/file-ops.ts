@@ -5,6 +5,7 @@ import { minimatch } from "minimatch";
 
 import { Passage, PassageOrigin, PassageRange, PassageStringRange } from "./passage";
 import { parseRawText } from "./parse-text";
+import { normalizePath } from "./utils";
 
 export async function readFile(path: string) {
 	return Buffer.from(await vscode.workspace.fs.readFile(vscode.Uri.file(path))).toString("utf-8");
@@ -29,7 +30,7 @@ export interface MoveData {
 export async function moveToFile(context: vscode.ExtensionContext, moveData: MoveData) {
 	// Make thepassages appear in the order they were
 	const sortedPassages = moveData.passages.slice().sort((a, b) => {
-		const fileCompare = a.origin.full.localeCompare(b.origin.full);
+		const fileCompare = normalizePath(a.origin.full).localeCompare(normalizePath(b.origin.full));
 		if (fileCompare !== 0) return fileCompare;
 		if (a.range.startLine > b.range.startLine) return 1;
 		if (a.range.startLine < b.range.startLine) return -1;
@@ -38,13 +39,13 @@ export async function moveToFile(context: vscode.ExtensionContext, moveData: Mov
 
 	// Update files
 	let text: string[] = new Array(sortedPassages.length);
-	
-	const files = [... new Set(moveData.passages.map(passage => passage.origin.full))];
+
+	const files = [... new Set(moveData.passages.map(passage => normalizePath(passage.origin.full)))];
 	for (const file of files) {
 		const fDocText = await readFile(file);
 		let edited = fDocText;
 
-		const filePassages = moveData.passages.filter(el => el.origin.full === file);
+		const filePassages = moveData.passages.filter(el => normalizePath(el.origin.full) === file);
 
 		for (const passage of filePassages) {
 			const p = new Passage(passage.name, new vscode.Range(
