@@ -21,6 +21,7 @@ import * as sugarcube2Language from './sugarcube-2/configuration';
 import * as sugarcube2CodeActions from './sugarcube-2/code-actions';
 import { ExtractPassage, extractPassageCommand } from './extract-passage';
 import * as sugarcube2Macros from './sugarcube-2/macros';
+import * as sugarcube2Widgets from './sugarcube-2/widgets';
 import { packer } from './story-map/packer';
 
 import { passageCounter } from './status-bar';
@@ -87,6 +88,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
 	function start() {
 		collection.clear();
+		sugarcube2Widgets.clearWidgets();
 		return ctx.workspaceState.update("passages", undefined);
 	}
 
@@ -297,6 +299,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			if (e.affectsConfiguration("twee3LanguageTools.directories")) {
 				start().then(prepare);
 			}
+			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.features.widgetDefinitions")) {
+				start().then(prepare);
+			}
 			if (e.affectsConfiguration("twee3LanguageTools.sugarcube-2.cache.argumentInformation") && !vscode.workspace.getConfiguration("twee3LanguageTools.sugarcube-2.cache").get(".argumentInformation")) {
 				// The configuration for this setting has been changed and it is now false, so we
 				// clear the cache.
@@ -325,6 +330,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 		vscode.workspace.onDidDeleteFiles(e => {
 			e.files.forEach(file => sugarcube2Macros.collectCache.clearFilename(file.fsPath));
 
+			const widgetsChanged = e.files
+				.map(file => sugarcube2Widgets.clearFileWidgets(file.path))
+				.some(changed => changed);
+			if (widgetsChanged) {
+				sugarcube2Language.updateConfigurationCache();
+				vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
+			}
+
 			const removedFilePaths = new Set(e.files.map((file) => normalizePath(file.path)));
 			const oldPassages: Passage[] = getWorkspacePassages(ctx);
 			const newPassages: Passage[] = oldPassages.filter((passage) => !removedFilePaths.has(normalizePath(passage.origin.full)));
@@ -340,6 +353,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
 				await changeStoryFormat(doc);
 
 				sugarcube2Macros.collectCache.clearFilename(file.oldUri.fsPath);
+
+				if (sugarcube2Widgets.clearFileWidgets(file.oldUri.path)) {
+					sugarcube2Language.updateConfigurationCache();
+					vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics");
+				}
 
 				const oldPath = normalizePath(file.oldUri.path);
 				const newPath = normalizePath(file.newUri.path);
