@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { getWorkspacePassages, Passage, PassageListProvider } from "./passage";
 import * as sugarcube2Macros from "./sugarcube-2/macros";
 import * as sugarcube2Language from "./sugarcube-2/configuration";
+import * as sugarcube2Widgets from "./sugarcube-2/widgets";
 import { normalizePath } from "./utils";
 
 interface IParsedToken {
@@ -212,6 +213,15 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 			Object.assign(newPassage.meta, {
 				wordCount: genericCountWords(passageText),
 			});
+		}
+	}
+
+	if (document.languageId === sugarcube2Language.LanguageID && sugarcube2Widgets.isWidgetCollectionEnabled()) {
+		const widgets = sugarcube2Widgets.collectWidgets(document.text, newPassages);
+		if (sugarcube2Widgets.setFileWidgets(docPath, widgets)) {
+			sugarcube2Language.updateConfigurationCache();
+			// The command does not exist yet during the initial parse, which refreshes anyway.
+			vscode.commands.executeCommand("twee3LanguageTools.refreshDiagnostics").then(undefined, () => { });
 		}
 	}
 

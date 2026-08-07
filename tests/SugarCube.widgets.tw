@@ -1,0 +1,52 @@
+:: SugarCube widgets [widget] {"position":"950,500"}
+/* widget definition tests */
+
+/* should be collected, and <<greetPlayer>> recognized below */
+<<widget "greetPlayer">>
+	Well met, _args[0].
+<</widget>>
+
+/* barewords are accepted by SugarCube too */
+<<widget barewordWidget>>
+	Beep boop!
+<</widget>>
+
+/* container widget - should require a closing tag where used */
+<<widget "asideBox" container>>
+	<div class="aside"><<print _contents>></div>
+<</widget>>
+
+/* should not be collected: commented out */
+/* <<widget "commentedOutWidget">><</widget>> */
+<!-- <<widget "htmlCommentedWidget">><</widget>> -->
+
+/* should not be collected: verbatim markup */
+{{{<<widget "verbatimWidget">><</widget>>}}}
+
+/* should not be collected: not a usable macro name */
+<<widget "2fast">><</widget>>
+
+
+:: SugarCube widget usage {"position":"1075,500"}
+/* should not throw unrecognized macro warnings */
+<<greetPlayer "Anon">>
+<<barewordWidget>>
+<<asideBox>>Contents.<</asideBox>>
+
+/* should throw a malformed container macro error - no closing tag */
+<<asideBox>>
+
+/* should throw unrecognized macro warnings */
+<<commentedOutWidget>>
+<<htmlCommentedWidget>>
+<<verbatimWidget>>
+<<2fast>>
+
+/* should not be collected: widgets are only read from `widget` tagged passages */
+<<untaggedWidget>>
+
+
+:: SugarCube untagged widget {"position":"1200,500"}
+<<widget "untaggedWidget">>
+	This is an error in SugarCube itself.
+<</widget>>

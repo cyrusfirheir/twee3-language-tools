@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import * as macros from './macros';
 import * as macroListCore from './macros.json';
+import { getWidgetMacros, isWidgetCollectionEnabled } from './widgets';
 
 export const LanguageID = "twee3-sugarcube-2";
 
@@ -75,6 +76,15 @@ export const parseConfiguration = async function (): Promise<Configuration> {
 		macros: Object.assign(Object.create(null), macroListCore),
 		enums: Object.assign(Object.create(null), enumListCore),
 	};
+
+	// Between the core macros and the config files, neither of which a widget may override.
+	if (isWidgetCollectionEnabled()) {
+		const widgetMacros = getWidgetMacros();
+		for (const name in widgetMacros) {
+			if (name in macroListCore) continue;
+			configuration.macros[name] = widgetMacros[name];
+		}
+	}
 
 	const files = vscode.workspace.findFiles("**/*.twee-config.{json,yaml,yml}", "**/{node_modules,.git}/**");
 

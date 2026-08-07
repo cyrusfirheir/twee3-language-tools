@@ -87,7 +87,7 @@ To set the correct storyformat for the files, a `StoryData` passage with the sto
 	- Deprecated `<<end...>>` closing macros:  
 		- [Screenshot - diagnostic](docs/images/sc2-endvariant-macro.png)
 		- [Screenshot - quick fix](docs/images/sc2-endvariant-quickfix.png)
-	- Unrecognized macros. New/custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting:  
+	- Unrecognized macros. Widgets defined with `<<widget>>` in `widget` tagged passages are picked up from the workspace automatically (see: [Widget definitions](#widget-definitions)). Other custom macros can be defined manually (see: [Custom macro definitions for SC](#custom-macro-definitions-for-sugarcube)), but anything else will throw a warning. This can be turned off by the `twee3LanguageTools.sugarcube-2.undefinedMacroWarnings` setting:  
 		- [Screenshot - diagnostic](docs/images/sc2-unrecognized-macro.png)
 		- [Screenshot - quick fix](docs/images/sc2-unrecognized-quickfix.png) (Writes definitions to `t3lt.twee-config.yml` in the root of the first workspace folder.)
 	- Invalid argument syntax in macros:  
@@ -154,6 +154,26 @@ The fields `description` and `parameters` allow substituting globally defined va
 
 **NOTE:** Multiple `twee-config` files can be present in a workspace. They will stack and add to the macro definitions for the workspace. The recommended strategy is to make separate files for separate macro sets/libraries, e.g. (the following file can also be used as an example):
 - `click-to-proceed.twee-config.yaml` ([Link](https://github.com/cyrusfirheir/cycy-wrote-custom-macros/blob/master/click-to-proceed/click-to-proceed.twee-config.yaml))
+
+---
+
+### Widget definitions
+
+Widgets are already defined in the story itself, so they do not have to be declared a second time. The extension collects the `<<widget "widgetName">>` definitions from every passage tagged `widget` in the workspace and treats them as macro definitions:
+
+```
+:: Widgets [widget]
+
+<<widget "greet">>Well met, _args[0].<</widget>>
+
+<<widget "aside" container>><div class="aside"><<print _contents>></div><</widget>>
+```
+
+`<<greet>>` is then a known macro, and `<<aside>>` a known *container* macro — so an unclosed `<<aside>>` is reported, while neither is reported as unrecognized. Hovering either one shows where it was defined.
+
+Only passages tagged `widget` are read, since SugarCube itself only accepts widget definitions there. Definitions in `twee-config` files win over collected ones, which is the way to add a `description` or `parameters` to a widget. Core SugarCube macros are never overridden, as SugarCube does not allow a widget to clobber one.
+
+This can be turned off with the `twee3LanguageTools.sugarcube-2.features.widgetDefinitions` setting.
 
 ---
 
