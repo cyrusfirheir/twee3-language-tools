@@ -283,6 +283,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 			updateTextEditorDecorations(ctx);
 		})
 		,
+		vscode.workspace.onDidCloseTextDocument(document => {
+			sugarcube2Macros.collectCache.clearDocument(document);
+		})
+		,
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration("twee3LanguageTools.storyformat")) {
 				fileGlob().forEach(async file => {

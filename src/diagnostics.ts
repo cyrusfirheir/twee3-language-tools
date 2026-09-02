@@ -3,12 +3,20 @@ import { diagnostics as sc2 } from './sugarcube-2/macros';
 import { LanguageID as SC2LanguageID } from './sugarcube-2/configuration';
 import { getWorkspacePassages, Passage } from './passage';
 import { normalizePath } from './utils';
+import { parseRawText } from './parse-text';
 
 export const updateDiagnostics = async function (ctx: vscode.ExtensionContext, document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 	if (!/^twee3.*/.test(document.languageId)) return;
 
 	const docPath = normalizePath(document.uri.path);
-	const passages: Passage[] = getWorkspacePassages(ctx).filter(passage => normalizePath(passage.origin.full) === docPath);
+	let passages: Passage[] = getWorkspacePassages(ctx).filter(passage => normalizePath(passage.origin.full) === docPath);
+	if (document.uri.scheme === 'git') {
+		await parseRawText(ctx, {
+			text: document.getText(),
+			uri: document.uri,
+			languageId: document.languageId,
+		}, parsed => { passages = parsed; });
+	}
 
 	const diagnostics = (await Promise.all(
 		passages.map(async (passage) => {
