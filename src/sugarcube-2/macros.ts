@@ -368,33 +368,46 @@ interface CollectedMacroCacheEntry {
 	collectedMacros: Promise<CollectedMacros>,
 	// Last text-document version
 	version: number,
+	document: vscode.TextDocument,
+	filename: string,
 }
 class CollectedMacroCache {
-	// the string is the filename
+	// Full URI, including the scheme and Git revision query.
 	private cache: Record<string, CollectedMacroCacheEntry>
 	constructor () {
 		this.cache = Object.create(null);
 	}
 
 	create (document: vscode.TextDocument) {
-		const filename = document.fileName;
-		this.cache[filename] = {
+		const uri = document.uri.toString();
+		this.cache[uri] = {
 			collectedMacros: collectUncached(document.getText()),
 			version: document.version,
+			document,
+			filename: document.fileName,
 		};
 	}
 
 	clearFilename (filename: string) {
-		if (filename in this.cache) {
-			delete this.cache[filename];
+		for (const uri in this.cache) {
+			if (this.cache[uri].filename === filename) {
+				delete this.cache[uri];
+			}
+		}
+	}
+
+	clearDocument (document: vscode.TextDocument) {
+		const uri = document.uri.toString();
+		if (this.cache[uri]?.document === document) {
+			delete this.cache[uri];
 		}
 	}
 
 	get (document: vscode.TextDocument): Promise<CollectedMacros> {
-		const filename = document.fileName;
-		if (filename in this.cache) {
-			if (document.version > this.cache[filename].version) {
-				// Changed file so we need to update
+		const uri = document.uri.toString();
+		if (uri in this.cache) {
+			// Reopening a document can restart its version counter.
+			if (document !== this.cache[uri].document || document.version !== this.cache[uri].version) {
 				this.create(document);
 			}
 		} else {
@@ -402,7 +415,7 @@ class CollectedMacroCache {
 			this.create(document);
 		}
 
-		return this.cache[filename].collectedMacros;
+		return this.cache[uri].collectedMacros;
 	}
 }
 export const collectCache = new CollectedMacroCache();

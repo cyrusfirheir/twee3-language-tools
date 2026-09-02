@@ -20,7 +20,7 @@ export interface RawDocument {
 	languageId: vscode.TextDocument["languageId"];
 }
 
-export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
+export async function parseRawText(context: vscode.ExtensionContext, document: RawDocument, passageStore?: (value: Passage[]) => void): Promise<IParsedToken[]> {
 	const StoryData: any = context.workspaceState.get("StoryData", {});
 	const docPath = normalizePath(document.uri.path);
 	const passages = getWorkspacePassages(context).filter(el => normalizePath(el.origin.full) !== docPath);
@@ -216,6 +216,8 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 	}
 
 	if (!passageStore) {
+		// A diff snapshot must not replace the working tree's passage ranges.
+		if (document.uri.scheme === "git") return r;
 		await context.workspaceState.update("passages", passages.concat(newPassages));
 		if (document.languageId === sugarcube2Language.LanguageID) sugarcube2Macros.argumentCache.clearMacrosUsingPassage();
 	}
@@ -227,7 +229,7 @@ export async function parseRawText(context: vscode.ExtensionContext, document: R
 	return Promise.resolve(r);
 }
 
-export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, passageStore?: (value: Passage[] | PromiseLike<Passage[]>) => void): Promise<IParsedToken[]> {
+export async function parseText(context: vscode.ExtensionContext, document: vscode.TextDocument, passageStore?: (value: Passage[]) => void): Promise<IParsedToken[]> {
 	const config = vscode.workspace.getConfiguration("twee3LanguageTools.storyformat");
 	const languageFormat = "twee3-" + (config.get("override") || config.get("current"));
 

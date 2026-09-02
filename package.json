@@ -3,6 +3,7 @@
 		"serve": "vue-cli-service serve",
 		"build": "vue-cli-service build",
 		"lint": "vue-cli-service lint",
+		"test": "node --test tests/git-diff.test.cjs",
 		"vscode:prepublish": "npm run clean && npm run build && webpack --mode production",
 		"webpack": "webpack --mode development",
 		"webpack-dev": "webpack --mode development --watch",
